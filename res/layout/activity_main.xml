@@ -16,29 +16,35 @@
 
     <Button
         android:id="@+id/button1"
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView1"
         android:clickable="false"
-        android:text="get Games" />
+        android:text="get Games"
+        />
 
     <Button
         android:id="@+id/button2"
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/button1"
         android:layout_toRightOf="@+id/button1"
         android:clickable="false"
-        android:text="Zoom In" />
+        android:text="Zoom In"
+        />
 
     <Button
         android:id="@+id/button3"
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/button1"
         android:layout_toRightOf="@+id/button2"
         android:clickable="false"
-        android:text="Zoom Out" />
+        android:text="Zoom Out"
+        />
     
     <WebView
         android:id="@+id/web1"
@@ -46,5 +52,14 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/button1"
         android:isScrollContainer="true" />
+
+    <Button
+        android:id="@+id/morebutts"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textView1"
+        android:text="..." />
 
 </RelativeLayout>

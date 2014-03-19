@@ -132,15 +132,22 @@ public class GoJsActivity extends FragmentActivity {
 				String move = url.substring(j);
 				System.out.println("move "+move);
 				String cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move="+move;
+				if (move.toLowerCase().startsWith("tt")) {
+					// pass move
+					cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move=pass";
+				}
 				HttpGet httpget = new HttpGet("http://www.dragongoserver.net/"+cmd);
 				try {
 					HttpResponse response = httpclient.execute(httpget);
+					// TODO: check if move has correctly been sent
+					showMsg("move "+move+" sent !");
+					moveid=0;
+					games2play.remove(curgidx2play);
+					showGame();
 				} catch (Exception e) {
 					e.printStackTrace();
+					showMsg("net ERROR sending move");
 				}
-				showMsg("move "+move+" sent !");
-				++curgidx2play; moveid=0;
-				showGame();
 				return true;
 			} else {
 				// its not an android call back 
@@ -152,8 +159,12 @@ public class GoJsActivity extends FragmentActivity {
 
 	void showGame() {
 		if (curgidx2play>=games2play.size()) {
-		    showMsg("No game to show");
-			return;
+			if (games2play.size()==0) {
+				showMsg("No game to show");
+				return;
+			} else {
+				curgidx2play=0;
+			}
 		}
 		System.out.println("showing game "+curgidx2play);
 		System.out.println(" ... "+games2play.get(curgidx2play));
@@ -248,7 +259,6 @@ public class GoJsActivity extends FragmentActivity {
 		// show the board game
 		String f=eidogodir+"/example.html";
 		wv.loadUrl("file://"+f);
-//		wv.invalidate();
 }
 	
 	@Override
@@ -269,6 +279,15 @@ public class GoJsActivity extends FragmentActivity {
 //		wv.loadDataWithBaseURL("about:blank", myHTML, "text/html", "utf-8", "");
 		//		wv.addJavascriptInterface(new WebAppInterface(this), "Android");
 		
+		{
+			final Button button = (Button)findViewById(R.id.morebutts);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					showMoreButtons();
+				}
+			});
+		}
 		{
 			final Button button = (Button)findViewById(R.id.button2);
 			button.setOnClickListener(new View.OnClickListener() {
@@ -565,5 +584,59 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		LoginDialogFragment dialog = new LoginDialogFragment();
 		dialog.show(getSupportFragmentManager(),"dgs signin");
+	}
+
+	private void skipGame() {
+		if (games2play.size()<=1) {
+			showMsg("No more games downloaded; retry GetGames ?");
+			return;
+		}
+		if (++curgidx2play>=games2play.size()) curgidx2play=0;
+		showGame();
+	}
+	
+	private void loadSgf() {
+		String f=eidogodir+"/example.html";
+		wv.loadUrl("file://"+f);
+	}
+	
+	private void showMoreButtons() {
+		System.out.println("showing more buttons");
+		class MoreButtonsDialogFragment extends DialogFragment {
+			private final MoreButtonsDialogFragment dialog = this;
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because its going in the dialog layout
+				View v = inflater.inflate(R.layout.other_buttons, null);
+				Button bdebug = (Button)v.findViewById(R.id.loadSgf);
+				bdebug.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						System.out.println("loading sgf");
+						loadSgf();
+						dialog.dismiss();
+					}
+				});
+				Button bskip = (Button)v.findViewById(R.id.skipGame);
+				bskip.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						System.out.println("skip game");
+						skipGame();
+						dialog.dismiss();
+					}
+				});
+				
+				builder.setView(v);
+				return builder.create();
+			}
+		}
+		MoreButtonsDialogFragment dialog = new MoreButtonsDialogFragment();
+		dialog.show(getSupportFragmentManager(),"more actions");
 	}
 }
