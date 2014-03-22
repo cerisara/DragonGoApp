@@ -65,6 +65,7 @@ public class GoJsActivity extends FragmentActivity {
 	ArrayList<String> games2play = new ArrayList<String>();
 	int curgidx2play=0,moveid=0;
 	String gameid="";
+	boolean isSelectingDeadStones = false;
 
 //	private static void copyFile(InputStream in, OutputStream out) throws IOException {
 //		byte[] buffer = new byte[1024];
@@ -124,24 +125,63 @@ public class GoJsActivity extends FragmentActivity {
 		wv.invalidate();
 	}
 	
+	private String getMarkedStones(String sgf) {
+		String res = null;
+		int i=0;
+		for (;;) {
+			System.out.println("debug "+sgf.substring(i));
+			int j=sgf.indexOf("MA[",i);
+			if (j<0) {
+				return res;
+			} else {
+				i=j+2;
+				while (i<sgf.length()) {
+					if (sgf.charAt(i)!='[') break;
+					j=sgf.indexOf(']',i);
+					if (j<0) break;
+					String stone = sgf.substring(i+1,j);
+					if (res==null) res=stone;
+					else res+=","+stone;
+					i=j+1;
+				}
+			}
+		}
+	}
+	
 	private class myWebViewClient extends WebViewClient {
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			int i=url.indexOf("androidcall01");
 			if (i>=0) {
 				int j=url.lastIndexOf('|')+1;
-				String move = url.substring(j);
-				System.out.println("move "+move);
-				String cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move="+move;
-				if (move.toLowerCase().startsWith("tt")) {
-					// pass move
-					cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move=pass";
+				String cmd="", move="??";
+				if (isSelectingDeadStones) {
+					String sgfdata = url.substring(i+14, j);
+					String deadstones=getMarkedStones(sgfdata);
+					System.out.println("deadstones "+deadstones);
+					if (deadstones==null)
+						cmd = "quick_do.php?obj=game&cmd=status_score&gid="+gameid;
+					else
+						cmd = "quick_do.php?obj=game&cmd=status_score&gid="+gameid+"&toggle=uniq&move="+deadstones;
+				} else {
+					move = url.substring(j);
+					System.out.println("move "+move);
+					cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move="+move;
+					if (move.toLowerCase().startsWith("tt")) {
+						// pass move
+						cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move=pass";
+					}
 				}
 				HttpGet httpget = new HttpGet("http://www.dragongoserver.net/"+cmd);
 				try {
 					HttpResponse response = httpclient.execute(httpget);
 					// TODO: check if move has correctly been sent
-					showMsg("move "+move+" sent !");
+					if (isSelectingDeadStones) {
+						showMsg("dead stones sent !");
+						isSelectingDeadStones=false;
+					} else {
+						showMsg("move "+move+" sent !");
+					}
 					moveid=0;
 					games2play.remove(curgidx2play);
 					showGame();
@@ -691,6 +731,17 @@ public class GoJsActivity extends FragmentActivity {
 						dialog.dismiss();
 					}
 				});
+				{
+					Button button = (Button)v.findViewById(R.id.deadStones);
+					button.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							showMsg("Put one X marker on each dead group and click SEND");
+							isSelectingDeadStones=true;
+							dialog.dismiss();
+						}
+					});
+				}
 				
 				builder.setView(v);
 				return builder.create();
