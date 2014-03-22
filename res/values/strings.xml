@@ -8,5 +8,6 @@
     <string name="password">password</string>
     <string name="signin">signin</string>
     <string name="cancel">cancel</string>
+    <string name="loading">loading</string>
     
 </resources>

@@ -38,6 +38,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
@@ -312,14 +313,7 @@ public class GoJsActivity extends FragmentActivity {
 		button.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				++nc;
-
-				Thread gett = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        getsgfs();
-                    }
-                });
-				gett.start();
+                dowbloadListOfGames();
 
 //				{
 //					Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -443,72 +437,113 @@ public class GoJsActivity extends FragmentActivity {
 	    }
 	}
 	
-	private void getsgfs() {
-	    String u = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
-	    String p = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
+	private void dowbloadListOfGames() {
+	    final String u = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
+	    final String p = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
 	    if (u==null||p==null) {
 	        showMsg("Please enter your credentials first via menu Settings");
 	        return;
 	    }
-		if (httpclient==null) {
-		    System.out.println("creating httpclient in getsgf");
-		    httpclient = new DefaultHttpClient();
-		}
-		try {
-		    String cmd = "http://www.dragongoserver.net/login.php?quick_mode=1&userid="+u+"&passwd="+p;
-		    System.out.println("debug cmd "+cmd);
-			HttpGet httpget = new HttpGet(cmd);
-			HttpResponse response = httpclient.execute(httpget);
-			Header[] heds = response.getAllHeaders();
-			for (Header s : heds)
-				System.out.println("[HEADER] "+s);
-			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				InputStream instream = entity.getContent();
-				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-				for (;;) {
-					String s = fin.readLine();
-					if (s==null) break;
-					System.out.println("LOGINlog "+s);
-					if (s.contains("#Error")) showMsg("Error login; check credentials");
-				}
-				fin.close();
-			}
+	    
+		class WaitDialogFragment extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
 
-			// get list of games to play
-			httpget = new HttpGet("http://www.dragongoserver.net/quick_status.php?order=0");
-			response = httpclient.execute(httpget);
-			heds = response.getAllHeaders();
-			for (Header s : heds)
-				System.out.println("[HEADER] "+s);
-			entity = response.getEntity();
-			games2play.clear();
-			if (entity != null) {
-				InputStream instream = entity.getContent();
-				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-				for (;;) {
-					String s = fin.readLine();
-					if (s==null) break;
-					s=s.trim();
-					if (s.length()>0&&s.charAt(0)!='[')
-						games2play.add(s);
-					System.out.println("LOGINstatus "+s);
-				}
-				fin.close();
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because its going in the dialog layout
+				builder.setView(inflater.inflate(R.layout.waiting, null))
+				// Add action buttons
+				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						WaitDialogFragment.this.getDialog().cancel();
+						// TODO: stop downloading
+					}
+				});
+				return builder.create();
 			}
-			System.out.println("NBGAMES "+games2play.size());
-			showMsg("Nb games to play: "+games2play.size());
-
-			if (games2play.size()>0) {
-				curgidx2play=0;
-				showGame();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			showMsg("Connection or network problems");
 		}
-		// TODO: where to close the connection ?
-//		httpclient.getConnectionManager().shutdown();
+		final WaitDialogFragment waitdialog = new WaitDialogFragment();
+		waitdialog.show(getSupportFragmentManager(),"waiting");
+
+	    Thread downloadThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println("CREATE DOWNLOAD THREAD "+Thread.currentThread().getId());
+				if (httpclient==null) {
+				    System.out.println("creating httpclient in getsgf");
+				    httpclient = new DefaultHttpClient();
+				}
+				try {
+				    String cmd = "http://www.dragongoserver.net/login.php?quick_mode=1&userid="+u+"&passwd="+p;
+				    System.out.println("debug cmd "+cmd);
+					HttpGet httpget = new HttpGet(cmd);
+					HttpResponse response = httpclient.execute(httpget);
+					Header[] heds = response.getAllHeaders();
+					for (Header s : heds)
+						System.out.println("[HEADER] "+s);
+					HttpEntity entity = response.getEntity();
+					if (entity != null) {
+						InputStream instream = entity.getContent();
+						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+						for (;;) {
+							String s = fin.readLine();
+							if (s==null) break;
+							System.out.println("LOGINlog "+s);
+							if (s.contains("#Error")) showMsg("Error login; check credentials");
+						}
+						fin.close();
+					}
+
+					// get list of games to play
+					httpget = new HttpGet("http://www.dragongoserver.net/quick_status.php?order=0");
+					response = httpclient.execute(httpget);
+					heds = response.getAllHeaders();
+					for (Header s : heds)
+						System.out.println("[HEADER] "+s);
+					entity = response.getEntity();
+					games2play.clear();
+					if (entity != null) {
+						InputStream instream = entity.getContent();
+						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+						for (;;) {
+							String s = fin.readLine();
+							if (s==null) break;
+							s=s.trim();
+							if (s.length()>0&&s.charAt(0)!='[')
+								games2play.add(s);
+							System.out.println("LOGINstatus "+s);
+						}
+						fin.close();
+					}
+					System.out.println("NBGAMES "+games2play.size());
+					showMsg("Nb games to play: "+games2play.size());
+
+					if (games2play.size()>0) {
+						curgidx2play=0;
+						showGame();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					showMsg("Connection or network problems");
+				}
+				
+				try {
+					for (;;) {
+						if (waitdialog!=null && waitdialog.getDialog()!=null) break;
+						Thread.sleep(500);
+					}
+					waitdialog.getDialog().cancel();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				// TODO: where to close the connection ?
+//				httpclient.getConnectionManager().shutdown();
+			}
+		});
+	    downloadThread.start();
 	}
 
 	private class CopyEidogoTask extends AsyncTask<String, Void, String> {
@@ -594,6 +629,22 @@ public class GoJsActivity extends FragmentActivity {
 		if (++curgidx2play>=games2play.size()) curgidx2play=0;
 		showGame();
 	}
+	private void resignGame() {
+		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+gameid+"&move_id="+moveid;
+		HttpGet httpget = new HttpGet("http://www.dragongoserver.net/"+cmd);
+		try {
+			HttpResponse response = httpclient.execute(httpget);
+			// TODO: check if move has correctly been sent
+			showMsg("resign sent !");
+			moveid=0;
+			games2play.remove(curgidx2play);
+			showGame();
+		} catch (Exception e) {
+			e.printStackTrace();
+			showMsg("net ERROR sending move");
+		}
+
+	}
 	
 	private void loadSgf() {
 		String f=eidogodir+"/example.html";
@@ -628,6 +679,15 @@ public class GoJsActivity extends FragmentActivity {
 					public void onClick(View vv) {
 						System.out.println("skip game");
 						skipGame();
+						dialog.dismiss();
+					}
+				});
+				Button bresign= (Button)v.findViewById(R.id.resign);
+				bresign.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						System.out.println("resign game");
+						resignGame();
 						dialog.dismiss();
 					}
 				});
