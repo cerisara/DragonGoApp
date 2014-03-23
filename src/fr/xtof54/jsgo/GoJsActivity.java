@@ -19,6 +19,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import com.example.testbrowser.R;
 import android.os.AsyncTask;
@@ -66,6 +69,7 @@ public class GoJsActivity extends FragmentActivity {
 	int curgidx2play=0,moveid=0;
 	String gameid="";
 	boolean isSelectingDeadStones = false;
+	final String netErrMsg = "Connection errors or timeout, you may retry";
 
 //	private static void copyFile(InputStream in, OutputStream out) throws IOException {
 //		byte[] buffer = new byte[1024];
@@ -175,7 +179,6 @@ public class GoJsActivity extends FragmentActivity {
 				HttpGet httpget = new HttpGet("http://www.dragongoserver.net/"+cmd);
 				try {
 					HttpResponse response = httpclient.execute(httpget);
-					// TODO: check if move has correctly been sent
 					if (isSelectingDeadStones) {
 						showMsg("dead stones sent !");
 						isSelectingDeadStones=false;
@@ -187,7 +190,7 @@ public class GoJsActivity extends FragmentActivity {
 					showGame();
 				} catch (Exception e) {
 					e.printStackTrace();
-					showMsg("net ERROR sending move");
+					showMsg(netErrMsg);
 				}
 				return true;
 			} else {
@@ -294,6 +297,7 @@ public class GoJsActivity extends FragmentActivity {
 				fout.close();
 			}
 		} catch (Exception e) {
+			showMsg(netErrMsg);
 			e.printStackTrace();
 		}
 
@@ -406,6 +410,8 @@ public class GoJsActivity extends FragmentActivity {
 			    showMsg("eidogo already on disk");
 				initFinished();
 			}
+		} else {
+			showMsg("R/W ERROR sdcard");
 		}
 	}
 
@@ -514,7 +520,10 @@ public class GoJsActivity extends FragmentActivity {
 				System.out.println("CREATE DOWNLOAD THREAD "+Thread.currentThread().getId());
 				if (httpclient==null) {
 				    System.out.println("creating httpclient in getsgf");
-				    httpclient = new DefaultHttpClient();
+				    HttpParams httpparms = new BasicHttpParams();
+				    HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
+				    HttpConnectionParams.setSoTimeout(httpparms, 6000);
+				    httpclient = new DefaultHttpClient(httpparms);
 				}
 				try {
 				    String cmd = "http://www.dragongoserver.net/login.php?quick_mode=1&userid="+u+"&passwd="+p;
@@ -567,7 +576,7 @@ public class GoJsActivity extends FragmentActivity {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					showMsg("Connection or network problems");
+					showMsg(netErrMsg);
 				}
 				
 				try {
@@ -681,7 +690,7 @@ public class GoJsActivity extends FragmentActivity {
 			showGame();
 		} catch (Exception e) {
 			e.printStackTrace();
-			showMsg("net ERROR sending move");
+			showMsg(netErrMsg);
 		}
 
 	}
