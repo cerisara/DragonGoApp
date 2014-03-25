@@ -32,7 +32,7 @@
         android:layout_alignTop="@+id/button1"
         android:layout_toRightOf="@+id/button1"
         android:clickable="false"
-        android:text="Zoom In"
+        android:text="Zoom+"
         />
 
     <Button
@@ -43,7 +43,18 @@
         android:layout_alignTop="@+id/button1"
         android:layout_toRightOf="@+id/button2"
         android:clickable="false"
-        android:text="Zoom Out"
+        android:text="Zoom-"
+        />
+
+    <Button
+        android:id="@+id/bpass"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/button1"
+        android:layout_toRightOf="@+id/button3"
+        android:clickable="false"
+        android:text="pass"
         />
     
     <WebView
