@@ -163,6 +163,7 @@ public class GoJsActivity extends FragmentActivity {
 			if (isSelectingDeadStones) {
 				showMsg("dead stones sent !");
 				isSelectingDeadStones=false;
+//				wv.loadUrl("javascript:detmarkp()");
 			} else {
 				showMsg("sent to server: "+msg);
 			}
@@ -831,6 +832,9 @@ public class GoJsActivity extends FragmentActivity {
 						public void onClick(View v) {
 							showMsg("Put one X marker on each dead group and click SEND");
 							isSelectingDeadStones=true;
+							
+							wv.loadUrl("javascript:last()");
+//							wv.loadUrl("javascript:detmarkx()");
 							dialog.dismiss();
 						}
 					});

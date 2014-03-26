@@ -224,6 +224,13 @@ eidogo.Player.prototype = {
             return this.hooks[hook].bind(this)(params);
         }
     },
+
+    detmarkx: function() {
+        this.mode="x";
+    },
+    detmarkp: function() {
+        this.mode="play";
+    },
     
     /**
      * Resets settings that can change per game

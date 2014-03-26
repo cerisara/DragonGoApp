@@ -1,6 +1,7 @@
 package fr.xtof54.jsgo;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,6 +31,9 @@ public class Message {
     private static GoJsActivity c;
     private static JSONArray headers, jsonmsgs;
     private static int curmsg=0;
+    
+    public int getMessageId() {return msgid;}
+    
     public static void handleMessages(GoJsActivity main) throws Exception {
         c=main;
         HttpGet httpget = new HttpGet(main.server+"quick_do.php?obj=message&cmd=list&filter_folders=2");
@@ -98,6 +103,7 @@ System.out.println("gotanswerjson: "+s);
     
     private Message() {}
     private void show() {
+    	final Message mm = this;
         class MsgDialogFragment extends DialogFragment {
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -106,7 +112,7 @@ System.out.println("gotanswerjson: "+s);
                 LayoutInflater inflater = getActivity().getLayoutInflater();
 
                 // Inflate and set the layout for the dialog
-                // Pass null as the parent view because its going in the dialog layout
+                // Pass null as the parent view because it's going in the dialog layout
                 View msgview = inflater.inflate(R.layout.message, null);
                 TextView t = (TextView)msgview.findViewById(R.id.msgLabel);
                 t.setMovementMethod(new ScrollingMovementMethod());
@@ -115,19 +121,84 @@ System.out.println("gotanswerjson: "+s);
                 s+= "subject: "+subject+"\n";
                 s+= "text: "+text+"\n";
                 t.setText(s);
+                builder.setView(msgview);
 
-                builder.setView(msgview)
-                // Add action buttons
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        MsgDialogFragment.this.getDialog().dismiss();
-                        showNextMsg();
-                    }
-                });
+                if (type.equals("INVITATION")) {
+                    builder.setPositiveButton("skip", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            MsgDialogFragment.this.getDialog().dismiss();
+                            showNextMsg();
+                        }
+                    })
+                    .setNegativeButton("decline", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            MsgDialogFragment.this.getDialog().dismiss();
+                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=decline_inv&mid="+mm.getMessageId());
+                            HttpResponse response;
+    						try {
+    							response = c.httpclient.execute(httpget);
+    							System.out.println("invitation declined:");
+    	                        Header[] heds = response.getAllHeaders();
+    	                        for (Header s : heds)
+    	                            System.out.println("[HEADER] "+s);
+    						} catch (ClientProtocolException e) {
+    							e.printStackTrace();
+    						} catch (IOException e) {
+    							e.printStackTrace();
+    						}
+                            showNextMsg();
+                        }
+                    });
+                	builder.setNeutralButton("accept", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            MsgDialogFragment.this.getDialog().dismiss();
+                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=accept_inv&mid="+mm.getMessageId());
+                            HttpResponse response;
+    						try {
+    							response = c.httpclient.execute(httpget);
+    							System.out.println("invitation accepted:");
+    	                        Header[] heds = response.getAllHeaders();
+    	                        for (Header s : heds)
+    	                            System.out.println("[HEADER] "+s);
+    						} catch (ClientProtocolException e) {
+    							e.printStackTrace();
+    						} catch (IOException e) {
+    							e.printStackTrace();
+    						}
+                            showNextMsg();
+                        }
+                    });
+                } else {
+                    builder.setPositiveButton("skip", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            MsgDialogFragment.this.getDialog().dismiss();
+                            showNextMsg();
+                        }
+                    })
+                    .setNegativeButton("mark as read", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            MsgDialogFragment.this.getDialog().dismiss();
+                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=move_msg&mid="+mm.getMessageId()+"&folder=1");
+                            HttpResponse response;
+    						try {
+    							response = c.httpclient.execute(httpget);
+    							System.out.println("message marked as read:");
+    	                        Header[] heds = response.getAllHeaders();
+    	                        for (Header s : heds)
+    	                            System.out.println("[HEADER] "+s);
+    						} catch (ClientProtocolException e) {
+    							e.printStackTrace();
+    						} catch (IOException e) {
+    							e.printStackTrace();
+    						}
+                            showNextMsg();
+                        }
+                    });
+                }
                 return builder.create();
             }
         }
-        final MsgDialogFragment waitdialog = new MsgDialogFragment();
-        waitdialog.show(c.getSupportFragmentManager(),"message");
+        final MsgDialogFragment msgdialog = new MsgDialogFragment();
+        msgdialog.show(c.getSupportFragmentManager(),"message");
     }
 }
