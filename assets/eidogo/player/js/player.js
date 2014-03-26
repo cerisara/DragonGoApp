@@ -1047,6 +1047,7 @@ eidogo.Player.prototype = {
     },
 
     pass: function() {
+		window.location="androidcall01|"+sgf+"|tt";
         if (!this.variations) return;
         for (var i = 0; i < this.variations.length; i++) {
             if (!this.variations[i].move || this.variations[i].move == "tt") {

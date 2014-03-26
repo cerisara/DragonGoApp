@@ -152,46 +152,55 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 	
+	private void sendCmd2server(String cmd, String msg) {
+		HttpGet httpget = new HttpGet("http://www.dragongoserver.net/"+cmd);
+		try {
+			HttpResponse response = httpclient.execute(httpget);
+			if (isSelectingDeadStones) {
+				showMsg("dead stones sent !");
+				isSelectingDeadStones=false;
+			} else {
+				showMsg("sent to server: "+msg);
+			}
+			moveid=0;
+			games2play.remove(curgidx2play);
+			showGame();
+		} catch (Exception e) {
+			e.printStackTrace();
+			showMsg(netErrMsg);
+		}
+	}
+	
 	private class myWebViewClient extends WebViewClient {
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			int i=url.indexOf("androidcall01");
 			if (i>=0) {
 				int j=url.lastIndexOf('|')+1;
-				String cmd="", move="??";
+				String cmd="", msg="unk";
 				if (isSelectingDeadStones) {
 					String sgfdata = url.substring(i+14, j);
 					String deadstones=getMarkedStones(sgfdata);
 					System.out.println("deadstones "+deadstones);
-					if (deadstones==null)
+					if (deadstones==null) {
 						cmd = "quick_do.php?obj=game&cmd=status_score&gid="+gameid;
-					else
+						msg = "no deadstone";
+					} else {
 						cmd = "quick_do.php?obj=game&cmd=status_score&gid="+gameid+"&toggle=uniq&move="+deadstones;
+						msg = "deadstones "+deadstones;
+					}
 				} else {
-					move = url.substring(j);
+					String move = url.substring(j);
 					System.out.println("move "+move);
 					cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move="+move;
 					if (move.toLowerCase().startsWith("tt")) {
 						// pass move
 						cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move=pass";
-					}
+						msg="pass move";
+					} else
+						msg="move "+move;
 				}
-				HttpGet httpget = new HttpGet("http://www.dragongoserver.net/"+cmd);
-				try {
-					HttpResponse response = httpclient.execute(httpget);
-					if (isSelectingDeadStones) {
-						showMsg("dead stones sent !");
-						isSelectingDeadStones=false;
-					} else {
-						showMsg("move "+move+" sent !");
-					}
-					moveid=0;
-					games2play.remove(curgidx2play);
-					showGame();
-				} catch (Exception e) {
-					e.printStackTrace();
-					showMsg(netErrMsg);
-				}
+				sendCmd2server(cmd,msg);
 				return true;
 			} else {
 				// its not an android call back 
@@ -304,7 +313,7 @@ public class GoJsActivity extends FragmentActivity {
 		// show the board game
 		String f=eidogodir+"/example.html";
 		wv.loadUrl("file://"+f);
-}
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -350,6 +359,23 @@ public class GoJsActivity extends FragmentActivity {
 				public void onClick(View v) {
 					wv.zoomOut();
 					wv.invalidate();
+				}
+			});
+		}
+		{
+			final Button button = (Button)findViewById(R.id.bpass);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Thread passthread = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							String cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move=pass";
+							String msg="pass move";
+							sendCmd2server(cmd, msg);
+						}
+					});
+					passthread.start();
 				}
 			});
 		}
@@ -696,6 +722,7 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	
 	private void loadSgf() {
+		System.out.println("eidogodir: "+eidogodir);
 		String f=eidogodir+"/example.html";
 		wv.loadUrl("file://"+f);
 	}
@@ -719,6 +746,15 @@ public class GoJsActivity extends FragmentActivity {
 					public void onClick(View vv) {
 						System.out.println("loading sgf");
 						loadSgf();
+						dialog.dismiss();
+					}
+				});
+				Button beidogo = (Button)v.findViewById(R.id.copyEidogo);
+				beidogo.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						System.out.println("copy eidogo");
+						new CopyEidogoTask().execute("noparms");
 						dialog.dismiss();
 					}
 				});
