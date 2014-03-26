@@ -22,6 +22,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.example.testbrowser.R;
 import android.os.AsyncTask;
@@ -59,15 +61,17 @@ import android.support.v4.app.FragmentActivity;
  *
  */
 public class GoJsActivity extends FragmentActivity {
+    String server;
+    
 	int nc=0;
 	File eidogodir;
 	final boolean forcecopy=false;
 	Thread uithread;
 	HttpClient httpclient=null;
 	WebView wv;
-	ArrayList<String> games2play = new ArrayList<String>();
+	ArrayList<Game> games2play = new ArrayList<Game>();
 	int curgidx2play=0,moveid=0;
-	String gameid="";
+	int gameid=-1;
 	boolean isSelectingDeadStones = false;
 	final String netErrMsg = "Connection errors or timeout, you may retry";
 
@@ -152,8 +156,8 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 	
-	private void sendCmd2server(String cmd, String msg) {
-		HttpGet httpget = new HttpGet("http://www.dragongoserver.net/"+cmd);
+	private boolean sendCmd2server(String cmd, String msg) {
+		HttpGet httpget = new HttpGet(server+cmd);
 		try {
 			HttpResponse response = httpclient.execute(httpget);
 			if (isSelectingDeadStones) {
@@ -162,12 +166,11 @@ public class GoJsActivity extends FragmentActivity {
 			} else {
 				showMsg("sent to server: "+msg);
 			}
-			moveid=0;
-			games2play.remove(curgidx2play);
-			showGame();
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			showMsg(netErrMsg);
+			return false;
 		}
 	}
 	
@@ -200,7 +203,11 @@ public class GoJsActivity extends FragmentActivity {
 					} else
 						msg="move "+move;
 				}
-				sendCmd2server(cmd,msg);
+                if (sendCmd2server(cmd, msg)) {
+                    moveid=0;
+                    games2play.remove(curgidx2play);
+                    showGame();
+                }
 				return true;
 			} else {
 				// its not an android call back 
@@ -272,9 +279,8 @@ public class GoJsActivity extends FragmentActivity {
 		};
 
 		// load the sgf and saves it in example.html
-		String[] ss = games2play.get(curgidx2play).split(",");
-		gameid = ss[1].replaceAll("\\D", "");
-		HttpGet httpget = new HttpGet("http://www.dragongoserver.net/sgf.php?gid="+gameid+"&owned_comments=1&quick_mode=1");
+		gameid = games2play.get(curgidx2play).getGameID();
+		HttpGet httpget = new HttpGet(server+"sgf.php?gid="+gameid+"&owned_comments=1&quick_mode=1");
 		try {
 			HttpResponse response = httpclient.execute(httpget);
 			Header[] heds = response.getAllHeaders();
@@ -372,7 +378,11 @@ public class GoJsActivity extends FragmentActivity {
 						public void run() {
 							String cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move=pass";
 							String msg="pass move";
-							sendCmd2server(cmd, msg);
+							if (sendCmd2server(cmd, msg)) {
+	                            moveid=0;
+	                            games2play.remove(curgidx2play);
+	                            showGame();
+							}
 						}
 					});
 					passthread.start();
@@ -552,7 +562,7 @@ public class GoJsActivity extends FragmentActivity {
 				    httpclient = new DefaultHttpClient(httpparms);
 				}
 				try {
-				    String cmd = "http://www.dragongoserver.net/login.php?quick_mode=1&userid="+u+"&passwd="+p;
+				    String cmd = server+"login.php?quick_mode=1&userid="+u+"&passwd="+p;
 				    System.out.println("debug cmd "+cmd);
 					HttpGet httpget = new HttpGet(cmd);
 					HttpResponse response = httpclient.execute(httpget);
@@ -573,7 +583,8 @@ public class GoJsActivity extends FragmentActivity {
 					}
 
 					// get list of games to play
-					httpget = new HttpGet("http://www.dragongoserver.net/quick_status.php?order=0");
+//                    httpget = new HttpGet(server+"quick_status.php?order=0");
+                    httpget = new HttpGet(server+"quick_do.php?obj=game&cmd=list&view=status");
 					response = httpclient.execute(httpget);
 					heds = response.getAllHeaders();
 					for (Header s : heds)
@@ -587,8 +598,26 @@ public class GoJsActivity extends FragmentActivity {
 							String s = fin.readLine();
 							if (s==null) break;
 							s=s.trim();
-							if (s.length()>0&&s.charAt(0)!='[')
-								games2play.add(s);
+							if (s.length()>0 && s.charAt(0)=='{') {
+							    JSONObject o = new JSONObject(s);
+							    System.out.println("debugjson "+o.getInt("list_size"));
+							    if (o.getInt("list_size")>0) {
+	                                JSONArray headers = o.getJSONArray("list_header");
+	                                int gid_jsonidx = -1;
+	                                for (int i=0;i<headers.length();i++) {
+	                                    String h = headers.getString(i);
+	                                    System.out.println("jsonheader "+i+" "+h);
+	                                    if (h.equals("id")) gid_jsonidx=i;
+	                                }
+	                                JSONArray jsongames = o.getJSONArray("list_result");
+	                                for (int i=0;i<jsongames.length();i++) {
+	                                    JSONArray jsongame = jsongames.getJSONArray(i);
+	                                    int gameid = jsongame.getInt(gid_jsonidx);
+	                                    Game g = new Game(gameid);
+	                                    games2play.add(g);
+	                                }
+							    }
+							}
 							System.out.println("LOGINstatus "+s);
 						}
 						fin.close();
@@ -632,6 +661,12 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 
+    @Override
+	public void onStart() {
+        super.onStart();
+	    server = getString(R.string.server1);
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -688,7 +723,7 @@ public class GoJsActivity extends FragmentActivity {
 					public void onClick(DialogInterface dialog, int id) {
 						LoginDialogFragment.this.getDialog().cancel();
 					}
-				});      
+				});
 				return builder.create();
 			}
 		}
@@ -706,7 +741,7 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	private void resignGame() {
 		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+gameid+"&move_id="+moveid;
-		HttpGet httpget = new HttpGet("http://www.dragongoserver.net/"+cmd);
+		HttpGet httpget = new HttpGet(server+cmd);
 		try {
 			HttpResponse response = httpclient.execute(httpget);
 			// TODO: check if move has correctly been sent
@@ -740,15 +775,25 @@ public class GoJsActivity extends FragmentActivity {
 				// Inflate and set the layout for the dialog
 				// Pass null as the parent view because its going in the dialog layout
 				View v = inflater.inflate(R.layout.other_buttons, null);
-				Button bdebug = (Button)v.findViewById(R.id.loadSgf);
-				bdebug.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View vv) {
-						System.out.println("loading sgf");
-						loadSgf();
-						dialog.dismiss();
-					}
-				});
+				
+                Button bdebug = (Button)v.findViewById(R.id.loadSgf);
+                bdebug.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        System.out.println("loading sgf");
+                        loadSgf();
+                        dialog.dismiss();
+                    }
+                });
+                Button bserver2 = (Button)v.findViewById(R.id.devServer);
+                bserver2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        System.out.println("next connections to devel server");
+                        server = getString(R.string.server2);
+                        dialog.dismiss();
+                    }
+                });
 				Button beidogo = (Button)v.findViewById(R.id.copyEidogo);
 				beidogo.setOnClickListener(new View.OnClickListener() {
 					@Override

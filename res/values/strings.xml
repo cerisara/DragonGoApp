@@ -9,5 +9,7 @@
     <string name="signin">signin</string>
     <string name="cancel">cancel</string>
     <string name="loading">loading</string>
+    <string name="server1">http://www.dragongoserver.net/</string>
+    <string name="server2">http://dragongoserver.sourceforge.net/</string>
     
 </resources>
