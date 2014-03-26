@@ -18,7 +18,7 @@ For now, there are only a few most basic features implemented in DragonGoApp:
 * javascript goban based on eidogo to try some variations, and select the move you want to play
 * upload your chosen move and switch to the next game.
 
-Note that ending game is not supporting yet: no passing, resign, comments...
+Note that ending game, resign, comments are not supporting yet
 All these will come soon.
 
 That's all for now ! I expect much more features soon, but if you want more features in your android app, let me recommend you to (also) use the very good anDGS app that is available on the market.

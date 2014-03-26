@@ -316,6 +316,7 @@ public class GoJsActivity extends FragmentActivity {
 				Thread gett = new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        showMsg("Downloading, please wait 5s until the next message...");
                         getsgfs();
                     }
                 });
