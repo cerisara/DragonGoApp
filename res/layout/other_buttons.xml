@@ -11,6 +11,20 @@
         android:text="skip this game" />
 
     <Button
+        android:id="@+id/resign"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="resign game" />
+
+    <Button
+        android:id="@+id/deadStones"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="select dead stones" />
+    
+    <Button
         android:id="@+id/loadSgf"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
