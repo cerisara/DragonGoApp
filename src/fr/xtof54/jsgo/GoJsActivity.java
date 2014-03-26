@@ -549,7 +549,8 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		final WaitDialogFragment waitdialog = new WaitDialogFragment();
 		waitdialog.show(getSupportFragmentManager(),"waiting");
-
+		final GoJsActivity main = this;
+		
 	    Thread downloadThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -582,6 +583,8 @@ public class GoJsActivity extends FragmentActivity {
 						fin.close();
 					}
 
+					Message.handleMessages(main);
+					
 					// get list of games to play
 //                    httpget = new HttpGet(server+"quick_status.php?order=0");
                     httpget = new HttpGet(server+"quick_do.php?obj=game&cmd=list&view=status");
