@@ -61,6 +61,7 @@ import android.support.v4.app.FragmentActivity;
  *
  */
 public class GoJsActivity extends FragmentActivity {
+	static int debugdevel=-1;
     String server;
     
 	int nc=0;
@@ -118,13 +119,13 @@ public class GoJsActivity extends FragmentActivity {
 		System.out.println("init finished");
 		final TextView wv = (TextView)findViewById(R.id.textView1);
 		wv.setText("init done. You can play !");
-		final Button button1 = (Button)findViewById(R.id.button1);
+		final Button button1 = (Button)findViewById(R.id.bgetgames);
 		button1.setClickable(true);
 		button1.setEnabled(true);
-		final Button button2 = (Button)findViewById(R.id.button2);
+		final Button button2 = (Button)findViewById(R.id.bzoomin);
 		button2.setClickable(true);
 		button2.setEnabled(true);
-		final Button button3 = (Button)findViewById(R.id.button3);
+		final Button button3 = (Button)findViewById(R.id.bzoomout);
 		button3.setClickable(true);
 		button3.setEnabled(true);
 		button1.invalidate();
@@ -149,7 +150,7 @@ public class GoJsActivity extends FragmentActivity {
 					if (j<0) break;
 					String stone = sgf.substring(i+1,j);
 					if (res==null) res=stone;
-					else res+=","+stone;
+					else res+=stone;
 					i=j+1;
 				}
 			}
@@ -160,10 +161,29 @@ public class GoJsActivity extends FragmentActivity {
 		HttpGet httpget = new HttpGet(server+cmd);
 		try {
 			HttpResponse response = httpclient.execute(httpget);
+			System.out.println("answer to send move:");
+			Header[] heds = response.getAllHeaders();
+			for (Header s : heds)
+				System.out.println("[HEADER] "+s);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				InputStream instream = entity.getContent();
+				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+				for (;;) {
+					String s = fin.readLine();
+					if (s==null) break;
+					System.out.println("LOGINlog "+s);
+					if (s.contains("#Error")) showMsg("Error login; check credentials");
+				}
+				fin.close();
+			}
 			if (isSelectingDeadStones) {
+				// TODO: get back the score from JSON + territories, print it,
+				//        mark all territories, ask for agree, play or choose other deadstones
+				// TODO: if agreed, send the "score" command
 				showMsg("dead stones sent !");
 				isSelectingDeadStones=false;
-//				wv.loadUrl("javascript:detmarkp()");
+				wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkp()");
 			} else {
 				showMsg("sent to server: "+msg);
 			}
@@ -176,6 +196,12 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	
 	private class myWebViewClient extends WebViewClient {
+		@Override
+		public void onPageFinished(WebView view, String url) {
+			view.loadUrl("javascript:eidogo.autoPlayers[0].last()");
+			if (isSelectingDeadStones)
+				view.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
+		}
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			int i=url.indexOf("androidcall01");
@@ -207,7 +233,7 @@ public class GoJsActivity extends FragmentActivity {
                 if (sendCmd2server(cmd, msg)) {
                     moveid=0;
                     games2play.remove(curgidx2play);
-                    showGame();
+                    downloadAndShowGame();
                 }
 				return true;
 			} else {
@@ -218,7 +244,7 @@ public class GoJsActivity extends FragmentActivity {
 		}   
 	}  
 
-	void showGame() {
+	void downloadAndShowGame() {
 		if (curgidx2play>=games2play.size()) {
 			if (games2play.size()==0) {
 				showMsg("No game to show");
@@ -293,6 +319,7 @@ public class GoJsActivity extends FragmentActivity {
 				for (String s : exampleFileHtmlHeader) fout.println(s);
 				InputStream instream = entity.getContent();
 				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+				String lastb="12", lastw="32";
 				for (;;) {
 					String s = fin.readLine();
 					if (s==null) break;
@@ -307,10 +334,28 @@ public class GoJsActivity extends FragmentActivity {
 					}
 					System.out.println("LOGINstatus "+s);
 					fout.println(s);
+					{
+						int z=s.lastIndexOf("B[");
+						int zz=s.indexOf(']',z);
+						if (z>=0) lastb=s.substring(z+2, zz);
+					}
+					{
+						int z=s.lastIndexOf("W[");
+						int zz=s.indexOf(']',z);
+						if (z>=0) lastw=s.substring(z+2, zz);
+					}
 				}
 				fin.close();
 				for (String s : htmlend) fout.println(s);
 				fout.close();
+				
+				// detect if in scoring phase
+				System.out.println("debuglastmoves --"+lastw+"--"+lastb);
+				if ((lastb.equals("")||lastb.equals("tt")) && ((lastw.equals("")||lastw.equals("tt")))) {
+					System.out.println("scoring phase detected !");
+					showMsg("Scoring phase: put one (or more) X marker on each dead group and click SEND");
+					isSelectingDeadStones=true;
+				}
 			}
 		} catch (Exception e) {
 			showMsg(netErrMsg);
@@ -350,7 +395,7 @@ public class GoJsActivity extends FragmentActivity {
 			});
 		}
 		{
-			final Button button = (Button)findViewById(R.id.button2);
+			final Button button = (Button)findViewById(R.id.bzoomin);
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -360,7 +405,7 @@ public class GoJsActivity extends FragmentActivity {
 			});
 		}
 		{
-			final Button button = (Button)findViewById(R.id.button3);
+			final Button button = (Button)findViewById(R.id.bzoomout);
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -382,7 +427,7 @@ public class GoJsActivity extends FragmentActivity {
 							if (sendCmd2server(cmd, msg)) {
 	                            moveid=0;
 	                            games2play.remove(curgidx2play);
-	                            showGame();
+	                            downloadAndShowGame();
 							}
 						}
 					});
@@ -390,7 +435,7 @@ public class GoJsActivity extends FragmentActivity {
 				}
 			});
 		}
-		final Button button = (Button)findViewById(R.id.button1);
+		final Button button = (Button)findViewById(R.id.bgetgames);
 		button.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				++nc;
@@ -430,13 +475,13 @@ public class GoJsActivity extends FragmentActivity {
 			eidogodir = new File(d, "eidogo");
 			if (forcecopy||!eidogodir.exists()) {
 				eidogodir.mkdirs();
-				final Button button3 = (Button)findViewById(R.id.button3);
+				final Button button3 = (Button)findViewById(R.id.bzoomout);
 				button3.setClickable(false);
 				button3.setEnabled(false);
-				final Button button2= (Button)findViewById(R.id.button2);
+				final Button button2= (Button)findViewById(R.id.bzoomin);
 				button2.setClickable(false);
 				button2.setEnabled(false);
-				final Button button1= (Button)findViewById(R.id.button1);
+				final Button button1= (Button)findViewById(R.id.bgetgames);
 				button1.setClickable(false);
 				button1.setEnabled(false);
 				button1.invalidate();
@@ -487,6 +532,8 @@ public class GoJsActivity extends FragmentActivity {
 	static class PrefUtils {
 	    public static final String PREFS_LOGIN_USERNAME_KEY = "__USERNAME__" ;
 	    public static final String PREFS_LOGIN_PASSWORD_KEY = "__PASSWORD__" ;
+	    public static final String PREFS_LOGIN_USERNAME2_KEY = "__USERNAME2__" ;
+	    public static final String PREFS_LOGIN_PASSWORD2_KEY = "__PASSWORD2__" ;
 
 	    /**
 	     * Called to save supplied value in shared preferences against given key.
@@ -521,12 +568,20 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	
 	private void dowbloadListOfGames() {
-	    final String u = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
-	    final String p = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
-	    if (u==null||p==null) {
+	    String tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
+	    String tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
+	    if (tu==null||tp==null) {
 	        showMsg("Please enter your credentials first via menu Settings");
 	        return;
 	    }
+		if (debugdevel==0) {
+			debugdevel=1;
+		} else if (debugdevel==1) {
+			tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME2_KEY,null);
+			tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD2_KEY,null);
+			debugdevel=0;
+		}
+		final String u = tu, p=tp;
 	    
 		class WaitDialogFragment extends DialogFragment {
 			@Override
@@ -631,7 +686,7 @@ public class GoJsActivity extends FragmentActivity {
 
 					if (games2play.size()>0) {
 						curgidx2play=0;
-						showGame();
+						downloadAndShowGame();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -734,6 +789,42 @@ public class GoJsActivity extends FragmentActivity {
 		LoginDialogFragment dialog = new LoginDialogFragment();
 		dialog.show(getSupportFragmentManager(),"dgs signin");
 	}
+	private void ask4credentials2() {
+		System.out.println("calling debug settings");
+		final Context c = this;
+		class LoginDialogFragment extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because its going in the dialog layout
+				builder.setView(inflater.inflate(R.layout.dialog_signin, null))
+				// Add action buttons
+				.setPositiveButton(R.string.signin, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						// sign in the user ...
+						TextView username = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.username);
+						TextView pwd = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.password);
+                        PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_USERNAME2_KEY, username.getText().toString());
+                        PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_PASSWORD2_KEY, (String)pwd.getText().toString());
+                        showMsg("Credentials2 saved");
+					}
+				})
+				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						LoginDialogFragment.this.getDialog().cancel();
+					}
+				});
+				return builder.create();
+			}
+		}
+		LoginDialogFragment dialog = new LoginDialogFragment();
+		dialog.show(getSupportFragmentManager(),"dgs signin");
+	}
 
 	private void skipGame() {
 		if (games2play.size()<=1) {
@@ -741,7 +832,7 @@ public class GoJsActivity extends FragmentActivity {
 			return;
 		}
 		if (++curgidx2play>=games2play.size()) curgidx2play=0;
-		showGame();
+		downloadAndShowGame();
 	}
 	private void resignGame() {
 		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+gameid+"&move_id="+moveid;
@@ -752,7 +843,7 @@ public class GoJsActivity extends FragmentActivity {
 			showMsg("resign sent !");
 			moveid=0;
 			games2play.remove(curgidx2play);
-			showGame();
+			downloadAndShowGame();
 		} catch (Exception e) {
 			e.printStackTrace();
 			showMsg(netErrMsg);
@@ -768,6 +859,7 @@ public class GoJsActivity extends FragmentActivity {
 	
 	private void showMoreButtons() {
 		System.out.println("showing more buttons");
+		final GoJsActivity c = this;
 		class MoreButtonsDialogFragment extends DialogFragment {
 			private final MoreButtonsDialogFragment dialog = this;
 			@Override
@@ -793,9 +885,14 @@ public class GoJsActivity extends FragmentActivity {
                 bserver2.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View vv) {
+                    	debugdevel=0;
+                    	showMsg("debug devel mode ON");
                         System.out.println("next connections to devel server");
                         server = getString(R.string.server2);
+                	    final String u = PrefUtils.getFromPrefs(c, PrefUtils.PREFS_LOGIN_USERNAME2_KEY,null);
+                	    System.out.println("debugcred2 "+u);
                         dialog.dismiss();
+                	    if (u==null) ask4credentials2();
                     }
                 });
 				Button beidogo = (Button)v.findViewById(R.id.copyEidogo);
@@ -825,20 +922,6 @@ public class GoJsActivity extends FragmentActivity {
 						dialog.dismiss();
 					}
 				});
-				{
-					Button button = (Button)v.findViewById(R.id.deadStones);
-					button.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							showMsg("Put one X marker on each dead group and click SEND");
-							isSelectingDeadStones=true;
-							
-							wv.loadUrl("javascript:last()");
-//							wv.loadUrl("javascript:detmarkx()");
-							dialog.dismiss();
-						}
-					});
-				}
 				
 				builder.setView(v);
 				return builder.create();

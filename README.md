@@ -16,7 +16,12 @@ It's still at the alpha stage of development, but you can already find the follo
 * status: look at the next games where it's your turn
 * download the sgf of these games
 * javascript goban based on eidogo to try some variations, and select the move you want to play
-* upload your chosen move, or upload a pass move, or resign, or skip this game
+* upload your chosen move, or send a pass move, or resign, or skip this game
+* automatic detection of scoring phase after two passes; then mouse cliks = mark dead stones
+* unread messages are downloaded and shown; you can then mark them as read or no.
+* support for receiving games invitations: you can accept, decline or skip.
+* automatically goes to the last move played after downloading a game
+* nice support of network errors with "short" timeout and no crash
 
 Thanks to the integrated eidogo editor, the following features are also supported:
 
@@ -27,18 +32,19 @@ Thanks to the integrated eidogo editor, the following features are also supporte
 
 Features that will be supported soon:
 
-* Endgame: select dead stones, agree/disagree on dead stones
+* Endgame: score checking, choosing dead stones (nearly done, to come very soon !)
 * Sending comments
 
 Here is a quickstart guide:
 
 * First open the menu, click on settings and enter your DGS login and password (it is securely stored !)
 * Then click on "GetGames" and wait a few seconds: it will report after maximum 6 seconds whether it has been able to
-succesfully connect or not, and if so, it will report the number of games where it's your turn
+succesfully connect or not, and if so, it will report the number of games where it's your turn.
+"GetGames" will also check for unread messages and game invitations and display them if there are any.
+You then have the opportunity to mark messages as unread or not, invite or declide or skip game invitations.
 * Then wait 2 seconds for the first game to show up
-* The board game shows the very start (empty board) of the game: you can see at the bottom the information about the game in the text area for comments
-* You may want to directly jump to the last move of the game by clicking on the "rightmost" button, just on the left of the "SEND" button; whenever a move is displayed, the comments associated with this move are also shown on the bottom text area.
 * You can navigate the game, explore variations, nothing is sent to the server as long as you don't press the SEND button !
+* The comments associated with each move are shown in the bottom text area. Game information is stored in the comments associated with the game start.
 * When you press the SEND button, the single last move that is visible on screen is sent (this is the stone marked with a
 red square, or the pass move if no stone is marked)
 * There are actually two ways to send a pass move: either pressing the top "PASS" button, or in the board, recording a pass move with the board pass button and pressing the board send button.

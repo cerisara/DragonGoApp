@@ -15,7 +15,7 @@
         android:text="@string/hello_world" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/bgetgames"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -25,23 +25,23 @@
         />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/bzoomin"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/button1"
-        android:layout_toRightOf="@+id/button1"
+        android:layout_alignTop="@+id/bgetgames"
+        android:layout_toRightOf="@+id/bgetgames"
         android:clickable="false"
         android:text="Zoom+"
         />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/bzoomout"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/button1"
-        android:layout_toRightOf="@+id/button2"
+        android:layout_alignTop="@+id/bgetgames"
+        android:layout_toRightOf="@+id/bzoomin"
         android:clickable="false"
         android:text="Zoom-"
         />
@@ -51,8 +51,8 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/button1"
-        android:layout_toRightOf="@+id/button3"
+        android:layout_alignTop="@+id/bgetgames"
+        android:layout_toRightOf="@+id/bzoomout"
         android:clickable="false"
         android:text="pass"
         />
@@ -61,7 +61,7 @@
         android:id="@+id/web1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button1"
+        android:layout_below="@+id/bgetgames"
         android:isScrollContainer="true" />
 
     <Button
