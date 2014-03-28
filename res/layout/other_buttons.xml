@@ -33,6 +33,13 @@
         android:text="connect to devel server" />
     
     <Button
+        android:id="@+id/cycleStates"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="cycle thru states" />
+    
+    <Button
         android:id="@+id/copyEidogo"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"

@@ -75,7 +75,6 @@ public class GoJsActivity extends FragmentActivity {
 	ArrayList<Game> games2play = new ArrayList<Game>();
 	int curgidx2play=0,moveid=0;
 	int gameid=-1;
-	boolean isSelectingDeadStones = false;
 	final String netErrMsg = "Connection errors or timeout, you may retry";
 
 //	private static void copyFile(InputStream in, OutputStream out) throws IOException {
@@ -102,6 +101,9 @@ public class GoJsActivity extends FragmentActivity {
 	    });
 	}
 	private void changeState(guistate newstate) {
+		if (curstate==guistate.markDeadStones && newstate!=guistate.markDeadStones)
+	    	wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkp()");
+		System.out.println("inchangestate "+curstate+" .. "+newstate);
 	    switch (newstate) {
 	    case nogame: setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
 	    case play: setButtons("Send","Zoom+","Zoom-","Est.Score"); break;
@@ -230,14 +232,10 @@ public class GoJsActivity extends FragmentActivity {
 				}
 				fin.close();
 			}
-			if (isSelectingDeadStones) {
+			if (curstate==guistate.markDeadStones) {
 			    String sc = showCounting(jsonansw);
-				// TODO: get back the score from JSON + territories, print it,
-				//        mark all territories, ask for agree, play or choose other deadstones
-				// TODO: if agreed, send the "score" command
 				showMsg("dead stones sent; score="+sc);
-				isSelectingDeadStones=false;
-				wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkp()");
+				changeState(guistate.checkScore);
 			} else {
 				showMsg("sent to server: "+msg);
 			}
@@ -253,7 +251,7 @@ public class GoJsActivity extends FragmentActivity {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			view.loadUrl("javascript:eidogo.autoPlayers[0].last()");
-			if (isSelectingDeadStones)
+			if (curstate==guistate.markDeadStones)
 				view.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
 		}
 		@Override
@@ -262,7 +260,7 @@ public class GoJsActivity extends FragmentActivity {
 			if (i>=0) {
 				int j=url.lastIndexOf('|')+1;
 				String cmd="", msg="unk";
-				if (isSelectingDeadStones) {
+				if (curstate==guistate.markDeadStones) {
 					String sgfdata = url.substring(i+14, j);
 					String deadstones=getMarkedStones(sgfdata);
 					System.out.println("deadstones "+deadstones);
@@ -284,10 +282,16 @@ public class GoJsActivity extends FragmentActivity {
 					} else
 						msg="move "+move;
 				}
-                if (sendCmd2server(cmd, msg)) {
+                if (sendCmd2server(cmd, msg) && curstate==guistate.play) {
+                	// if the move has been correctly sent to the server and it's really a move, not a score request,
+                	// then we can switch to the next game
                     moveid=0;
                     games2play.remove(curgidx2play);
-                    downloadAndShowGame();
+                    if (games2play.size()==0) {
+                    	showMsg("No more games locally");
+                    	changeState(guistate.nogame);
+                    } else
+                    	downloadAndShowGame();
                 }
 				return true;
 			} else {
@@ -408,8 +412,9 @@ public class GoJsActivity extends FragmentActivity {
 				if ((lastb.equals("")||lastb.equals("tt")) && ((lastw.equals("")||lastw.equals("tt")))) {
 					System.out.println("scoring phase detected !");
 					showMsg("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
-					isSelectingDeadStones=true;
+					changeState(guistate.markDeadStones);
 				}
+				
 			}
 		} catch (Exception e) {
 			showMsg(netErrMsg);
@@ -418,6 +423,7 @@ public class GoJsActivity extends FragmentActivity {
 
 		// show the board game
 		String f=eidogodir+"/example.html";
+		System.out.println("debugloadurl file://"+f);
 		wv.loadUrl("file://"+f);
 	}
 	
@@ -453,20 +459,19 @@ public class GoJsActivity extends FragmentActivity {
 	        button.setOnClickListener(new View.OnClickListener() {
 	            public void onClick(View v) {
 	                switch(curstate) {
-	                case play: // send the move
-	                    if (sendMove()==0) {
-	                        showMsg("no more games stored locally");
-	                        changeState(guistate.nogame);
-	                    }
-	                    break;
 	                case nogame: // download games
 	                    dowbloadListOfGames();
 	                    break;
+	                case play: // send the move
+	            		// ask eidogo to send last move; it will be captured by the web listener
+	                    wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
+	                    break;
 	                case markDeadStones: // send a request to the server to compute the score
-	                    evaluateScore();
+	                	// ask eidogo to send sgf, which shall contain X
+	                    wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
 	                    break;
 	                case checkScore: // accept the current score evaluation
-	                    acceptScore();
+//	                    acceptScore();
 	                    break;
 	                }
 
@@ -510,34 +515,28 @@ public class GoJsActivity extends FragmentActivity {
 				@Override
 				public void onClick(View v) {
                     switch(curstate) {
-                    case nogame: Message.send(); break;
-                    case play: startSelectDeadstones(); break;
+                    case nogame: // send message (TODO)
+                    	Message.send(); break;
+                    case play: // start evaluation of score
+                    	// normally, detmarkx() is called right after the board is displayed,
+                    	// but here, the board is displayed long ago, so we have to call it manually
+        				wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
+        				changeState(guistate.markDeadStones);
+        				break;
                     case markDeadStones: // cancels marking stones and comes back to playing
+                    	changeState(guistate.play);
                         break;
                     case checkScore: // refuse score and continues to mark stones
                         break;
                     }
-					Thread passthread = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							String cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move=pass";
-							String msg="pass move";
-							if (sendCmd2server(cmd, msg)) {
-	                            moveid=0;
-	                            games2play.remove(curgidx2play);
-	                            downloadAndShowGame();
-							}
-						}
-					});
-					passthread.start();
 				}
 			});
 		}
 
 		// ====================================
 		// copy the eidogo dir into the external sdcard
-		// TODO: only copy if it does not exist already
-		// TODO: this takes time, so do it in a thread and show a message for the user to wait
+		// only copy if it does not exist already
+		// this takes time, so do it in a thread and show a message for the user to wait
 		boolean mExternalStorageAvailable = false;
 		boolean mExternalStorageWriteable = false;
 		String state = Environment.getExternalStorageState();
@@ -766,7 +765,8 @@ public class GoJsActivity extends FragmentActivity {
 					if (games2play.size()>0) {
 						curgidx2play=0;
 						downloadAndShowGame();
-						changeState(guistate.play);
+						// download detects if 2 passes and auto change state to markdeadstones
+						if (curstate!=guistate.markDeadStones) changeState(guistate.play);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -982,6 +982,20 @@ public class GoJsActivity extends FragmentActivity {
 						System.out.println("copy eidogo");
 						new CopyEidogoTask().execute("noparms");
 						dialog.dismiss();
+					}
+				});
+				Button bcycle = (Button)v.findViewById(R.id.cycleStates);
+				bcycle.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						switch (curstate) {
+					    case nogame: changeState(guistate.play); break;
+					    case play: changeState(guistate.markDeadStones); break;
+					    case markDeadStones: changeState(guistate.checkScore); break;
+					    case checkScore: changeState(guistate.nogame); break;
+					    default:
+						}
+						System.out.println("cycle state "+curstate);
 					}
 				});
 				Button bskip = (Button)v.findViewById(R.id.skipGame);
