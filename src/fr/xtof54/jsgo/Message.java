@@ -34,6 +34,10 @@ public class Message {
     
     public int getMessageId() {return msgid;}
     
+    public static void send() {
+        // TODO
+    }
+    
     public static void handleMessages(GoJsActivity main) throws Exception {
         c=main;
         HttpGet httpget = new HttpGet(main.server+"quick_do.php?obj=message&cmd=list&filter_folders=2");

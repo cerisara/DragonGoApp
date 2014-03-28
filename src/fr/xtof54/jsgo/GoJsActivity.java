@@ -67,7 +67,6 @@ public class GoJsActivity extends FragmentActivity {
     enum guistate {nogame, play, markDeadStones, checkScore};
     guistate curstate = guistate.nogame;
     
-	int nc=0;
 	File eidogodir;
 	final boolean forcecopy=false;
 	Thread uithread;
@@ -91,13 +90,13 @@ public class GoJsActivity extends FragmentActivity {
 	    this.runOnUiThread(new Runnable() {
 	        @Override
 	        public void run() {
-	            Button but1 = (Button)findViewById(R.id.bgetgames);
+	            Button but1 = (Button)findViewById(R.id.but1);
 	            but1.setText(b1);
-	            Button but2 = (Button)findViewById(R.id.bzoomin);
+	            Button but2 = (Button)findViewById(R.id.but2);
 	            but2.setText(b2);
-	            Button but3 = (Button)findViewById(R.id.bzoomout);
+	            Button but3 = (Button)findViewById(R.id.but3);
 	            but3.setText(b3);
-	            Button but4 = (Button)findViewById(R.id.bpass);
+	            Button but4 = (Button)findViewById(R.id.but4);
 	            but4.setText(b4);
 	        }
 	    });
@@ -105,7 +104,7 @@ public class GoJsActivity extends FragmentActivity {
 	private void changeState(guistate newstate) {
 	    switch (newstate) {
 	    case nogame: setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
-	    case play: setButtons("Scoring","Zoom+","Zoom-","Send"); break;
+	    case play: setButtons("Send","Zoom+","Zoom-","Est.Score"); break;
 	    case markDeadStones: setButtons("Score","Zoom+","Zoom-","Play"); break;
 	    case checkScore: setButtons("Accept","Zoom+","Zoom-","Refuse"); break;
 	    default:
@@ -171,13 +170,13 @@ public class GoJsActivity extends FragmentActivity {
 		System.out.println("init finished");
 		final TextView wv = (TextView)findViewById(R.id.textView1);
 		wv.setText("init done. You can play !");
-		final Button button1 = (Button)findViewById(R.id.bgetgames);
+		final Button button1 = (Button)findViewById(R.id.but1);
 		button1.setClickable(true);
 		button1.setEnabled(true);
-		final Button button2 = (Button)findViewById(R.id.bzoomin);
+		final Button button2 = (Button)findViewById(R.id.but2);
 		button2.setClickable(true);
 		button2.setEnabled(true);
-		final Button button3 = (Button)findViewById(R.id.bzoomout);
+		final Button button3 = (Button)findViewById(R.id.but3);
 		button3.setClickable(true);
 		button3.setEnabled(true);
 		button1.invalidate();
@@ -450,7 +449,43 @@ public class GoJsActivity extends FragmentActivity {
 			});
 		}
 		{
-			final Button button = (Button)findViewById(R.id.bzoomin);
+	        final Button button = (Button)findViewById(R.id.but1);
+	        button.setOnClickListener(new View.OnClickListener() {
+	            public void onClick(View v) {
+	                switch(curstate) {
+	                case play: // send the move
+	                    if (sendMove()==0) {
+	                        showMsg("no more games stored locally");
+	                        changeState(guistate.nogame);
+	                    }
+	                    break;
+	                case nogame: // download games
+	                    dowbloadListOfGames();
+	                    break;
+	                case markDeadStones: // send a request to the server to compute the score
+	                    evaluateScore();
+	                    break;
+	                case checkScore: // accept the current score evaluation
+	                    acceptScore();
+	                    break;
+	                }
+
+//	              {
+//	                  Intent intent = new Intent(Intent.ACTION_VIEW);
+//	                  intent.addCategory(Intent.CATEGORY_BROWSABLE);
+//	                  intent.setDataAndType(Uri.fromFile(ff), "application/x-webarchive-xml");
+//	                  //                  intent.setDataAndType(Uri.fromFile(ff), "text/html");
+//	                  intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
+//	                  //                  intent.setClassName("Lnu.tommie.inbrowser", "com.android.browser.BrowserActivity");
+//	                  startActivity(intent);
+//	                  // to launch a browser:
+//	                  //                  Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("file:///mnt/sdcard/"));
+//	              }
+	            }
+	        });
+		}
+		{
+			final Button button = (Button)findViewById(R.id.but2);
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -460,7 +495,7 @@ public class GoJsActivity extends FragmentActivity {
 			});
 		}
 		{
-			final Button button = (Button)findViewById(R.id.bzoomout);
+			final Button button = (Button)findViewById(R.id.but3);
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -470,11 +505,18 @@ public class GoJsActivity extends FragmentActivity {
 			});
 		}
 		{
-			final Button button = (Button)findViewById(R.id.bpass);
+			final Button button = (Button)findViewById(R.id.but4);
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-				    changeState(guistate.checkScore);
+                    switch(curstate) {
+                    case nogame: Message.send(); break;
+                    case play: startSelectDeadstones(); break;
+                    case markDeadStones: // cancels marking stones and comes back to playing
+                        break;
+                    case checkScore: // refuse score and continues to mark stones
+                        break;
+                    }
 					Thread passthread = new Thread(new Runnable() {
 						@Override
 						public void run() {
@@ -491,25 +533,6 @@ public class GoJsActivity extends FragmentActivity {
 				}
 			});
 		}
-		final Button button = (Button)findViewById(R.id.bgetgames);
-		button.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				++nc;
-                dowbloadListOfGames();
-
-//				{
-//					Intent intent = new Intent(Intent.ACTION_VIEW);
-//					intent.addCategory(Intent.CATEGORY_BROWSABLE);
-//					intent.setDataAndType(Uri.fromFile(ff), "application/x-webarchive-xml");
-//					//	                intent.setDataAndType(Uri.fromFile(ff), "text/html");
-//					intent.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
-//					//	                intent.setClassName("Lnu.tommie.inbrowser", "com.android.browser.BrowserActivity");
-//					startActivity(intent);
-//					// to launch a browser:
-//					//	                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("file:///mnt/sdcard/"));
-//				}
-			}
-		});
 
 		// ====================================
 		// copy the eidogo dir into the external sdcard
@@ -531,13 +554,13 @@ public class GoJsActivity extends FragmentActivity {
 			eidogodir = new File(d, "eidogo");
 			if (forcecopy||!eidogodir.exists()) {
 				eidogodir.mkdirs();
-				final Button button3 = (Button)findViewById(R.id.bzoomout);
+				final Button button3 = (Button)findViewById(R.id.but3);
 				button3.setClickable(false);
 				button3.setEnabled(false);
-				final Button button2= (Button)findViewById(R.id.bzoomin);
+				final Button button2= (Button)findViewById(R.id.but2);
 				button2.setClickable(false);
 				button2.setEnabled(false);
-				final Button button1= (Button)findViewById(R.id.bgetgames);
+				final Button button1= (Button)findViewById(R.id.but1);
 				button1.setClickable(false);
 				button1.setEnabled(false);
 				button1.invalidate();
@@ -743,6 +766,7 @@ public class GoJsActivity extends FragmentActivity {
 					if (games2play.size()>0) {
 						curgidx2play=0;
 						downloadAndShowGame();
+						changeState(guistate.play);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

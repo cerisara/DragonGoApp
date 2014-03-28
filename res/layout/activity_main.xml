@@ -15,7 +15,7 @@
         android:text="@string/hello_world" />
 
     <Button
-        android:id="@+id/bgetgames"
+        android:id="@+id/but1"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -25,34 +25,34 @@
         />
 
     <Button
-        android:id="@+id/bzoomin"
+        android:id="@+id/but2"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/bgetgames"
-        android:layout_toRightOf="@+id/bgetgames"
+        android:layout_alignTop="@+id/but1"
+        android:layout_toRightOf="@+id/but1"
         android:clickable="false"
         android:text="Zoom+"
         />
 
     <Button
-        android:id="@+id/bzoomout"
+        android:id="@+id/but3"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/bgetgames"
-        android:layout_toRightOf="@+id/bzoomin"
+        android:layout_alignTop="@+id/but1"
+        android:layout_toRightOf="@+id/but2"
         android:clickable="false"
         android:text="Zoom-"
         />
 
     <Button
-        android:id="@+id/bpass"
+        android:id="@+id/but4"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/bgetgames"
-        android:layout_toRightOf="@+id/bzoomout"
+        android:layout_alignTop="@+id/but1"
+        android:layout_toRightOf="@+id/but3"
         android:clickable="false"
         android:text="pass"
         />
@@ -61,7 +61,7 @@
         android:id="@+id/web1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/bgetgames"
+        android:layout_below="@+id/but1"
         android:isScrollContainer="true" />
 
     <Button
