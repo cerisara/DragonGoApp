@@ -23,6 +23,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.testbrowser.R;
@@ -63,6 +64,8 @@ import android.support.v4.app.FragmentActivity;
 public class GoJsActivity extends FragmentActivity {
 	static int debugdevel=-1;
     String server;
+    enum guistate {nogame, play, markDeadStones, checkScore};
+    guistate curstate = guistate.nogame;
     
 	int nc=0;
 	File eidogodir;
@@ -81,8 +84,57 @@ public class GoJsActivity extends FragmentActivity {
 //		int read;
 //		while((read = in.read(buffer)) != -1){
 //			out.write(buffer, 0, read);
-//		}
-//	}
+	//		}
+	//	}
+
+	private void setButtons(final String b1, final String b2, final String b3, final String b4) {
+	    this.runOnUiThread(new Runnable() {
+	        @Override
+	        public void run() {
+	            Button but1 = (Button)findViewById(R.id.bgetgames);
+	            but1.setText(b1);
+	            Button but2 = (Button)findViewById(R.id.bzoomin);
+	            but2.setText(b2);
+	            Button but3 = (Button)findViewById(R.id.bzoomout);
+	            but3.setText(b3);
+	            Button but4 = (Button)findViewById(R.id.bpass);
+	            but4.setText(b4);
+	        }
+	    });
+	}
+	private void changeState(guistate newstate) {
+	    switch (newstate) {
+	    case nogame: setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
+	    case play: setButtons("Scoring","Zoom+","Zoom-","Send"); break;
+	    case markDeadStones: setButtons("Score","Zoom+","Zoom-","Play"); break;
+	    case checkScore: setButtons("Accept","Zoom+","Zoom-","Refuse"); break;
+	    default:
+	    }
+	    curstate=newstate;
+	}
+	
+    public String showCounting(String json) {
+        JSONObject o = new JSONObject(json);
+        String sc="";
+        try {
+            sc = o.getString("score");
+            String bt = o.getString("black_territory").trim();
+            for (int i=0;i<bt.length();i+=2) {
+                String coords = bt.substring(i, i+2);
+                wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"TB\",\""+coords+"\")");
+            }
+            String wt = o.getString("white_territory").trim();
+            for (int i=0;i<wt.length();i+=2) {
+                String coords = wt.substring(i, i+2);
+                wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"TW\",\""+coords+"\")");
+            }
+            wv.loadUrl("javascript:eidogo.autoPlayers[0].refresh()");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            showMsg("warning: error counting");
+        }
+        return sc;
+    }
 
 	void copyEidogo(final String edir, final File odir) {
 		AssetManager mgr = getResources().getAssets();
@@ -166,6 +218,7 @@ public class GoJsActivity extends FragmentActivity {
 			for (Header s : heds)
 				System.out.println("[HEADER] "+s);
 			HttpEntity entity = response.getEntity();
+			String jsonansw=null;
 			if (entity != null) {
 				InputStream instream = entity.getContent();
 				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
@@ -174,14 +227,16 @@ public class GoJsActivity extends FragmentActivity {
 					if (s==null) break;
 					System.out.println("LOGINlog "+s);
 					if (s.contains("#Error")) showMsg("Error login; check credentials");
+					if (s.length()>0&&s.charAt(0)=='{') jsonansw = s;
 				}
 				fin.close();
 			}
 			if (isSelectingDeadStones) {
+			    String sc = showCounting(jsonansw);
 				// TODO: get back the score from JSON + territories, print it,
 				//        mark all territories, ask for agree, play or choose other deadstones
 				// TODO: if agreed, send the "score" command
-				showMsg("dead stones sent !");
+				showMsg("dead stones sent; score="+sc);
 				isSelectingDeadStones=false;
 				wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkp()");
 			} else {
@@ -353,7 +408,7 @@ public class GoJsActivity extends FragmentActivity {
 				System.out.println("debuglastmoves --"+lastw+"--"+lastb);
 				if ((lastb.equals("")||lastb.equals("tt")) && ((lastw.equals("")||lastw.equals("tt")))) {
 					System.out.println("scoring phase detected !");
-					showMsg("Scoring phase: put one (or more) X marker on each dead group and click SEND");
+					showMsg("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
 					isSelectingDeadStones=true;
 				}
 			}
@@ -419,6 +474,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+				    changeState(guistate.checkScore);
 					Thread passthread = new Thread(new Runnable() {
 						@Override
 						public void run() {
