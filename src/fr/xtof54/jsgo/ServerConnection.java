@@ -186,14 +186,18 @@ public class ServerConnection {
      * @return
      */
     public JSONObject sendCmdToServer(final String cmd) {
+		System.out.println("begin send command, httpclient="+httpclient);
+		if (httpclient==null) {
+			boolean loginok = login();
+			System.out.println("login success: "+loginok);
+			if (!loginok) {
+				return null;
+			}
+		}
+		System.out.println("now httpclient="+httpclient);
     	Runnable r = new Runnable() {
 			@Override
 			public void run() {
-				if (httpclient==null) {
-					if (!login()) {
-						return;
-					}
-				}
 				try {
 					 System.out.println("debug send cmd "+server+cmd);
 						HttpGet httpget = new HttpGet(server+cmd);
@@ -330,7 +334,6 @@ public class ServerConnection {
     	String p=f.readLine();
     	f.close();
     	ServerConnection server = new ServerConnection(0,u,p);
-    	server.login();
     	JSONObject o = server.sendCmdToServer(cmdGetListOfGames);
     	System.out.println("answer: "+o);
     	server.closeConnection();
