@@ -21,19 +21,43 @@ import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import fr.xtof54.jsgo.GoJsActivity.PrefUtils;
-import fr.xtof54.jsgo.GoJsActivity.guistate;
-
 public class Game {
-	
+	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
+
 	static ArrayList<Game> games2play = new ArrayList<Game>();
 	
-	private ServerConnection server;
     private int gid;
+    private JSONArray gameinfo;
     ArrayList<String> sgf = null;
     int moveid;
     
-    public Game(int gameid) {gid=gameid;}
+    public static int loadStatusGames(ServerConnection server) {
+    	JSONObject o = server.sendCmdToServer(cmdGetListOfGames);
+    	if (o==null) return -1;
+    	int ngames = o.getInt("list_size");
+	    if (ngames>0) {
+            JSONArray headers = o.getJSONArray("list_header");
+            int gid_jsonidx = -1;
+            for (int i=0;i<headers.length();i++) {
+                String h = headers.getString(i);
+                System.out.println("jsonheader "+i+" "+h);
+                if (h.equals("id")) gid_jsonidx=i;
+            }
+            JSONArray jsongames = o.getJSONArray("list_result");
+            for (int i=0;i<jsongames.length();i++) {
+                JSONArray jsongame = jsongames.getJSONArray(i);
+                int gameid = jsongame.getInt(gid_jsonidx);
+                Game g = new Game(jsongame, gameid);
+                games2play.add(g);
+            }
+	    }
+	    return ngames;
+    }
+    
+    Game(JSONArray gameObject, int gameid) {
+    	gid=gameid;
+    	gameinfo = gameObject;
+    }
     
     public int getGameID() {return gid;}
 
@@ -77,7 +101,7 @@ public class Game {
     }
     
     
-    // TODO: est-ce qu'il faut garder le meme httpclient qu'avant pour pouvoir beneficier du proxy ?
+    // est-ce qu'il faut garder le meme httpclient qu'avant pour pouvoir beneficier du proxy ? ==> OUI
     public void downloadGame(final int gid) {
     	sgf = new ArrayList<String>();
 	    GoJsActivity.main.runInWaitingThread(new Runnable() {
@@ -172,4 +196,11 @@ public class Game {
 			"</body>",
 			"</html>",
 	};
+
+	public static void main(String args[]) {
+		String[] c = ServerConnection.loadCredsFromFile("creds.txt");
+		ServerConnection server = new ServerConnection(0, c[0], c[1]);
+		int ng = Game.loadStatusGames(server);
+		System.out.println("ngames "+ng);
+	}
 }

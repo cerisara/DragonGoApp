@@ -2,6 +2,7 @@ package fr.xtof54.jsgo;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -324,16 +325,26 @@ public class ServerConnection {
 //				} catch (Exception e) {
 //					e.printStackTrace();
 //					showMsg(netErrMsg);
-//				}
-//			}
+    //				}
+    //			}
 
+    static String[] loadCredsFromFile(String file) {
+    	String u=null, p=null;
+    	try {
+    		BufferedReader f=new BufferedReader(new FileReader(file));
+    		u=f.readLine();
+    		p=f.readLine();
+    		f.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	String[] res = {u,p};
+    	return res;
+    }
     
     public static void main(String args[]) throws Exception {
-    	BufferedReader f=new BufferedReader(new FileReader("creds.txt"));
-    	String u=f.readLine();
-    	String p=f.readLine();
-    	f.close();
-    	ServerConnection server = new ServerConnection(0,u,p);
+    	String[] c = loadCredsFromFile("creds.txt");
+    	ServerConnection server = new ServerConnection(0,c[0],c[1]);
     	JSONObject o = server.sendCmdToServer(cmdGetListOfGames);
     	System.out.println("answer: "+o);
     	server.closeConnection();

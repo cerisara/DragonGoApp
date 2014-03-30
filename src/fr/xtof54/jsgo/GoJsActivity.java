@@ -726,7 +726,7 @@ public class GoJsActivity extends FragmentActivity {
 	                                for (int i=0;i<jsongames.length();i++) {
 	                                    JSONArray jsongame = jsongames.getJSONArray(i);
 	                                    int gameid = jsongame.getInt(gid_jsonidx);
-	                                    Game g = new Game(gameid);
+	                                    Game g = new Game(null,gameid);
 	                                    games2play.add(g);
 	                                }
 							    }
