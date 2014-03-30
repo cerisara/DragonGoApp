@@ -28,8 +28,8 @@ import org.json.JSONObject;
 
 import com.example.testbrowser.R;
 
+import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.ServerConnection.DetLogger;
-import fr.xtof54.jsgo.ServerConnection.DetThreadRunner;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -559,29 +559,6 @@ public class GoJsActivity extends FragmentActivity {
 	 * This method must not be blocking, otherwise the waiting dialog window is never displayed.
 	 */
 	public Thread runInWaitingThread(final Runnable method) {
-		class WaitDialogFragment extends DialogFragment {
-			@Override
-			public Dialog onCreateDialog(Bundle savedInstanceState) {
-				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-				// Get the layout inflater
-				LayoutInflater inflater = getActivity().getLayoutInflater();
-
-				// Inflate and set the layout for the dialog
-				// Pass null as the parent view because its going in the dialog layout
-				builder.setView(inflater.inflate(R.layout.waiting, null))
-				// Add action buttons
-				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						WaitDialogFragment.this.getDialog().cancel();
-						// TODO stop thread
-					}
-				});
-				return builder.create();
-			}
-		}
-		
-		final WaitDialogFragment waitdialog = new WaitDialogFragment();
-		waitdialog.show(getSupportFragmentManager(),"waiting");
 		final Thread computingThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -628,36 +605,33 @@ public class GoJsActivity extends FragmentActivity {
 		System.out.println("credentials passed to server "+u+" "+p);
 		if (server==null) {
 			server = new ServerConnection(0, u, p);
-			DetThreadRunner d = new DetThreadRunner() {
-				@Override
-				public void runInThread(Runnable r) {
-					runInWaitingThread(r);
-					synchronized (waiterComputingFinished) {
-						try {
-							waiterComputingFinished.wait();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			};
 			DetLogger l = new DetLogger() {
 				@Override
 				public void showMsg(String s) {
 					showMessage(s);
 				}
 			};
-			server.setRunners(d, l);
+			server.setLogget(l);
 		}
-		int ngames = Game.loadStatusGames(server);
-		if (ngames>=0)
-			showMessage("Nb games to play: "+ngames);
-		if (games2play.size()>0) {
-			curgidx2play=0;
-			downloadAndShowGame();
-			// download detects if 2 passes and auto change state to markdeadstones
-			if (curstate!=guistate.markDeadStones) changeState(guistate.play);
-		} else return;
+		
+		final EventManager em = EventManager.getEventManager();
+		EventManager.EventListener l = new EventManager.EventListener() {
+			@Override
+			public void reactToEvent() {
+				em.unregisterListener(eventType.downloadListEnd, this);
+				int ngames = Game.getGames().size();
+				if (ngames>=0)
+					showMessage("Nb games to play: "+ngames);
+				if (ngames>0) {
+					curgidx2play=0;
+					downloadAndShowGame();
+					// download detects if 2 passes and auto change state to markdeadstones
+					if (curstate!=guistate.markDeadStones) changeState(guistate.play);
+				} else return;
+			}
+		};
+		em.registerListener(eventType.downloadListEnd, l);
+		Game.loadStatusGames(server);
 	}
 
 	private class CopyEidogoTask extends AsyncTask<String, Void, String> {
@@ -671,54 +645,67 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 
+	public static class WaitDialogFragment extends DialogFragment {
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			// Get the layout inflater
+			LayoutInflater inflater = getActivity().getLayoutInflater();
+
+			// Inflate and set the layout for the dialog
+			// Pass null as the parent view because its going in the dialog layout
+			builder.setView(inflater.inflate(R.layout.waiting, null))
+			// Add action buttons
+			.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					WaitDialogFragment.this.getDialog().cancel();
+					// TODO stop thread
+				}
+			});
+			return builder.create();
+		}
+	}
+	
+	private WaitDialogFragment waitdialog;
+	private int numEventsReceived = 0;
+	
     @Override
 	public void onStart() {
         super.onStart();
 //	    server = getString(R.string.server1);
 	    main = this;
 	    
-	    Runnable r = new Runnable() {
+		final EventManager em = EventManager.getEventManager();
+		EventManager.EventListener waitDialogShower = new EventManager.EventListener() {
+			boolean isShown = false;
 			@Override
-			public void run() {
-				System.out.println("test thread");
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			public synchronized void reactToEvent() {
+				if (!isShown) {
+					waitdialog = new WaitDialogFragment();
+					waitdialog.show(getSupportFragmentManager(),"waiting");
+					isShown=true;
 				}
-				System.out.println("fin thread");
+				numEventsReceived++;
 			}
 		};
-		System.out.println("avant");
-		DetThreadRunner d = new DetThreadRunner() {
+		em.registerListener(eventType.downloadGameStarted, waitDialogShower);
+		em.registerListener(eventType.downloadListStarted, waitDialogShower);
+		em.registerListener(eventType.loginStarted, waitDialogShower);
+		
+		EventManager.EventListener waitDialogHider = new EventManager.EventListener() {
 			@Override
-			public void runInThread(final Runnable r) {
-				// runInWaitingThread must be called in a non-blocking manner so that the waiting dialog appears
-				// but the runInThread is expected to be blocking.
-				// So I run runInWaitingThread in another thread
-				// and then I wait for r to have finished its job.
-				
-				Thread t = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						runInWaitingThread(r);
-					}
-				});
-				t.start();
-				synchronized (waiterComputingFinished) {
-					try {
-						waiterComputingFinished.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+			public synchronized void reactToEvent() {
+				--numEventsReceived;
+				if (numEventsReceived<0) {
+					System.out.println("ERROR events stream...");
+					return;
 				}
+				if (numEventsReceived==0) waitdialog.dismiss();
 			}
 		};
-		d.runInThread(r);
-		System.out.println("apres");
-
-
+		em.registerListener(eventType.downloadGameEnd, waitDialogHider);
+		em.registerListener(eventType.downloadListEnd, waitDialogHider);
+		em.registerListener(eventType.loginEnd, waitDialogHider);
 	}
 	
 	@Override

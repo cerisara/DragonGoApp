@@ -19,6 +19,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
+import fr.xtof54.jsgo.EventManager.eventType;
 
 /**
  * This class is designed to be as much independent on the other
@@ -59,47 +60,6 @@ public class ServerConnection {
 	};
 	public void setLogget(DetLogger l) {logger=l;}
 
-	/**
-	 * We define this interface so that it can be deployed on an Android unlimited progress dialog,
-	 * as well as on a simple independent thread.
-	 * 
-	 * Note that runInThread should not be blocking, because it may be called from the UI thread !
-	 * 
-	 * @author xtof
-	 *
-	 */
-	public interface DetThreadRunner {
-		public void runInThread(Runnable r);
-	}
-	DetThreadRunner threadRunner = new DetThreadRunner() {
-		@Override
-		public synchronized void runInThread(final Runnable r) {
-			// wrap by another runnable to wait for its end
-			Runnable rr = new Runnable() {
-				@Override
-				public void run() {
-					System.out.println("start run");
-					r.run();
-					System.out.println("run done");
-					synchronized (threadRunner) {
-						System.out.println("notify");
-						threadRunner.notify();
-					}
-				}
-			};
-			Thread t = new Thread(rr);
-			t.start();
-			try {
-				threadRunner.wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	};
-	public void setRunners(DetThreadRunner d, DetLogger l) {
-		threadRunner = d;
-		logger=l;
-	}
 
 	final String[] serverNames = {
 			"http://www.dragongoserver.net/",
@@ -138,10 +98,11 @@ public class ServerConnection {
 
 	/**
 	 * Login to this server
+	 * WARNING: asynchronous / non-blocking !!
 	 */
-	public boolean login() {
+	public boolean loginok=false;
+	public void startLogin() {
 		class MyRunnable implements Runnable {
-			boolean loginok=false;
 			@Override
 			public void run() {
 				System.out.println("start login run");
@@ -181,24 +142,36 @@ public class ServerConnection {
 			}
 		};
 		MyRunnable r = new MyRunnable();
-		threadRunner.runInThread(r);
-		return r.loginok;
+		EventManager em = EventManager.getEventManager();
+		em.sendEvent(eventType.loginStarted);
+		Thread loginthread = new Thread(r);
+		loginthread.start();
 	}
 
-	JSONObject o=null;
+	public JSONObject o=null;
 	/**
 	 * send a command to the server and gets back a JSon object with the answer
+	 * 
+	 * WARNING: asynchronous / non-blocking !!
 	 * @param cmd
 	 * @return
 	 */
-	public JSONObject sendCmdToServer(final String cmd) {
+	public void sendCmdToServer(final String cmd, final eventType startEvent, final eventType endEvent) {
 		System.out.println("begin send command, httpclient="+httpclient);
+		final EventManager em = EventManager.getEventManager();
+		if (startEvent!=null) em.sendEvent(startEvent);
 		if (httpclient==null) {
-			boolean loginok = login();
-			System.out.println("login success: "+loginok);
-			if (!loginok) {
-				return null;
-			}
+			System.out.println("in sendcmd: no httpclient, trying login...");
+			em.registerListener(eventType.loginEnd, new EventManager.EventListener() {
+				@Override
+				public void reactToEvent() {
+					em.unregisterListener(eventType.loginEnd, this);
+					if (loginok) sendCmdToServer(cmd,null,endEvent);
+					else if (endEvent!=null) em.sendEvent(endEvent);
+				}
+			});
+			startLogin();
+			return;
 		}
 		System.out.println("now httpclient="+httpclient);
 		Runnable r = new Runnable() {
@@ -232,35 +205,44 @@ public class ServerConnection {
 					logger.showMsg(netErrMsg);
 				}
 				System.out.println("server runnable terminated");
+				if (endEvent!=null) em.sendEvent(endEvent);
 			}
 		};
 		o=null;
-		System.out.println("server launch thread");
-		threadRunner.runInThread(r);
-		System.out.println("server thread exit");
+		Thread t = new Thread(r);
+		t.start();
 		//    	if (GoJsActivity.main!=null) {
 		//    		Thread cmdthread = GoJsActivity.main.runInWaitingThread(r);
 		//    	} else {
 		//    		Thread cmdthread = new Thread(r);
 		//    		cmdthread.start();
 		//    	}
-		return o;
 	}
 
+	public List<String> sgf = null;
 	/**
 	 * because download sgf does not return a JSON object, we have to use a dedicated function to do it
 	 * @param gameid
+	 * @param sendEvent=true when called normally
 	 * @return
 	 */
-	public List<String> downloadSgf(final int gameid) {
+	public void downloadSgf(final int gameid, boolean sendEvent) {
+		final EventManager em = EventManager.getEventManager();
+		if (sendEvent) em.sendEvent(eventType.downloadGameStarted);
 		if (httpclient==null) {
-			boolean loginok = login();
-			System.out.println("login success: "+loginok);
-			if (!loginok) {
-				return null;
-			}
+			System.out.println("in getsgf: no httpclient, trying login...");
+			em.registerListener(eventType.loginEnd, new EventManager.EventListener() {
+				@Override
+				public void reactToEvent() {
+					em.unregisterListener(eventType.loginEnd, this);
+					if (loginok) downloadSgf(gameid, false);
+					else em.sendEvent(eventType.downloadGameEnd);
+				}
+			});
+			startLogin();
+			return;
 		}
-		final ArrayList<String> sgf = new ArrayList<String>();
+		sgf = new ArrayList<String>();
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
@@ -290,10 +272,11 @@ public class ServerConnection {
 					e.printStackTrace();
 					logger.showMsg(netErrMsg);
 				}
+				em.sendEvent(eventType.downloadGameEnd);
 			}
 		};
-		threadRunner.runInThread(r);
-		return sgf;
+		Thread t = new Thread(r);
+		t.start();
 	}
 
 	static String[] loadCredsFromFile(String file) {
@@ -311,9 +294,22 @@ public class ServerConnection {
 	}
 
 	public static void main(String args[]) throws Exception {
-		String[] c = loadCredsFromFile("creds.txt");
+		final String[] c = loadCredsFromFile("creds.txt");
 		ServerConnection server = new ServerConnection(0,c[0],c[1]);
-		JSONObject o = server.sendCmdToServer(cmdGetListOfGames);
+		final EventManager em = EventManager.getEventManager();
+		em.registerListener(eventType.downloadListEnd, new EventManager.EventListener() {
+			@Override
+			public void reactToEvent() {
+				synchronized (c) {
+					c.notifyAll();
+				}
+			}
+		});
+		server.sendCmdToServer(cmdGetListOfGames,eventType.downloadListStarted, eventType.downloadListEnd);
+		synchronized (c) {
+			c.wait();
+		}
+		JSONObject o = server.o;
 		System.out.println("answer: "+o);
 		server.closeConnection();
 	}
