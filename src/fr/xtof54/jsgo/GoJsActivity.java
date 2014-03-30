@@ -76,6 +76,7 @@ public class GoJsActivity extends FragmentActivity {
 	int curgidx2play=0,moveid=0;
 	int gameid=-1;
 	final String netErrMsg = "Connection errors or timeout, you may retry";
+	static GoJsActivity main;
 
 //	private static void copyFile(InputStream in, OutputStream out) throws IOException {
 //		byte[] buffer = new byte[1024];
@@ -107,7 +108,10 @@ public class GoJsActivity extends FragmentActivity {
 	    switch (newstate) {
 	    case nogame: setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
 	    case play: setButtons("Send","Zoom+","Zoom-","Est.Score"); break;
-	    case markDeadStones: setButtons("Score","Zoom+","Zoom-","Play"); break;
+	    case markDeadStones:
+	    	// just in case the board is already rendered...
+			wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
+	    	setButtons("Score","Zoom+","Zoom-","Play"); break;
 	    case checkScore: setButtons("Accept","Zoom+","Zoom-","Refuse"); break;
 	    default:
 	    }
@@ -313,55 +317,6 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		System.out.println("showing game "+curgidx2play);
 		System.out.println(" ... "+games2play.get(curgidx2play));
-		final String[] exampleFileHtmlHeader = {
-				"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"",
-				"    \"http://www.w3.org/TR/html4/loose.dtd\">",
-				"<html>",
-				"<head>",
-				"    <title>Xtof54 GoJs</title>",
-				"",
-				"    <!--",
-				"        Optional config - defaults given",
-				"    -->",
-				"    <script type=\"text/javascript\">",
-				"    eidogoConfig = {",
-				"        theme:          \"compact\",",
-				"        mode:           \"play\",",
-				"        showComments:    true,",
-				"        showPlayerInfo:  false,",
-				"        showGameInfo:    false,",
-				"        showTools:       false,",
-				"        showOptions:     false,",
-				"        markCurrent:     true,",
-				"        markVariations:  true,",
-				"        markNext:        false,",
-				"        problemMode:     false,",
-				"        enableShortcuts: false",
-				"    };",
-				"    </script>",
-				"    ",
-				"    <!--",
-				"        Optional international support (see player/i18n/ folder)",
-				"    -->",
-				"<script type=\"text/javascript\" src=\"player/js/lang.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/js/eidogo.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/js/util.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/i18n/en.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/js/gametree.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/js/sgf.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/js/board.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/js/rules.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/js/player.js\"></script>",
-				"<script type=\"text/javascript\" src=\"player/js/init.js\"></script>",
-				"</head>",
-				"<body>",
-				"    <div class=\"eidogo-player-auto\">",
-		};
-		final String[] htmlend = {
-				"    </div>",
-				"</body>",
-				"</html>",
-		};
 
 		// load the sgf and saves it in example.html
 		gameid = games2play.get(curgidx2play).getGameID();
@@ -374,7 +329,7 @@ public class GoJsActivity extends FragmentActivity {
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				PrintWriter fout = new PrintWriter(new FileWriter(eidogodir+"/example.html"));
-				for (String s : exampleFileHtmlHeader) fout.println(s);
+//				for (String s : exampleFileHtmlHeader) fout.println(s);
 				InputStream instream = entity.getContent();
 				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
 				String lastb="12", lastw="32";
@@ -404,7 +359,7 @@ public class GoJsActivity extends FragmentActivity {
 					}
 				}
 				fin.close();
-				for (String s : htmlend) fout.println(s);
+//				for (String s : htmlend) fout.println(s);
 				fout.close();
 				
 				// detect if in scoring phase
@@ -645,6 +600,51 @@ public class GoJsActivity extends FragmentActivity {
 	    }
 	}
 	
+	public Thread runInWaitingThread(final Runnable method) {
+		class WaitDialogFragment extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because its going in the dialog layout
+				builder.setView(inflater.inflate(R.layout.waiting, null))
+				// Add action buttons
+				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						WaitDialogFragment.this.getDialog().cancel();
+						// TODO stop thread
+					}
+				});
+				return builder.create();
+			}
+		}
+		final WaitDialogFragment waitdialog = new WaitDialogFragment();
+		waitdialog.show(getSupportFragmentManager(),"waiting");
+		final Thread computingThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				method.run();
+				try {
+					// just in case, wait for the waiting dialog to be visible
+					for (;;) {
+						if (waitdialog!=null && waitdialog.getDialog()!=null) break;
+						Thread.sleep(500);
+					}
+					// then dismisses it
+					waitdialog.getDialog().cancel();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		computingThread.start();
+		return computingThread;
+	}
+	
+	
 	private void dowbloadListOfGames() {
 	    String tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
 	    String tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
@@ -661,31 +661,7 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		final String u = tu, p=tp;
 	    
-		class WaitDialogFragment extends DialogFragment {
-			@Override
-			public Dialog onCreateDialog(Bundle savedInstanceState) {
-				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-				// Get the layout inflater
-				LayoutInflater inflater = getActivity().getLayoutInflater();
-
-				// Inflate and set the layout for the dialog
-				// Pass null as the parent view because its going in the dialog layout
-				builder.setView(inflater.inflate(R.layout.waiting, null))
-				// Add action buttons
-				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						WaitDialogFragment.this.getDialog().cancel();
-						// TODO: stop downloading
-					}
-				});
-				return builder.create();
-			}
-		}
-		final WaitDialogFragment waitdialog = new WaitDialogFragment();
-		waitdialog.show(getSupportFragmentManager(),"waiting");
-		final GoJsActivity main = this;
-		
-	    Thread downloadThread = new Thread(new Runnable() {
+		runInWaitingThread(new Runnable() {
 			@Override
 			public void run() {
 				System.out.println("CREATE DOWNLOAD THREAD "+Thread.currentThread().getId());
@@ -772,21 +748,10 @@ public class GoJsActivity extends FragmentActivity {
 					e.printStackTrace();
 					showMsg(netErrMsg);
 				}
-				
-				try {
-					for (;;) {
-						if (waitdialog!=null && waitdialog.getDialog()!=null) break;
-						Thread.sleep(500);
-					}
-					waitdialog.getDialog().cancel();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 				// TODO: where to close the connection ?
 //				httpclient.getConnectionManager().shutdown();
 			}
 		});
-	    downloadThread.start();
 	}
 
 	private class CopyEidogoTask extends AsyncTask<String, Void, String> {
@@ -804,6 +769,7 @@ public class GoJsActivity extends FragmentActivity {
 	public void onStart() {
         super.onStart();
 	    server = getString(R.string.server1);
+	    main = this;
 	}
 	
 	@Override
