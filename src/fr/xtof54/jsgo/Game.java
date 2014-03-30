@@ -33,6 +33,7 @@ public class Game {
     int moveid;
     
     public static int loadStatusGames(ServerConnection server) {
+    	games2play.clear();
     	JSONObject o = server.sendCmdToServer(cmdGetListOfGames);
     	if (o==null) return -1;
     	int ngames = o.getInt("list_size");

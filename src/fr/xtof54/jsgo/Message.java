@@ -39,7 +39,8 @@ public class Message {
     }
     
     public static void handleMessages(GoJsActivity main) throws Exception {
-        c=main;
+/*
+    	c=main;
         HttpGet httpget = new HttpGet(main.server+"quick_do.php?obj=message&cmd=list&filter_folders=2");
         HttpResponse response = main.httpclient.execute(httpget);
         Header[] heds = response.getAllHeaders();
@@ -68,6 +69,7 @@ System.out.println("gotanswerjson: "+s);
             }
             fin.close();
         }
+        */
     }
     private static void showNextMsg() {
         if (curmsg>=jsonmsgs.length()) return;
@@ -137,38 +139,38 @@ System.out.println("gotanswerjson: "+s);
                     .setNegativeButton("decline", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             MsgDialogFragment.this.getDialog().dismiss();
-                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=decline_inv&mid="+mm.getMessageId());
-                            HttpResponse response;
-    						try {
-    							response = c.httpclient.execute(httpget);
-    							System.out.println("invitation declined:");
-    	                        Header[] heds = response.getAllHeaders();
-    	                        for (Header s : heds)
-    	                            System.out.println("[HEADER] "+s);
-    						} catch (ClientProtocolException e) {
-    							e.printStackTrace();
-    						} catch (IOException e) {
-    							e.printStackTrace();
-    						}
+//                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=decline_inv&mid="+mm.getMessageId());
+//                            HttpResponse response;
+//    						try {
+//    							response = c.httpclient.execute(httpget);
+//    							System.out.println("invitation declined:");
+//    	                        Header[] heds = response.getAllHeaders();
+//    	                        for (Header s : heds)
+//    	                            System.out.println("[HEADER] "+s);
+//    						} catch (ClientProtocolException e) {
+//    							e.printStackTrace();
+//    						} catch (IOException e) {
+//    							e.printStackTrace();
+//    						}
                             showNextMsg();
                         }
                     });
                 	builder.setNeutralButton("accept", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             MsgDialogFragment.this.getDialog().dismiss();
-                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=accept_inv&mid="+mm.getMessageId());
-                            HttpResponse response;
-    						try {
-    							response = c.httpclient.execute(httpget);
-    							System.out.println("invitation accepted:");
-    	                        Header[] heds = response.getAllHeaders();
-    	                        for (Header s : heds)
-    	                            System.out.println("[HEADER] "+s);
-    						} catch (ClientProtocolException e) {
-    							e.printStackTrace();
-    						} catch (IOException e) {
-    							e.printStackTrace();
-    						}
+//                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=accept_inv&mid="+mm.getMessageId());
+//                            HttpResponse response;
+//    						try {
+//    							response = c.httpclient.execute(httpget);
+//    							System.out.println("invitation accepted:");
+//    	                        Header[] heds = response.getAllHeaders();
+//    	                        for (Header s : heds)
+//    	                            System.out.println("[HEADER] "+s);
+//    						} catch (ClientProtocolException e) {
+//    							e.printStackTrace();
+//    						} catch (IOException e) {
+//    							e.printStackTrace();
+//    						}
                             showNextMsg();
                         }
                     });
@@ -182,19 +184,19 @@ System.out.println("gotanswerjson: "+s);
                     .setNegativeButton("mark as read", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             MsgDialogFragment.this.getDialog().dismiss();
-                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=move_msg&mid="+mm.getMessageId()+"&folder=1");
-                            HttpResponse response;
-    						try {
-    							response = c.httpclient.execute(httpget);
-    							System.out.println("message marked as read:");
-    	                        Header[] heds = response.getAllHeaders();
-    	                        for (Header s : heds)
-    	                            System.out.println("[HEADER] "+s);
-    						} catch (ClientProtocolException e) {
-    							e.printStackTrace();
-    						} catch (IOException e) {
-    							e.printStackTrace();
-    						}
+//                            HttpGet httpget = new HttpGet(c.server+"quick_do.php?obj=message&cmd=move_msg&mid="+mm.getMessageId()+"&folder=1");
+//                            HttpResponse response;
+//    						try {
+//    							response = c.httpclient.execute(httpget);
+//    							System.out.println("message marked as read:");
+//    	                        Header[] heds = response.getAllHeaders();
+//    	                        for (Header s : heds)
+//    	                            System.out.println("[HEADER] "+s);
+//    						} catch (ClientProtocolException e) {
+//    							e.printStackTrace();
+//    						} catch (IOException e) {
+//    							e.printStackTrace();
+//    						}
                             showNextMsg();
                         }
                     });

@@ -27,6 +27,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.testbrowser.R;
+
+import fr.xtof54.jsgo.ServerConnection.DetLogger;
+import fr.xtof54.jsgo.ServerConnection.DetThreadRunner;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -62,14 +65,15 @@ import android.support.v4.app.FragmentActivity;
  *
  */
 public class GoJsActivity extends FragmentActivity {
+	private ServerConnection server=null;
+	
 	static int debugdevel=-1;
-    String server;
+//    String server;
     enum guistate {nogame, play, markDeadStones, checkScore};
     guistate curstate = guistate.nogame;
     
 	File eidogodir;
 	final boolean forcecopy=false;
-	Thread uithread;
 	HttpClient httpclient=null;
 	WebView wv;
 	ArrayList<Game> games2play = new ArrayList<Game>();
@@ -136,7 +140,7 @@ public class GoJsActivity extends FragmentActivity {
             wv.loadUrl("javascript:eidogo.autoPlayers[0].refresh()");
         } catch (JSONException e) {
             e.printStackTrace();
-            showMsg("warning: error counting");
+            showMessage("warning: error counting");
         }
         return sc;
     }
@@ -167,7 +171,7 @@ public class GoJsActivity extends FragmentActivity {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			showMsg("DISK ERROR: "+e.toString());
+			showMessage("DISK ERROR: "+e.toString());
 		}
 		System.out.println("endof copy");
 	}
@@ -231,22 +235,22 @@ public class GoJsActivity extends FragmentActivity {
 					String s = fin.readLine();
 					if (s==null) break;
 					System.out.println("LOGINlog "+s);
-					if (s.contains("#Error")) showMsg("Error login; check credentials");
+					if (s.contains("#Error")) showMessage("Error login; check credentials");
 					if (s.length()>0&&s.charAt(0)=='{') jsonansw = s;
 				}
 				fin.close();
 			}
 			if (curstate==guistate.markDeadStones) {
 			    String sc = showCounting(jsonansw);
-				showMsg("dead stones sent; score="+sc);
+				showMessage("dead stones sent; score="+sc);
 				changeState(guistate.checkScore);
 			} else {
-				showMsg("sent to server: "+msg);
+				showMessage("sent to server: "+msg);
 			}
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			showMsg(netErrMsg);
+			showMessage(netErrMsg);
 			return false;
 		}
 	}
@@ -292,7 +296,7 @@ public class GoJsActivity extends FragmentActivity {
                     moveid=0;
                     games2play.remove(curgidx2play);
                     if (games2play.size()==0) {
-                    	showMsg("No more games locally");
+                    	showMessage("No more games locally");
                     	changeState(guistate.nogame);
                     } else
                     	downloadAndShowGame();
@@ -309,7 +313,7 @@ public class GoJsActivity extends FragmentActivity {
 	void downloadAndShowGame() {
 		if (curgidx2play>=games2play.size()) {
 			if (games2play.size()==0) {
-				showMsg("No game to show");
+				showMessage("No game to show");
 				return;
 			} else {
 				curgidx2play=0;
@@ -318,62 +322,15 @@ public class GoJsActivity extends FragmentActivity {
 		System.out.println("showing game "+curgidx2play);
 		System.out.println(" ... "+games2play.get(curgidx2play));
 
-		// load the sgf and saves it in example.html
-		gameid = games2play.get(curgidx2play).getGameID();
-		HttpGet httpget = new HttpGet(server+"sgf.php?gid="+gameid+"&owned_comments=1&quick_mode=1");
-		try {
-			HttpResponse response = httpclient.execute(httpget);
-			Header[] heds = response.getAllHeaders();
-			for (Header s : heds)
-				System.out.println("[HEADER] "+s);
-			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				PrintWriter fout = new PrintWriter(new FileWriter(eidogodir+"/example.html"));
-//				for (String s : exampleFileHtmlHeader) fout.println(s);
-				InputStream instream = entity.getContent();
-				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-				String lastb="12", lastw="32";
-				for (;;) {
-					String s = fin.readLine();
-					if (s==null) break;
-					s=s.trim();
-					if (s.length()>0&&s.charAt(0)!='[') {
-						// look for move_id
-						int i=s.indexOf("XM[");
-						if (i>=0) {
-							int j=s.indexOf(']',i+3);
-							moveid = Integer.parseInt(s.substring(i+3, j));
-						}
-					}
-					System.out.println("LOGINstatus "+s);
-					fout.println(s);
-					{
-						int z=s.lastIndexOf("B[");
-						int zz=s.indexOf(']',z);
-						if (z>=0) lastb=s.substring(z+2, zz);
-					}
-					{
-						int z=s.lastIndexOf("W[");
-						int zz=s.indexOf(']',z);
-						if (z>=0) lastw=s.substring(z+2, zz);
-					}
-				}
-				fin.close();
-//				for (String s : htmlend) fout.println(s);
-				fout.close();
-				
-				// detect if in scoring phase
-				System.out.println("debuglastmoves --"+lastw+"--"+lastb);
-				if ((lastb.equals("")||lastb.equals("tt")) && ((lastw.equals("")||lastw.equals("tt")))) {
-					System.out.println("scoring phase detected !");
-					showMsg("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
-					changeState(guistate.markDeadStones);
-				}
-				
-			}
-		} catch (Exception e) {
-			showMsg(netErrMsg);
-			e.printStackTrace();
+		Game g = Game.getGames().get(curgidx2play);
+		g.downloadGame(server);
+		g.showGame();
+		
+		// detect if in scoring phase
+		if (g.isTwoPasses()) {
+			System.out.println("scoring phase detected !");
+			showMessage("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
+			changeState(guistate.markDeadStones);
 		}
 
 		// show the board game
@@ -385,8 +342,6 @@ public class GoJsActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		uithread = Thread.currentThread();
 		
 		// ====================================
 		setContentView(R.layout.activity_main);
@@ -415,7 +370,7 @@ public class GoJsActivity extends FragmentActivity {
 	            public void onClick(View v) {
 	                switch(curstate) {
 	                case nogame: // download games
-	                    dowbloadListOfGames();
+	                    downloadListOfGames();
 	                    break;
 	                case play: // send the move
 	            		// ask eidogo to send last move; it will be captured by the web listener
@@ -522,11 +477,11 @@ public class GoJsActivity extends FragmentActivity {
 				button3.invalidate();
 				new CopyEidogoTask().execute("noparms");
 			} else {
-			    showMsg("eidogo already on disk");
+			    showMessage("eidogo already on disk");
 				initFinished();
 			}
 		} else {
-			showMsg("R/W ERROR sdcard");
+			showMessage("R/W ERROR sdcard");
 		}
 	}
 
@@ -600,6 +555,9 @@ public class GoJsActivity extends FragmentActivity {
 	    }
 	}
 	
+	/*
+	 * This method must not be blocking, otherwise the waiting dialog window is never displayed.
+	 */
 	public Thread runInWaitingThread(final Runnable method) {
 		class WaitDialogFragment extends DialogFragment {
 			@Override
@@ -621,11 +579,13 @@ public class GoJsActivity extends FragmentActivity {
 				return builder.create();
 			}
 		}
+		
 		final WaitDialogFragment waitdialog = new WaitDialogFragment();
 		waitdialog.show(getSupportFragmentManager(),"waiting");
 		final Thread computingThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				// this is blocking
 				method.run();
 				try {
 					// just in case, wait for the waiting dialog to be visible
@@ -638,18 +598,22 @@ public class GoJsActivity extends FragmentActivity {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				// I notify potential threads that wait for computing to be finished
+				synchronized (waiterComputingFinished) {
+					waiterComputingFinished.notifyAll();
+				}
 			}
 		});
 		computingThread.start();
 		return computingThread;
 	}
+	private Boolean waiterComputingFinished=true;
 	
-	
-	private void dowbloadListOfGames() {
+	private void downloadListOfGames() {
 	    String tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
 	    String tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
 	    if (tu==null||tp==null) {
-	        showMsg("Please enter your credentials first via menu Settings");
+	        showMessage("Please enter your credentials first via menu Settings");
 	        return;
 	    }
 		if (debugdevel==0) {
@@ -661,97 +625,39 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		final String u = tu, p=tp;
 	    
-		runInWaitingThread(new Runnable() {
-			@Override
-			public void run() {
-				System.out.println("CREATE DOWNLOAD THREAD "+Thread.currentThread().getId());
-				if (httpclient==null) {
-				    System.out.println("creating httpclient in getsgf");
-				    HttpParams httpparms = new BasicHttpParams();
-				    HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
-				    HttpConnectionParams.setSoTimeout(httpparms, 6000);
-				    httpclient = new DefaultHttpClient(httpparms);
-				}
-				try {
-				    String cmd = server+"login.php?quick_mode=1&userid="+u+"&passwd="+p;
-				    System.out.println("debug cmd "+cmd);
-					HttpGet httpget = new HttpGet(cmd);
-					HttpResponse response = httpclient.execute(httpget);
-					Header[] heds = response.getAllHeaders();
-					for (Header s : heds)
-						System.out.println("[HEADER] "+s);
-					HttpEntity entity = response.getEntity();
-					if (entity != null) {
-						InputStream instream = entity.getContent();
-						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-						for (;;) {
-							String s = fin.readLine();
-							if (s==null) break;
-							System.out.println("LOGINlog "+s);
-							if (s.contains("#Error")) showMsg("Error login; check credentials");
+		System.out.println("credentials passed to server "+u+" "+p);
+		if (server==null) {
+			server = new ServerConnection(0, u, p);
+			DetThreadRunner d = new DetThreadRunner() {
+				@Override
+				public void runInThread(Runnable r) {
+					runInWaitingThread(r);
+					synchronized (waiterComputingFinished) {
+						try {
+							waiterComputingFinished.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-						fin.close();
 					}
-
-					Message.handleMessages(main);
-					
-					// get list of games to play
-//                    httpget = new HttpGet(server+"quick_status.php?order=0");
-                    httpget = new HttpGet(server+"quick_do.php?obj=game&cmd=list&view=status");
-					response = httpclient.execute(httpget);
-					heds = response.getAllHeaders();
-					for (Header s : heds)
-						System.out.println("[HEADER] "+s);
-					entity = response.getEntity();
-					games2play.clear();
-					if (entity != null) {
-						InputStream instream = entity.getContent();
-						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-						for (;;) {
-							String s = fin.readLine();
-							if (s==null) break;
-							s=s.trim();
-							if (s.length()>0 && s.charAt(0)=='{') {
-							    JSONObject o = new JSONObject(s);
-							    System.out.println("debugjson "+o.getInt("list_size"));
-							    if (o.getInt("list_size")>0) {
-	                                JSONArray headers = o.getJSONArray("list_header");
-	                                int gid_jsonidx = -1;
-	                                for (int i=0;i<headers.length();i++) {
-	                                    String h = headers.getString(i);
-	                                    System.out.println("jsonheader "+i+" "+h);
-	                                    if (h.equals("id")) gid_jsonidx=i;
-	                                }
-	                                JSONArray jsongames = o.getJSONArray("list_result");
-	                                for (int i=0;i<jsongames.length();i++) {
-	                                    JSONArray jsongame = jsongames.getJSONArray(i);
-	                                    int gameid = jsongame.getInt(gid_jsonidx);
-	                                    Game g = new Game(null,gameid);
-	                                    games2play.add(g);
-	                                }
-							    }
-							}
-							System.out.println("LOGINstatus "+s);
-						}
-						fin.close();
-					}
-					System.out.println("NBGAMES "+games2play.size());
-					showMsg("Nb games to play: "+games2play.size());
-
-					if (games2play.size()>0) {
-						curgidx2play=0;
-						downloadAndShowGame();
-						// download detects if 2 passes and auto change state to markdeadstones
-						if (curstate!=guistate.markDeadStones) changeState(guistate.play);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					showMsg(netErrMsg);
 				}
-				// TODO: where to close the connection ?
-//				httpclient.getConnectionManager().shutdown();
-			}
-		});
+			};
+			DetLogger l = new DetLogger() {
+				@Override
+				public void showMsg(String s) {
+					showMessage(s);
+				}
+			};
+			server.setRunners(d, l);
+		}
+		int ngames = Game.loadStatusGames(server);
+		if (ngames>=0)
+			showMessage("Nb games to play: "+ngames);
+		if (games2play.size()>0) {
+			curgidx2play=0;
+			downloadAndShowGame();
+			// download detects if 2 passes and auto change state to markdeadstones
+			if (curstate!=guistate.markDeadStones) changeState(guistate.play);
+		} else return;
 	}
 
 	private class CopyEidogoTask extends AsyncTask<String, Void, String> {
@@ -768,8 +674,51 @@ public class GoJsActivity extends FragmentActivity {
     @Override
 	public void onStart() {
         super.onStart();
-	    server = getString(R.string.server1);
+//	    server = getString(R.string.server1);
 	    main = this;
+	    
+	    Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				System.out.println("test thread");
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("fin thread");
+			}
+		};
+		System.out.println("avant");
+		DetThreadRunner d = new DetThreadRunner() {
+			@Override
+			public void runInThread(final Runnable r) {
+				// runInWaitingThread must be called in a non-blocking manner so that the waiting dialog appears
+				// but the runInThread is expected to be blocking.
+				// So I run runInWaitingThread in another thread
+				// and then I wait for r to have finished its job.
+				
+				Thread t = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						runInWaitingThread(r);
+					}
+				});
+				t.start();
+				synchronized (waiterComputingFinished) {
+					try {
+						waiterComputingFinished.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		d.runInThread(r);
+		System.out.println("apres");
+
+
 	}
 	
 	@Override
@@ -790,7 +739,7 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 
-	void showMsg(final String txt) {
+	void showMessage(final String txt) {
 	    this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -821,7 +770,7 @@ public class GoJsActivity extends FragmentActivity {
 						TextView pwd = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.password);
                         PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_USERNAME_KEY, username.getText().toString());
                         PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, (String)pwd.getText().toString());
-                        showMsg("Credentials saved");
+                        showMessage("Credentials saved");
 					}
 				})
 				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -857,7 +806,7 @@ public class GoJsActivity extends FragmentActivity {
 						TextView pwd = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.password);
                         PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_USERNAME2_KEY, username.getText().toString());
                         PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_PASSWORD2_KEY, (String)pwd.getText().toString());
-                        showMsg("Credentials2 saved");
+                        showMessage("Credentials2 saved");
 					}
 				})
 				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -874,7 +823,7 @@ public class GoJsActivity extends FragmentActivity {
 
 	private void skipGame() {
 		if (games2play.size()<=1) {
-			showMsg("No more games downloaded; retry GetGames ?");
+			showMessage("No more games downloaded; retry GetGames ?");
 			return;
 		}
 		if (++curgidx2play>=games2play.size()) curgidx2play=0;
@@ -886,13 +835,13 @@ public class GoJsActivity extends FragmentActivity {
 		try {
 			HttpResponse response = httpclient.execute(httpget);
 			// TODO: check if move has correctly been sent
-			showMsg("resign sent !");
+			showMessage("resign sent !");
 			moveid=0;
 			games2play.remove(curgidx2play);
 			downloadAndShowGame();
 		} catch (Exception e) {
 			e.printStackTrace();
-			showMsg(netErrMsg);
+			showMessage(netErrMsg);
 		}
 
 	}
@@ -932,9 +881,9 @@ public class GoJsActivity extends FragmentActivity {
                     @Override
                     public void onClick(View vv) {
                     	debugdevel=0;
-                    	showMsg("debug devel mode ON");
+                    	showMessage("debug devel mode ON");
                         System.out.println("next connections to devel server");
-                        server = getString(R.string.server2);
+//                        server = getString(R.string.server2);
                 	    final String u = PrefUtils.getFromPrefs(c, PrefUtils.PREFS_LOGIN_USERNAME2_KEY,null);
                 	    System.out.println("debugcred2 "+u);
                         dialog.dismiss();

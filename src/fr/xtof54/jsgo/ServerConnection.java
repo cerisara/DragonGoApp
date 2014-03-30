@@ -63,8 +63,7 @@ public class ServerConnection {
 	 * We define this interface so that it can be deployed on an Android unlimited progress dialog,
 	 * as well as on a simple independent thread.
 	 * 
-	 * Warning: the object that implements this interface must be synchronized and wait for the runnable
-	 * to have finished its job !
+	 * Note that runInThread should not be blocking, because it may be called from the UI thread !
 	 * 
 	 * @author xtof
 	 *
@@ -97,6 +96,10 @@ public class ServerConnection {
 			}
 		}
 	};
+	public void setRunners(DetThreadRunner d, DetLogger l) {
+		threadRunner = d;
+		logger=l;
+	}
 
 	final String[] serverNames = {
 			"http://www.dragongoserver.net/",
@@ -228,10 +231,13 @@ public class ServerConnection {
 					e.printStackTrace();
 					logger.showMsg(netErrMsg);
 				}
+				System.out.println("server runnable terminated");
 			}
 		};
 		o=null;
+		System.out.println("server launch thread");
 		threadRunner.runInThread(r);
+		System.out.println("server thread exit");
 		//    	if (GoJsActivity.main!=null) {
 		//    		Thread cmdthread = GoJsActivity.main.runInWaitingThread(r);
 		//    	} else {
