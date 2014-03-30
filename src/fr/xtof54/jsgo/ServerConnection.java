@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -32,12 +34,12 @@ import org.json.JSONObject;
  */
 public class ServerConnection {
 	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
-	
+
 	final String netErrMsg = "Connection errors or timeout, you may retry";
-	
+
 	private String u,p,server;
 	private HttpClient httpclient=null;
-	
+
 	/**
 	 * We define this interface so that all logging info can be simply displayed on the console,
 	 * or shown as Android Toasts !
@@ -95,18 +97,18 @@ public class ServerConnection {
 			}
 		}
 	};
-	
+
 	final String[] serverNames = {
 			"http://www.dragongoserver.net/",
 			"http://dragongoserver.sourceforge.net/"
 	};
-	
+
 	public void closeConnection() {
 		if (httpclient!=null)
 			httpclient.getConnectionManager().shutdown();
 		httpclient=null;
 	}
-	
+
 	/**
 	 * creates a connection to a specific server;
 	 * determines the correct credentials
@@ -114,29 +116,29 @@ public class ServerConnection {
 	 */
 	public ServerConnection(int num, String userlogin, String userpwd) {
 		server=serverNames[num];
-// TODO: this must be handled outside of this class
-//		String tu = PrefUtils.getFromPrefs(GoJsActivity.main, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
-//	    String tp = PrefUtils.getFromPrefs(GoJsActivity.main, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
-//	    if (tu==null||tp==null) {
-//	    	logger.showMsg("Please enter your credentials first via menu Settings");
-//	        return;
-//	    }
-//		if (GoJsActivity.main.debugdevel==0) {
-//			GoJsActivity.main.debugdevel=1;
-//		} else if (GoJsActivity.main.debugdevel==1) {
-//			tu = PrefUtils.getFromPrefs(GoJsActivity.main, PrefUtils.PREFS_LOGIN_USERNAME2_KEY,null);
-//			tp = PrefUtils.getFromPrefs(GoJsActivity.main, PrefUtils.PREFS_LOGIN_PASSWORD2_KEY,null);
-//			GoJsActivity.main.debugdevel=0;
-//		}
+		// TODO: this must be handled outside of this class
+		//		String tu = PrefUtils.getFromPrefs(GoJsActivity.main, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
+		//	    String tp = PrefUtils.getFromPrefs(GoJsActivity.main, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
+		//	    if (tu==null||tp==null) {
+		//	    	logger.showMsg("Please enter your credentials first via menu Settings");
+		//	        return;
+		//	    }
+		//		if (GoJsActivity.main.debugdevel==0) {
+		//			GoJsActivity.main.debugdevel=1;
+		//		} else if (GoJsActivity.main.debugdevel==1) {
+		//			tu = PrefUtils.getFromPrefs(GoJsActivity.main, PrefUtils.PREFS_LOGIN_USERNAME2_KEY,null);
+		//			tp = PrefUtils.getFromPrefs(GoJsActivity.main, PrefUtils.PREFS_LOGIN_PASSWORD2_KEY,null);
+		//			GoJsActivity.main.debugdevel=0;
+		//		}
 		u=userlogin; p=userpwd;
 	}
-	
+
 	/**
 	 * Login to this server
 	 */
-    public boolean login() {
-    	class MyRunnable implements Runnable {
-    		boolean loginok=false;
+	public boolean login() {
+		class MyRunnable implements Runnable {
+			boolean loginok=false;
 			@Override
 			public void run() {
 				System.out.println("start login run");
@@ -146,7 +148,7 @@ public class ServerConnection {
 				httpclient = new DefaultHttpClient(httpparms);
 				try {
 					String cmd = server+"login.php?quick_mode=1&userid="+u+"&passwd="+p;
-				    System.out.println("debug login cmd "+cmd);
+					System.out.println("debug login cmd "+cmd);
 					HttpGet httpget = new HttpGet(cmd);
 					HttpResponse response = httpclient.execute(httpget);
 					Header[] heds = response.getAllHeaders();
@@ -168,25 +170,25 @@ public class ServerConnection {
 					loginok=true;
 				} catch (Exception e) {
 					e.printStackTrace();
-//				    if (s.contains("#Error")) logger.showMsg("Error login; check credentials");
+					//				    if (s.contains("#Error")) logger.showMsg("Error login; check credentials");
 					logger.showMsg(netErrMsg);
 					loginok=false;
 				}
 				System.out.println("end login run");
 			}
-    	};
-    	MyRunnable r = new MyRunnable();
-    	threadRunner.runInThread(r);
-    	return r.loginok;
-    }
-    
+		};
+		MyRunnable r = new MyRunnable();
+		threadRunner.runInThread(r);
+		return r.loginok;
+	}
+
 	JSONObject o=null;
-    /**
-     * send a command to the server and gets back a JSon object with the answer
-     * @param cmd
-     * @return
-     */
-    public JSONObject sendCmdToServer(final String cmd) {
+	/**
+	 * send a command to the server and gets back a JSon object with the answer
+	 * @param cmd
+	 * @return
+	 */
+	public JSONObject sendCmdToServer(final String cmd) {
 		System.out.println("begin send command, httpclient="+httpclient);
 		if (httpclient==null) {
 			boolean loginok = login();
@@ -196,32 +198,32 @@ public class ServerConnection {
 			}
 		}
 		System.out.println("now httpclient="+httpclient);
-    	Runnable r = new Runnable() {
+		Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				try {
-					 System.out.println("debug send cmd "+server+cmd);
-						HttpGet httpget = new HttpGet(server+cmd);
-						HttpResponse response = httpclient.execute(httpget);
-						Header[] heds = response.getAllHeaders();
-						for (Header s : heds)
-							System.out.println("[HEADER] "+s);
-						HttpEntity entity = response.getEntity();
-						if (entity != null) {
-							InputStream instream = entity.getContent();
-							BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-							for (;;) {
-								String s = fin.readLine();
-								if (s==null) break;
-								System.out.println("cmdlog "+s);
-								s=s.trim();
-								if (s.length()>0 && s.charAt(0)=='{') {
-								    o = new JSONObject(s);
-								    break;
-								}
+					System.out.println("debug send cmd "+server+cmd);
+					HttpGet httpget = new HttpGet(server+cmd);
+					HttpResponse response = httpclient.execute(httpget);
+					Header[] heds = response.getAllHeaders();
+					for (Header s : heds)
+						System.out.println("[HEADER] "+s);
+					HttpEntity entity = response.getEntity();
+					if (entity != null) {
+						InputStream instream = entity.getContent();
+						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+						for (;;) {
+							String s = fin.readLine();
+							if (s==null) break;
+							System.out.println("cmdlog "+s);
+							s=s.trim();
+							if (s.length()>0 && s.charAt(0)=='{') {
+								o = new JSONObject(s);
+								break;
 							}
-							fin.close();
 						}
+						fin.close();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					logger.showMsg(netErrMsg);
@@ -230,123 +232,83 @@ public class ServerConnection {
 		};
 		o=null;
 		threadRunner.runInThread(r);
-//    	if (GoJsActivity.main!=null) {
-//    		Thread cmdthread = GoJsActivity.main.runInWaitingThread(r);
-//    	} else {
-//    		Thread cmdthread = new Thread(r);
-//    		cmdthread.start();
-//    	}
+		//    	if (GoJsActivity.main!=null) {
+		//    		Thread cmdthread = GoJsActivity.main.runInWaitingThread(r);
+		//    	} else {
+		//    		Thread cmdthread = new Thread(r);
+		//    		cmdthread.start();
+		//    	}
 		return o;
-    }
-    
-//    public void dowbloadListOfGames() {
-//		GoJsActivity.main.runInWaitingThread(new Runnable() {
-//			@Override
-//			public void run() {
-//				HttpParams httpparms = new BasicHttpParams();
-//				HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
-//				HttpConnectionParams.setSoTimeout(httpparms, 6000);
-//				HttpClient httpclient = new DefaultHttpClient(httpparms);
-//				try {
-//					String cmd = server+"login.php?quick_mode=1&userid="+u+"&passwd="+p;
-//				    System.out.println("debug cmd "+cmd);
-//					HttpGet httpget = new HttpGet(cmd);
-//					HttpResponse response = httpclient.execute(httpget);
-//					Header[] heds = response.getAllHeaders();
-//					for (Header s : heds)
-//						System.out.println("[HEADER] "+s);
-//					HttpEntity entity = response.getEntity();
-//					if (entity != null) {
-//						InputStream instream = entity.getContent();
-//						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-//						for (;;) {
-//							String s = fin.readLine();
-//							if (s==null) break;
-//							System.out.println("LOGINlog "+s);
-//							s=s.trim();
-//							if (s.length()>0 && s.charAt(0)=='{') {
-//							    JSONObject o = new JSONObject(s);
-//							}
-//						}
-//						fin.close();
-//					}
-//
-////					Message.handleMessages(GoJsActivity.main);
-//					
-//					// get list of games to play
-////                    httpget = new HttpGet(server+"quick_status.php?order=0");
-//                    httpget = new HttpGet(server+"quick_do.php?obj=game&cmd=list&view=status");
-//					response = httpclient.execute(httpget);
-//					heds = response.getAllHeaders();
-//					for (Header s : heds)
-//						System.out.println("[HEADER] "+s);
-//					entity = response.getEntity();
-//					games2play.clear();
-//					if (entity != null) {
-//						InputStream instream = entity.getContent();
-//						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-//						for (;;) {
-//							String s = fin.readLine();
-//							if (s==null) break;
-//							s=s.trim();
-//							if (s.length()>0 && s.charAt(0)=='{') {
-//							    JSONObject o = new JSONObject(s);
-//							    System.out.println("debugjson "+o.getInt("list_size"));
-//							    if (o.getInt("list_size")>0) {
-//	                                JSONArray headers = o.getJSONArray("list_header");
-//	                                int gid_jsonidx = -1;
-//	                                for (int i=0;i<headers.length();i++) {
-//	                                    String h = headers.getString(i);
-//	                                    System.out.println("jsonheader "+i+" "+h);
-//	                                    if (h.equals("id")) gid_jsonidx=i;
-//	                                }
-//	                                JSONArray jsongames = o.getJSONArray("list_result");
-//	                                for (int i=0;i<jsongames.length();i++) {
-//	                                    JSONArray jsongame = jsongames.getJSONArray(i);
-//	                                    int gameid = jsongame.getInt(gid_jsonidx);
-//	                                    Game g = new Game(gameid);
-//	                                    games2play.add(g);
-//	                                }
-//							    }
-//							}
-//							System.out.println("LOGINstatus "+s);
-//						}
-//						fin.close();
-//					}
-//					System.out.println("NBGAMES "+games2play.size());
-//					showMsg("Nb games to play: "+games2play.size());
-//
-//					if (games2play.size()>0) {
-//						curgidx2play=0;
-//						downloadAndShowGame();
-//						// download detects if 2 passes and auto change state to markdeadstones
-//						if (curstate!=guistate.markDeadStones) changeState(guistate.play);
-//					}
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//					showMsg(netErrMsg);
-    //				}
-    //			}
+	}
 
-    static String[] loadCredsFromFile(String file) {
-    	String u=null, p=null;
-    	try {
-    		BufferedReader f=new BufferedReader(new FileReader(file));
-    		u=f.readLine();
-    		p=f.readLine();
-    		f.close();
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    	String[] res = {u,p};
-    	return res;
-    }
-    
-    public static void main(String args[]) throws Exception {
-    	String[] c = loadCredsFromFile("creds.txt");
-    	ServerConnection server = new ServerConnection(0,c[0],c[1]);
-    	JSONObject o = server.sendCmdToServer(cmdGetListOfGames);
-    	System.out.println("answer: "+o);
-    	server.closeConnection();
-    }
+	/**
+	 * because download sgf does not return a JSON object, we have to use a dedicated function to do it
+	 * @param gameid
+	 * @return
+	 */
+	public List<String> downloadSgf(final int gameid) {
+		if (httpclient==null) {
+			boolean loginok = login();
+			System.out.println("login success: "+loginok);
+			if (!loginok) {
+				return null;
+			}
+		}
+		final ArrayList<String> sgf = new ArrayList<String>();
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					final String cmd = server+"sgf.php?gid="+gameid+"&owned_comments=1&quick_mode=1";
+					HttpGet httpget = new HttpGet(cmd);
+					HttpResponse response = httpclient.execute(httpget);
+					Header[] heds = response.getAllHeaders();
+					for (Header s : heds)
+						System.out.println("[HEADER] "+s);
+					HttpEntity entity = response.getEntity();
+					if (entity != null) {
+						InputStream instream = entity.getContent();
+						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+						for (;;) {
+							String s = fin.readLine();
+							if (s==null) break;
+							s=s.trim();
+							if (s.length()>0&&s.charAt(0)!='[') {
+								sgf.add(s);
+							}
+							System.out.println("SGFdownload "+s);
+						}
+						fin.close();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.showMsg(netErrMsg);
+				}
+			}
+		};
+		threadRunner.runInThread(r);
+		return sgf;
+	}
+
+	static String[] loadCredsFromFile(String file) {
+		String u=null, p=null;
+		try {
+			BufferedReader f=new BufferedReader(new FileReader(file));
+			u=f.readLine();
+			p=f.readLine();
+			f.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String[] res = {u,p};
+		return res;
+	}
+
+	public static void main(String args[]) throws Exception {
+		String[] c = loadCredsFromFile("creds.txt");
+		ServerConnection server = new ServerConnection(0,c[0],c[1]);
+		JSONObject o = server.sendCmdToServer(cmdGetListOfGames);
+		System.out.println("answer: "+o);
+		server.closeConnection();
+	}
 }

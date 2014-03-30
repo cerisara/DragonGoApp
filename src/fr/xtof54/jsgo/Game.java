@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -28,7 +29,7 @@ public class Game {
 	
     private int gid;
     private JSONArray gameinfo;
-    ArrayList<String> sgf = null;
+    List<String> sgf = null;
     int moveid;
     
     public static int loadStatusGames(ServerConnection server) {
@@ -53,6 +54,8 @@ public class Game {
 	    }
 	    return ngames;
     }
+    
+    public static List<Game> getGames() {return games2play;}
     
     Game(JSONArray gameObject, int gameid) {
     	gid=gameid;
@@ -102,49 +105,62 @@ public class Game {
     
     
     // est-ce qu'il faut garder le meme httpclient qu'avant pour pouvoir beneficier du proxy ? ==> OUI
-    public void downloadGame(final int gid) {
-    	sgf = new ArrayList<String>();
-	    GoJsActivity.main.runInWaitingThread(new Runnable() {
-			@Override
-			public void run() {
-				HttpGet httpget = new HttpGet(GoJsActivity.main.server+"sgf.php?gid="+gid+"&owned_comments=1&quick_mode=1");
-				try {
-				    HttpParams httpparms = new BasicHttpParams();
-				    HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
-				    HttpConnectionParams.setSoTimeout(httpparms, 6000);
-				    HttpClient httpclient = new DefaultHttpClient(httpparms);
-					HttpResponse response = httpclient.execute(httpget);
-					Header[] heds = response.getAllHeaders();
-					for (Header s : heds)
-						System.out.println("[HEADER] "+s);
-					HttpEntity entity = response.getEntity();
-					if (entity != null) {
-						InputStream instream = entity.getContent();
-						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-						for (;;) {
-							String s = fin.readLine();
-							if (s==null) break;
-							s=s.trim();
-							if (s.length()>0&&s.charAt(0)!='[') {
-								// look for move_id
-								int i=s.indexOf("XM[");
-								if (i>=0) {
-									int j=s.indexOf(']',i+3);
-									moveid = Integer.parseInt(s.substring(i+3, j));
-								}
-								sgf.add(s);
-							}
-							System.out.println("SGFdownload "+s);
-						}
-						fin.close();
-					}
-					httpclient.getConnectionManager().shutdown();
-				} catch (Exception e) {
-					GoJsActivity.main.showMsg(GoJsActivity.main.netErrMsg);
-					e.printStackTrace();
-				}
-			}
-	    });
+    public void downloadGame(ServerConnection server) {
+    	sgf = server.downloadSgf(gid);
+    	
+		// look for move_id
+    	for (String s: sgf) {
+    		int i=s.indexOf("XM[");
+    		if (i>=0) {
+    			int j=s.indexOf(']',i+3);
+    			moveid = Integer.parseInt(s.substring(i+3, j));
+    		}
+    	}
+    	
+    	System.out.println("sgf: "+sgf);
+    	System.out.println("moveid "+moveid);
+
+//	    GoJsActivity.main.runInWaitingThread(new Runnable() {
+//			@Override
+//			public void run() {
+//				HttpGet httpget = new HttpGet(GoJsActivity.main.server+"sgf.php?gid="+gid+"&owned_comments=1&quick_mode=1");
+//				try {
+//				    HttpParams httpparms = new BasicHttpParams();
+//				    HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
+//				    HttpConnectionParams.setSoTimeout(httpparms, 6000);
+//				    HttpClient httpclient = new DefaultHttpClient(httpparms);
+//					HttpResponse response = httpclient.execute(httpget);
+//					Header[] heds = response.getAllHeaders();
+//					for (Header s : heds)
+//						System.out.println("[HEADER] "+s);
+//					HttpEntity entity = response.getEntity();
+//					if (entity != null) {
+//						InputStream instream = entity.getContent();
+//						BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+//						for (;;) {
+//							String s = fin.readLine();
+//							if (s==null) break;
+//							s=s.trim();
+//							if (s.length()>0&&s.charAt(0)!='[') {
+//								// look for move_id
+//								int i=s.indexOf("XM[");
+//								if (i>=0) {
+//									int j=s.indexOf(']',i+3);
+//									moveid = Integer.parseInt(s.substring(i+3, j));
+//								}
+//								sgf.add(s);
+//							}
+//							System.out.println("SGFdownload "+s);
+//						}
+//						fin.close();
+//					}
+//					httpclient.getConnectionManager().shutdown();
+//				} catch (Exception e) {
+//					GoJsActivity.main.showMsg(GoJsActivity.main.netErrMsg);
+//					e.printStackTrace();
+//				}
+//			}
+//	    });
     }
 
 	final String[] exampleFileHtmlHeader = {
@@ -202,5 +218,8 @@ public class Game {
 		ServerConnection server = new ServerConnection(0, c[0], c[1]);
 		int ng = Game.loadStatusGames(server);
 		System.out.println("ngames "+ng);
+		
+		Game g = Game.getGames().get(0);
+		g.downloadGame(server);
 	}
 }
