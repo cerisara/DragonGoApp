@@ -102,6 +102,9 @@ public class ServerConnection {
 	 */
 	public boolean loginok=false;
 	public void startLogin() {
+	    final EventManager em = EventManager.getEventManager();
+	    em.sendEvent(eventType.loginStarted);
+
 		class MyRunnable implements Runnable {
 			@Override
 			public void run() {
@@ -139,11 +142,10 @@ public class ServerConnection {
 					loginok=false;
 				}
 				System.out.println("end login run");
+				em.sendEvent(eventType.loginEnd);
 			}
 		};
 		MyRunnable r = new MyRunnable();
-		EventManager em = EventManager.getEventManager();
-		em.sendEvent(eventType.loginStarted);
 		Thread loginthread = new Thread(r);
 		loginthread.start();
 	}

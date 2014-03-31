@@ -1,24 +1,11 @@
 package fr.xtof54.jsgo;
 
-import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -27,7 +14,8 @@ import fr.xtof54.jsgo.EventManager.eventType;
 public class Game {
 	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
 
-	static ArrayList<Game> games2play = new ArrayList<Game>();
+	private static ArrayList<Game> games2play = new ArrayList<Game>();
+	public static Game gameShown = null;
 	
     private int gid;
     private JSONArray gameinfo;
@@ -59,6 +47,9 @@ public class Game {
 		                games2play.add(g);
 		            }
 			    }
+			    System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
+			    em.unregisterListener(eventType.downloadListEnd, this);
+			    em.sendEvent(eventType.downloadListGamesEnd);
 			}
 		};
     	em.registerListener(eventType.downloadListEnd, f);
@@ -88,6 +79,13 @@ public class Game {
     	} catch (IOException e) {
     		e.printStackTrace();
     	}
+    	gameShown=this;
+    }
+    
+    // TODO: call this method when it shall be !
+    public void finishedWithThisGame() {
+        games2play.remove(this);
+        gameShown=null;
     }
     
     public boolean isTwoPasses() {
@@ -121,7 +119,8 @@ public class Game {
 			@Override
 			public synchronized void reactToEvent() {
 				em.unregisterListener(eventType.downloadGameEnd, this);
-				List<String> sgf = server.sgf;
+				sgf = new ArrayList<String>();
+				for (String s : server.sgf) sgf.add(""+s);
 				// look for move_id
 		    	for (String s: sgf) {
 		    		int i=s.indexOf("XM[");
@@ -130,9 +129,9 @@ public class Game {
 		    			moveid = Integer.parseInt(s.substring(i+3, j));
 		    		}
 		    	}
-		    	
 		    	System.out.println("sgf: "+sgf);
 		    	System.out.println("moveid "+moveid);
+		    	em.sendEvent(eventType.GameOK);
 			}
 		};
     	em.registerListener(eventType.downloadGameEnd, f);
@@ -233,5 +232,34 @@ public class Game {
 			"</html>",
 	};
 
-	
+	public void sendMove2server(String move, final ServerConnection server) {
+        System.out.println("move "+move);
+        String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move="+move;
+        if (move.toLowerCase().startsWith("tt")) {
+            // pass move
+            cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move=pass";
+        }
+        final EventManager em = EventManager.getEventManager();
+        final Game g = this;
+        EventManager.EventListener f = new EventManager.EventListener() {
+            @Override
+            public synchronized void reactToEvent() {
+                em.unregisterListener(eventType.moveSent, this);
+                JSONObject o = server.o;
+                if (o==null) {
+                    // error: don't switch game
+                    return;
+                }
+                String err = o.getString("error");
+                if (err!=null&&err.length()>0) {
+                    // error: don't switch game
+                    return;
+                }
+                // switch to next game
+                g.finishedWithThisGame();
+            }
+        };
+        em.registerListener(eventType.moveSent, f);
+        server.sendCmdToServer(cmd,null,eventType.moveSent);
+	}
 }

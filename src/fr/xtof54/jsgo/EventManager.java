@@ -11,7 +11,7 @@ import java.util.List;
  *
  */
 public class EventManager {
-	enum eventType {loginStarted, loginEnd, downloadListStarted, downloadListEnd, downloadGameStarted, downloadGameEnd};
+	enum eventType {loginStarted, loginEnd, downloadListStarted, downloadListEnd, downloadListGamesEnd, downloadGameStarted, downloadGameEnd, GameOK, moveSent};
 	
 	private static EventManager em = new EventManager();
 	public static EventManager getEventManager() {
@@ -42,8 +42,13 @@ public class EventManager {
 	
 	public void sendEvent(eventType e) {
 		List<EventListener> l = listeners.get(e);
-		if (l!=null)
-			for (EventListener f : l)
-				f.reactToEvent();
+		System.out.println("Event sent: "+e+" "+l);
+		if (l!=null) {
+		    // make a copy of the listeners list to avoid concurrent modification of the original list
+		    ArrayList<EventListener> list = new ArrayList<EventManager.EventListener>();
+		    list.addAll(l);
+            for (EventListener f : list)
+                f.reactToEvent();
+		}
 	}
 }

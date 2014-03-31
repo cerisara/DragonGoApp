@@ -78,7 +78,6 @@ public class GoJsActivity extends FragmentActivity {
 	WebView wv;
 	ArrayList<Game> games2play = new ArrayList<Game>();
 	int curgidx2play=0,moveid=0;
-	int gameid=-1;
 	final String netErrMsg = "Connection errors or timeout, you may retry";
 	static GoJsActivity main;
 
@@ -264,43 +263,40 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			int i=url.indexOf("androidcall01");
-			if (i>=0) {
-				int j=url.lastIndexOf('|')+1;
-				String cmd="", msg="unk";
-				if (curstate==guistate.markDeadStones) {
-					String sgfdata = url.substring(i+14, j);
-					String deadstones=getMarkedStones(sgfdata);
-					System.out.println("deadstones "+deadstones);
-					if (deadstones==null) {
-						cmd = "quick_do.php?obj=game&cmd=status_score&gid="+gameid;
-						msg = "no deadstone";
-					} else {
-						cmd = "quick_do.php?obj=game&cmd=status_score&gid="+gameid+"&toggle=uniq&move="+deadstones;
-						msg = "deadstones "+deadstones;
-					}
-				} else {
-					String move = url.substring(j);
-					System.out.println("move "+move);
-					cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move="+move;
-					if (move.toLowerCase().startsWith("tt")) {
-						// pass move
-						cmd = "quick_do.php?obj=game&cmd=move&gid="+gameid+"&move_id="+moveid+"&move=pass";
-						msg="pass move";
-					} else
-						msg="move "+move;
-				}
-                if (sendCmd2server(cmd, msg) && curstate==guistate.play) {
-                	// if the move has been correctly sent to the server and it's really a move, not a score request,
-                	// then we can switch to the next game
-                    moveid=0;
-                    games2play.remove(curgidx2play);
-                    if (games2play.size()==0) {
-                    	showMessage("No more games locally");
-                    	changeState(guistate.nogame);
-                    } else
-                    	downloadAndShowGame();
-                }
+		    int i=url.indexOf("androidcall01");
+		    if (i>=0) {
+		        int j=url.lastIndexOf('|')+1;
+		        String sgf = url.substring(i+14, j);
+		        String lastMove = url.substring(j);
+
+		        // this is trigerred when the user clicks the SEND button
+		        Game g = Game.gameShown;
+		        String cmd, msg;
+		        if (curstate==guistate.markDeadStones) {
+		            String sgfdata = url.substring(i+14, j);
+		            String deadstones=getMarkedStones(sgfdata);
+		            System.out.println("deadstones "+deadstones);
+		            if (deadstones==null) {
+		                cmd = "quick_do.php?obj=game&cmd=status_score&gid="+g.getGameID();
+		                msg = "no deadstone";
+		            } else {
+		                cmd = "quick_do.php?obj=game&cmd=status_score&gid="+g.getGameID()+"&toggle=uniq&move="+deadstones;
+		                msg = "deadstones "+deadstones;
+		            }
+		        } else {
+		            g.sendMove2server(lastMove,server);
+		        }
+//	            if (sendCmd2server(cmd, msg) && curstate==guistate.play) {
+//	              // if the move has been correctly sent to the server and it's really a move, not a score request,
+//	              // then we can switch to the next game
+//	                moveid=0;
+//	                games2play.remove(curgidx2play);
+//	                if (games2play.size()==0) {
+//	                  showMessage("No more games locally");
+//	                  changeState(guistate.nogame);
+//	                } else
+//	                  downloadAndShowGame();
+//	            }
 				return true;
 			} else {
 				// its not an android call back 
@@ -311,8 +307,9 @@ public class GoJsActivity extends FragmentActivity {
 	}  
 
 	void downloadAndShowGame() {
-		if (curgidx2play>=games2play.size()) {
-			if (games2play.size()==0) {
+	    int ngames = Game.getGames().size();
+		if (curgidx2play>=ngames) {
+			if (ngames==0) {
 				showMessage("No game to show");
 				return;
 			} else {
@@ -320,23 +317,28 @@ public class GoJsActivity extends FragmentActivity {
 			}
 		}
 		System.out.println("showing game "+curgidx2play);
-		System.out.println(" ... "+games2play.get(curgidx2play));
 
-		Game g = Game.getGames().get(curgidx2play);
+		final Game g = Game.getGames().get(curgidx2play);
 		g.downloadGame(server);
-		g.showGame();
-		
-		// detect if in scoring phase
-		if (g.isTwoPasses()) {
-			System.out.println("scoring phase detected !");
-			showMessage("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
-			changeState(guistate.markDeadStones);
-		}
+		final EventManager em = EventManager.getEventManager();
+		em.registerListener(eventType.GameOK, new EventManager.EventListener() {
+            @Override
+            public synchronized void reactToEvent() {
+                em.unregisterListener(eventType.GameOK, this);
+                g.showGame();
+                // detect if in scoring phase
+                if (g.isTwoPasses()) {
+                    System.out.println("scoring phase detected !");
+                    showMessage("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
+                    changeState(guistate.markDeadStones);
+                }
 
-		// show the board game
-		String f=eidogodir+"/example.html";
-		System.out.println("debugloadurl file://"+f);
-		wv.loadUrl("file://"+f);
+                // show the board game
+                String f=eidogodir+"/example.html";
+                System.out.println("debugloadurl file://"+f);
+                wv.loadUrl("file://"+f);
+            }
+        });
 	}
 	
 	@Override
@@ -618,8 +620,9 @@ public class GoJsActivity extends FragmentActivity {
 		EventManager.EventListener l = new EventManager.EventListener() {
 			@Override
 			public void reactToEvent() {
-				em.unregisterListener(eventType.downloadListEnd, this);
+				em.unregisterListener(eventType.downloadListGamesEnd, this);
 				int ngames = Game.getGames().size();
+System.out.println("in downloadList listener "+ngames);
 				if (ngames>=0)
 					showMessage("Nb games to play: "+ngames);
 				if (ngames>0) {
@@ -630,7 +633,7 @@ public class GoJsActivity extends FragmentActivity {
 				} else return;
 			}
 		};
-		em.registerListener(eventType.downloadListEnd, l);
+		em.registerListener(eventType.downloadListGamesEnd, l);
 		Game.loadStatusGames(server);
 	}
 
@@ -817,7 +820,7 @@ public class GoJsActivity extends FragmentActivity {
 		downloadAndShowGame();
 	}
 	private void resignGame() {
-		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+gameid+"&move_id="+moveid;
+		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+moveid;
 		HttpGet httpget = new HttpGet(server+cmd);
 		try {
 			HttpResponse response = httpclient.execute(httpget);
@@ -830,7 +833,6 @@ public class GoJsActivity extends FragmentActivity {
 			e.printStackTrace();
 			showMessage(netErrMsg);
 		}
-
 	}
 	
 	private void loadSgf() {

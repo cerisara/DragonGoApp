@@ -1032,17 +1032,14 @@ eidogo.Player.prototype = {
     detsonSend: function() {
         var sgf = this.cursor.getGameRoot().toSgf();
         var selectedMove = this.cursor.getLastMove();
-		window.location="androidcall01|"+sgf+"|"+selectedMove;
+	window.location="androidcall01|"+sgf+"|"+selectedMove;
     },
 
-	send: function(e, obj, noRender) {
-		var sgf = this.cursor.getGameRoot().toSgf();
-		var selectedMove = this.cursor.getLastMove();
-		window.location="androidcall01|"+sgf+"|"+selectedMove;
-
-/*		Android.sendSgf1();
-		Android.sendSgf2(sgf,selectedMove); */
-	},
+    send: function(e, obj, noRender) {
+	var sgf = this.cursor.getGameRoot().toSgf();
+	var selectedMove = this.cursor.getLastMove();
+	window.location="androidcall01|"+sgf+"|"+selectedMove;
+    },
 
     forward: function(e, obj, noRender) {
         this.variation(null, noRender);
@@ -1923,7 +1920,7 @@ eidogo.Player.prototype = {
         }
     
         // detson
-        addClass(this.dom.controlSend, "send-on");
+        // addClass(this.dom.controlSend, "send-on");
 
         if (this.cursor.hasNext()) {
             addClass(this.dom.controlForward, "forward-on");
@@ -2126,7 +2123,6 @@ eidogo.Player.prototype = {
                     <li id='control-back' class='control back'>Back</li>\
                     <li id='control-forward' class='control forward'>Forward</li>\
                     <li id='control-last' class='control last'>Last</li>\
-                    <li id='control-send' class='control send'>Send</li>\
                     <li id='control-pass' class='control pass'>Pass</li>\
                 </ul>\
                 <div id='move-number' class='move-number" + (this.permalinkable ? " permalink" : "") + "'></div>\
