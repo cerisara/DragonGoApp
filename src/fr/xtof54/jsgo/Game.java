@@ -239,27 +239,6 @@ public class Game {
             // pass move
             cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move=pass";
         }
-        final EventManager em = EventManager.getEventManager();
-        final Game g = this;
-        EventManager.EventListener f = new EventManager.EventListener() {
-            @Override
-            public synchronized void reactToEvent() {
-                em.unregisterListener(eventType.moveSent, this);
-                JSONObject o = server.o;
-                if (o==null) {
-                    // error: don't switch game
-                    return;
-                }
-                String err = o.getString("error");
-                if (err!=null&&err.length()>0) {
-                    // error: don't switch game
-                    return;
-                }
-                // switch to next game
-                g.finishedWithThisGame();
-            }
-        };
-        em.registerListener(eventType.moveSent, f);
-        server.sendCmdToServer(cmd,null,eventType.moveSent);
+        server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
 	}
 }

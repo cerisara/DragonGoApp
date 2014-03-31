@@ -270,7 +270,7 @@ public class GoJsActivity extends FragmentActivity {
 		        String lastMove = url.substring(j);
 
 		        // this is trigerred when the user clicks the SEND button
-		        Game g = Game.gameShown;
+		        final Game g = Game.gameShown;
 		        String cmd, msg;
 		        if (curstate==guistate.markDeadStones) {
 		            String sgfdata = url.substring(i+14, j);
@@ -284,6 +284,31 @@ public class GoJsActivity extends FragmentActivity {
 		                msg = "deadstones "+deadstones;
 		            }
 		        } else {
+		            final EventManager em = EventManager.getEventManager();
+		            EventManager.EventListener f = new EventManager.EventListener() {
+		                @Override
+		                public synchronized void reactToEvent() {
+		                    em.unregisterListener(eventType.moveSentEnd, this);
+		                    JSONObject o = server.o;
+		                    if (o==null) {
+		                        // error: don't switch game
+		                        return;
+		                    }
+		                    String err = o.getString("error");
+		                    if (err!=null&&err.length()>0) {
+		                        // error: don't switch game
+		                        return;
+		                    }
+		                    // switch to next game
+		                    g.finishedWithThisGame();
+		                    if (Game.getGames().size()==0) {
+		                    	showMessage("No more games locally");
+		                    	changeState(guistate.nogame);
+		                    } else
+		                    	downloadAndShowGame();
+		                }
+		            };
+		            em.registerListener(eventType.moveSentEnd, f);
 		            g.sendMove2server(lastMove,server);
 		        }
 //	            if (sendCmd2server(cmd, msg) && curstate==guistate.play) {
@@ -313,6 +338,7 @@ public class GoJsActivity extends FragmentActivity {
 				showMessage("No game to show");
 				return;
 			} else {
+				
 				curgidx2play=0;
 			}
 		}
@@ -671,6 +697,7 @@ System.out.println("in downloadList listener "+ngames);
 	
 	private WaitDialogFragment waitdialog;
 	private int numEventsReceived = 0;
+	boolean isWaitingDialogShown = false;
 	
     @Override
 	public void onStart() {
@@ -680,20 +707,21 @@ System.out.println("in downloadList listener "+ngames);
 	    
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener waitDialogShower = new EventManager.EventListener() {
-			boolean isShown = false;
 			@Override
 			public synchronized void reactToEvent() {
-				if (!isShown) {
+				if (!isWaitingDialogShown) {
 					waitdialog = new WaitDialogFragment();
 					waitdialog.show(getSupportFragmentManager(),"waiting");
-					isShown=true;
+					isWaitingDialogShown=true;
 				}
 				numEventsReceived++;
 			}
 		};
+		// we put here all events that should trigger the "waiting" dialog
 		em.registerListener(eventType.downloadGameStarted, waitDialogShower);
 		em.registerListener(eventType.downloadListStarted, waitDialogShower);
 		em.registerListener(eventType.loginStarted, waitDialogShower);
+		em.registerListener(eventType.moveSentStart, waitDialogShower);
 		
 		EventManager.EventListener waitDialogHider = new EventManager.EventListener() {
 			@Override
@@ -703,12 +731,16 @@ System.out.println("in downloadList listener "+ngames);
 					System.out.println("ERROR events stream...");
 					return;
 				}
-				if (numEventsReceived==0) waitdialog.dismiss();
+				if (numEventsReceived==0) {
+					waitdialog.dismiss();
+					isWaitingDialogShown=false;
+				}
 			}
 		};
 		em.registerListener(eventType.downloadGameEnd, waitDialogHider);
 		em.registerListener(eventType.downloadListEnd, waitDialogHider);
 		em.registerListener(eventType.loginEnd, waitDialogHider);
+		em.registerListener(eventType.moveSentEnd, waitDialogHider);
 	}
 	
 	@Override
