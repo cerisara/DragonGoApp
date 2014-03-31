@@ -38,6 +38,8 @@ public class Message {
         // TODO
     }
     
+    
+    
     public static void handleMessages(GoJsActivity main) throws Exception {
 /*
     	c=main;

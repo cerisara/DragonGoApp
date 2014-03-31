@@ -6,11 +6,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import org.apache.http.Header;
@@ -18,11 +16,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,7 +40,6 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
@@ -67,9 +59,9 @@ import android.support.v4.app.FragmentActivity;
 public class GoJsActivity extends FragmentActivity {
 	private ServerConnection server=null;
 	
-	static int debugdevel=-1;
+	static int debugdevel=0;
 //    String server;
-    enum guistate {nogame, play, markDeadStones, checkScore};
+    enum guistate {nogame, play, markDeadStones, checkScore, message};
     guistate curstate = guistate.nogame;
     
 	File eidogodir;
@@ -104,6 +96,7 @@ public class GoJsActivity extends FragmentActivity {
 	        }
 	    });
 	}
+	private guistate lastGameState;
 	private void changeState(guistate newstate) {
 		if (curstate==guistate.markDeadStones && newstate!=guistate.markDeadStones)
 	    	wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkp()");
@@ -116,6 +109,9 @@ public class GoJsActivity extends FragmentActivity {
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
 	    	setButtons("Score","Zoom+","Zoom-","Play"); break;
 	    case checkScore: setButtons("Accept","Zoom+","Zoom-","Refuse"); break;
+	    case message:
+	    	lastGameState=curstate;
+	    	setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
 	    default:
 	    }
 	    curstate=newstate;
@@ -411,6 +407,9 @@ public class GoJsActivity extends FragmentActivity {
 	                case checkScore: // accept the current score evaluation
 //	                    acceptScore();
 	                    break;
+	                case message: // get messages
+	                	// TODO
+	                	break;
 	                }
 
 //	              {
@@ -432,8 +431,18 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					wv.zoomIn();
-					wv.invalidate();
+					switch(curstate) {
+					case nogame:
+					case play:
+					case markDeadStones:
+					case checkScore:
+						wv.zoomIn();
+						wv.invalidate();
+						break;
+					case message: // send invitation
+						// TODO
+						break;
+					}
 				}
 			});
 		}
@@ -442,8 +451,17 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					wv.zoomOut();
-					wv.invalidate();
+					switch(curstate) {
+					case nogame:
+					case play:
+					case markDeadStones:
+					case checkScore:
+						wv.zoomOut();
+						wv.invalidate();
+					case message: // send message
+						// TODO
+						break;
+					}
 				}
 			});
 		}
@@ -466,6 +484,9 @@ public class GoJsActivity extends FragmentActivity {
                         break;
                     case checkScore: // refuse score and continues to mark stones
                         break;
+					case message: // go back to last game mode
+						changeState(lastGameState);
+						break;
                     }
 				}
 			});
@@ -617,22 +638,21 @@ public class GoJsActivity extends FragmentActivity {
 	private void downloadListOfGames() {
 	    String tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
 	    String tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
+	    int numserver=0;
 	    if (tu==null||tp==null) {
 	        showMessage("Please enter your credentials first via menu Settings");
 	        return;
 	    }
-		if (debugdevel==0) {
-			debugdevel=1;
-		} else if (debugdevel==1) {
+	    if (debugdevel==1) {
 			tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME2_KEY,null);
 			tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD2_KEY,null);
-			debugdevel=0;
+			numserver=1;
 		}
 		final String u = tu, p=tp;
 	    
 		System.out.println("credentials passed to server "+u+" "+p);
 		if (server==null) {
-			server = new ServerConnection(0, u, p);
+			server = new ServerConnection(numserver, u, p);
 			DetLogger l = new DetLogger() {
 				@Override
 				public void showMsg(String s) {
@@ -901,7 +921,7 @@ System.out.println("in downloadList listener "+ngames);
                 bserver2.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View vv) {
-                    	debugdevel=0;
+                    	debugdevel=1-debugdevel;
                     	showMessage("debug devel mode ON");
                         System.out.println("next connections to devel server");
 //                        server = getString(R.string.server2);

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import fr.xtof54.jsgo.EventManager.eventType;
@@ -26,29 +27,33 @@ public class Game {
     	games2play.clear();
     	final EventManager em = EventManager.getEventManager();
     	EventManager.EventListener f = new EventManager.EventListener() {
-			@Override
-			public synchronized void reactToEvent() {
-				JSONObject o = server.o;
-		    	if (o==null) return;
-		    	int ngames = o.getInt("list_size");
-			    if (ngames>0) {
-		            JSONArray headers = o.getJSONArray("list_header");
-		            int gid_jsonidx = -1;
-		            for (int i=0;i<headers.length();i++) {
-		                String h = headers.getString(i);
-		                System.out.println("jsonheader "+i+" "+h);
-		                if (h.equals("id")) gid_jsonidx=i;
-		            }
-		            JSONArray jsongames = o.getJSONArray("list_result");
-		            for (int i=0;i<jsongames.length();i++) {
-		                JSONArray jsongame = jsongames.getJSONArray(i);
-		                int gameid = jsongame.getInt(gid_jsonidx);
-		                Game g = new Game(jsongame, gameid);
-		                games2play.add(g);
-		            }
-			    }
-			    System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
-			    em.unregisterListener(eventType.downloadListEnd, this);
+    		@Override
+    		public synchronized void reactToEvent() {
+    			JSONObject o = server.o;
+    			if (o==null) return;
+    			try {
+    				int ngames = o.getInt("list_size");
+    				if (ngames>0) {
+    					JSONArray headers = o.getJSONArray("list_header");
+    					int gid_jsonidx = -1;
+    					for (int i=0;i<headers.length();i++) {
+    						String h = headers.getString(i);
+    						System.out.println("jsonheader "+i+" "+h);
+    						if (h.equals("id")) gid_jsonidx=i;
+    					}
+    					JSONArray jsongames = o.getJSONArray("list_result");
+    					for (int i=0;i<jsongames.length();i++) {
+    						JSONArray jsongame = jsongames.getJSONArray(i);
+    						int gameid = jsongame.getInt(gid_jsonidx);
+    						Game g = new Game(jsongame, gameid);
+    						games2play.add(g);
+    					}
+    				}
+    			} catch (JSONException e) {
+    				e.printStackTrace();
+    			}
+    			System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
+    			em.unregisterListener(eventType.downloadListEnd, this);
 			    em.sendEvent(eventType.downloadListGamesEnd);
 			}
 		};
