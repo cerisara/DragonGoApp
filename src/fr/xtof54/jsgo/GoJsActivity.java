@@ -472,7 +472,7 @@ public class GoJsActivity extends FragmentActivity {
 				public void onClick(View v) {
                     switch(curstate) {
                     case nogame: // send message (TODO)
-                    	Message.send(); break;
+                    	changeState(guistate.message); break;
                     case play: // start evaluation of score
                     	// normally, detmarkx() is called right after the board is displayed,
                     	// but here, the board is displayed long ago, so we have to call it manually
@@ -725,19 +725,23 @@ System.out.println("in downloadList listener "+ngames);
 //	    server = getString(R.string.server1);
 	    main = this;
 	    
-		final EventManager em = EventManager.getEventManager();
-		EventManager.EventListener waitDialogShower = new EventManager.EventListener() {
-			@Override
-			public synchronized void reactToEvent() {
-				if (!isWaitingDialogShown) {
-					waitdialog = new WaitDialogFragment();
-					waitdialog.show(getSupportFragmentManager(),"waiting");
-					isWaitingDialogShown=true;
-				}
-				numEventsReceived++;
-			}
-		};
-		// we put here all events that should trigger the "waiting" dialog
+	    final EventManager em = EventManager.getEventManager();
+	    EventManager.EventListener waitDialogShower = new EventManager.EventListener() {
+	    	@Override
+	    	public synchronized void reactToEvent() {
+	    		try {
+	    			if (!isWaitingDialogShown) {
+	    				waitdialog = new WaitDialogFragment();
+	    				waitdialog.show(getSupportFragmentManager(),"waiting");
+	    				isWaitingDialogShown=true;
+	    			}
+	    		} catch (Exception e) {
+	    			e.printStackTrace();
+	    		}
+	    		numEventsReceived++;
+	    	}
+	    };
+	    // we put here all events that should trigger the "waiting" dialog
 		em.registerListener(eventType.downloadGameStarted, waitDialogShower);
 		em.registerListener(eventType.downloadListStarted, waitDialogShower);
 		em.registerListener(eventType.loginStarted, waitDialogShower);
@@ -864,11 +868,12 @@ System.out.println("in downloadList listener "+ngames);
 	}
 
 	private void skipGame() {
-		if (games2play.size()<=1) {
+		if (Game.getGames().size()<=1) {
 			showMessage("No more games downloaded; retry GetGames ?");
+			changeState(guistate.nogame);
 			return;
 		}
-		if (++curgidx2play>=games2play.size()) curgidx2play=0;
+		if (++curgidx2play>=Game.getGames().size()) curgidx2play=0;
 		downloadAndShowGame();
 	}
 	private void resignGame() {
