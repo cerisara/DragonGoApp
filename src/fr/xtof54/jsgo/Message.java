@@ -31,6 +31,7 @@ public class Message {
 	public int getMessageId() {return msgid;}
 
 	public static void send() {
+		String cmd = "quick_do.php?obj=message&cmd=send_msg&ouser=xtof54&msg=salut&subj=test";
 		// TODO
 	}
 
