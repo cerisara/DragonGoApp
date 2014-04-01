@@ -57,7 +57,7 @@ import android.support.v4.app.FragmentActivity;
  *
  */
 public class GoJsActivity extends FragmentActivity {
-	private ServerConnection server=null;
+	ServerConnection server=null;
 	
 	static int debugdevel=0;
 //    String server;
@@ -408,7 +408,8 @@ public class GoJsActivity extends FragmentActivity {
 //	                    acceptScore();
 	                    break;
 	                case message: // get messages
-	                	// TODO
+	                	initServer();
+	                	Message.downloadMessages(server,main);
 	                	break;
 	                }
 
@@ -635,7 +636,8 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	private Boolean waiterComputingFinished=true;
 	
-	private void downloadListOfGames() {
+	private void initServer() {
+		if (server!=null) return;
 	    String tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
 	    String tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
 	    int numserver=0;
@@ -661,7 +663,10 @@ public class GoJsActivity extends FragmentActivity {
 			};
 			server.setLogget(l);
 		}
-		
+	}
+	
+	private void downloadListOfGames() {
+		initServer();
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener l = new EventManager.EventListener() {
 			@Override
@@ -750,14 +755,18 @@ System.out.println("in downloadList listener "+ngames);
 		EventManager.EventListener waitDialogHider = new EventManager.EventListener() {
 			@Override
 			public synchronized void reactToEvent() {
-				--numEventsReceived;
-				if (numEventsReceived<0) {
-					System.out.println("ERROR events stream...");
-					return;
-				}
-				if (numEventsReceived==0) {
-					waitdialog.dismiss();
-					isWaitingDialogShown=false;
+				try {
+					--numEventsReceived;
+					if (numEventsReceived<0) {
+						System.out.println("ERROR events stream...");
+						return;
+					}
+					if (numEventsReceived==0) {
+						waitdialog.dismiss();
+						isWaitingDialogShown=false;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		};
@@ -765,6 +774,8 @@ System.out.println("in downloadList listener "+ngames);
 		em.registerListener(eventType.downloadListEnd, waitDialogHider);
 		em.registerListener(eventType.loginEnd, waitDialogHider);
 		em.registerListener(eventType.moveSentEnd, waitDialogHider);
+		
+		changeState(guistate.nogame);
 	}
 	
 	@Override
