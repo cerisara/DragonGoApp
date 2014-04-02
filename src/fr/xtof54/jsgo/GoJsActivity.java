@@ -283,6 +283,8 @@ public class GoJsActivity extends FragmentActivity {
 		            final EventManager em = EventManager.getEventManager();
 		            EventManager.EventListener f = new EventManager.EventListener() {
 		                @Override
+		                public String getName() {return "mywebclient";}
+		                @Override
 		                public synchronized void reactToEvent() {
 		                    em.unregisterListener(eventType.moveSentEnd, this);
 		                    JSONObject o = server.o;
@@ -344,6 +346,8 @@ public class GoJsActivity extends FragmentActivity {
 		g.downloadGame(server);
 		final EventManager em = EventManager.getEventManager();
 		em.registerListener(eventType.GameOK, new EventManager.EventListener() {
+            @Override
+            public String getName() {return "downloadAndShowGame";}
             @Override
             public synchronized void reactToEvent() {
                 em.unregisterListener(eventType.GameOK, this);
@@ -669,6 +673,8 @@ public class GoJsActivity extends FragmentActivity {
 		initServer();
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener l = new EventManager.EventListener() {
+            @Override
+            public String getName() {return "downloadListOfGames";}
 			@Override
 			public void reactToEvent() {
 				em.unregisterListener(eventType.downloadListGamesEnd, this);
@@ -732,6 +738,8 @@ System.out.println("in downloadList listener "+ngames);
 	    
 	    final EventManager em = EventManager.getEventManager();
 	    EventManager.EventListener waitDialogShower = new EventManager.EventListener() {
+            @Override
+            public String getName() {return "onStartShowWaitDialog";}
 	    	@Override
 	    	public synchronized void reactToEvent() {
 	    		try {
@@ -753,6 +761,8 @@ System.out.println("in downloadList listener "+ngames);
 		em.registerListener(eventType.moveSentStart, waitDialogShower);
 		
 		EventManager.EventListener waitDialogHider = new EventManager.EventListener() {
+            @Override
+            public String getName() {return "onStartHideWaitDialog";}
 			@Override
 			public synchronized void reactToEvent() {
 				try {
