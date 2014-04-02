@@ -105,7 +105,10 @@ public class GoJsActivity extends FragmentActivity {
 	    case nogame: setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
 	    case play: setButtons("Send","Zoom+","Zoom-","Est.Score"); break;
 	    case markDeadStones:
+            showMessage("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
 	    	// just in case the board is already rendered...
+        	// normally, detmarkx() is called right after the board is displayed,
+        	// but here, the board is displayed long ago, so we have to call it manually
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
 	    	setButtons("Score","Zoom+","Zoom-","Play"); break;
 	    case checkScore: setButtons("Accept","Zoom+","Zoom-","Refuse"); break;
@@ -117,8 +120,7 @@ public class GoJsActivity extends FragmentActivity {
 	    curstate=newstate;
 	}
 	
-    public String showCounting(String json) {
-        JSONObject o = new JSONObject(json);
+    public String showCounting(JSONObject o) {
         String sc="";
         try {
             sc = o.getString("score");
@@ -213,42 +215,42 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 	
-	private boolean sendCmd2server(String cmd, String msg) {
-		HttpGet httpget = new HttpGet(server+cmd);
-		try {
-			HttpResponse response = httpclient.execute(httpget);
-			System.out.println("answer to send move:");
-			Header[] heds = response.getAllHeaders();
-			for (Header s : heds)
-				System.out.println("[HEADER] "+s);
-			HttpEntity entity = response.getEntity();
-			String jsonansw=null;
-			if (entity != null) {
-				InputStream instream = entity.getContent();
-				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-				for (;;) {
-					String s = fin.readLine();
-					if (s==null) break;
-					System.out.println("LOGINlog "+s);
-					if (s.contains("#Error")) showMessage("Error login; check credentials");
-					if (s.length()>0&&s.charAt(0)=='{') jsonansw = s;
-				}
-				fin.close();
-			}
-			if (curstate==guistate.markDeadStones) {
-			    String sc = showCounting(jsonansw);
-				showMessage("dead stones sent; score="+sc);
-				changeState(guistate.checkScore);
-			} else {
-				showMessage("sent to server: "+msg);
-			}
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			showMessage(netErrMsg);
-			return false;
-		}
-	}
+//	private boolean sendCmd2server(String cmd, String msg) {
+//		HttpGet httpget = new HttpGet(server+cmd);
+//		try {
+//			HttpResponse response = httpclient.execute(httpget);
+//			System.out.println("answer to send move:");
+//			Header[] heds = response.getAllHeaders();
+//			for (Header s : heds)
+//				System.out.println("[HEADER] "+s);
+//			HttpEntity entity = response.getEntity();
+//			String jsonansw=null;
+//			if (entity != null) {
+//				InputStream instream = entity.getContent();
+//				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+//				for (;;) {
+//					String s = fin.readLine();
+//					if (s==null) break;
+//					System.out.println("LOGINlog "+s);
+//					if (s.contains("#Error")) showMessage("Error login; check credentials");
+//					if (s.length()>0&&s.charAt(0)=='{') jsonansw = s;
+//				}
+//				fin.close();
+//			}
+//			if (curstate==guistate.markDeadStones) {
+//			    String sc = showCounting(jsonansw);
+//				showMessage("dead stones sent; score="+sc);
+//				changeState(guistate.checkScore);
+//			} else {
+//				showMessage("sent to server: "+msg);
+//			}
+//			return true;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			showMessage(netErrMsg);
+//			return false;
+//		}
+//	}
 	
 	private class myWebViewClient extends WebViewClient {
 		@Override
@@ -267,18 +269,32 @@ public class GoJsActivity extends FragmentActivity {
 
 		        // this is trigerred when the user clicks the SEND button
 		        final Game g = Game.gameShown;
-		        String cmd, msg;
 		        if (curstate==guistate.markDeadStones) {
 		            String sgfdata = url.substring(i+14, j);
 		            String deadstones=getMarkedStones(sgfdata);
-		            System.out.println("deadstones "+deadstones);
-		            if (deadstones==null) {
-		                cmd = "quick_do.php?obj=game&cmd=status_score&gid="+g.getGameID();
-		                msg = "no deadstone";
-		            } else {
-		                cmd = "quick_do.php?obj=game&cmd=status_score&gid="+g.getGameID()+"&toggle=uniq&move="+deadstones;
-		                msg = "deadstones "+deadstones;
-		            }
+		            final EventManager em = EventManager.getEventManager();
+		            EventManager.EventListener f = new EventManager.EventListener() {
+		                @Override
+		                public synchronized void reactToEvent() {
+		                    em.unregisterListener(eventType.moveSentEnd, this);
+		                    JSONObject o = server.o;
+		                    if (o==null) {
+		                        // error: do nothing
+		                        return;
+		                    }
+		                    String err = o.getString("error");
+		                    if (err!=null&&err.length()>0) {
+		                        // error: do nothing
+		                        return;
+		                    }
+		                    // show territories
+		                    String sc = showCounting(o);
+		    				showMessage("dead stones sent; score="+sc);
+		    				changeState(guistate.checkScore);
+		                }
+		            };
+		            em.registerListener(eventType.moveSentEnd, f);
+		            g.sendDeadstonesToServer(deadstones, server);
 		        } else {
 		            final EventManager em = EventManager.getEventManager();
 		            EventManager.EventListener f = new EventManager.EventListener() {
@@ -351,7 +367,6 @@ public class GoJsActivity extends FragmentActivity {
                 // detect if in scoring phase
                 if (g.isTwoPasses()) {
                     System.out.println("scoring phase detected !");
-                    showMessage("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
                     changeState(guistate.markDeadStones);
                 }
 
@@ -460,7 +475,7 @@ public class GoJsActivity extends FragmentActivity {
 						wv.zoomOut();
 						wv.invalidate();
 					case message: // send message
-						// TODO
+						Message.send();
 						break;
 					}
 				}
@@ -475,9 +490,6 @@ public class GoJsActivity extends FragmentActivity {
                     case nogame: // send message (TODO)
                     	changeState(guistate.message); break;
                     case play: // start evaluation of score
-                    	// normally, detmarkx() is called right after the board is displayed,
-                    	// but here, the board is displayed long ago, so we have to call it manually
-        				wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
         				changeState(guistate.markDeadStones);
         				break;
                     case markDeadStones: // cancels marking stones and comes back to playing
@@ -930,6 +942,8 @@ System.out.println("in downloadList listener "+ngames);
                     public void onClick(View vv) {
                         System.out.println("loading sgf");
                         loadSgf();
+                        changeState(guistate.play);
+                        Game.createDebugGame();
                         dialog.dismiss();
                     }
                 });

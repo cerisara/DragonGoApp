@@ -23,6 +23,12 @@ public class Game {
     List<String> sgf = null;
     int moveid;
     
+    static void createDebugGame() {
+    	Game g = new Game(null, 1);
+    	games2play.add(g);
+    	gameShown = g;
+    }
+    
     public static void loadStatusGames(final ServerConnection server) {
     	games2play.clear();
     	final EventManager em = EventManager.getEventManager();
@@ -237,6 +243,12 @@ public class Game {
 			"</html>",
 	};
 
+	public void sendDeadstonesToServer(String deadstones, final ServerConnection server) {
+		System.out.println("deadstones "+deadstones);
+        String cmd = "quick_do.php?obj=game&cmd=status_score&gid="+getGameID()+"&toggle=uniq&move="+deadstones;
+        server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
+	}
+	
 	public void sendMove2server(String move, final ServerConnection server) {
         System.out.println("move "+move);
         String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move="+move;
