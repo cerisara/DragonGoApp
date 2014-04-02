@@ -261,10 +261,10 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+		    System.out.println("mywebclient detecting command from javascript: "+url);
 		    int i=url.indexOf("androidcall01");
 		    if (i>=0) {
 		        int j=url.lastIndexOf('|')+1;
-		        String sgf = url.substring(i+14, j);
 		        String lastMove = url.substring(j);
 
 		        // this is trigerred when the user clicks the SEND button
@@ -298,6 +298,8 @@ public class GoJsActivity extends FragmentActivity {
 		        } else {
 		            final EventManager em = EventManager.getEventManager();
 		            EventManager.EventListener f = new EventManager.EventListener() {
+		                @Override
+		                public String getName() {return "mywebclient";}
 		                @Override
 		                public synchronized void reactToEvent() {
 		                    em.unregisterListener(eventType.moveSentEnd, this);
@@ -361,6 +363,8 @@ public class GoJsActivity extends FragmentActivity {
 		final EventManager em = EventManager.getEventManager();
 		em.registerListener(eventType.GameOK, new EventManager.EventListener() {
             @Override
+            public String getName() {return "downloadAndShowGame";}
+            @Override
             public synchronized void reactToEvent() {
                 em.unregisterListener(eventType.GameOK, this);
                 g.showGame();
@@ -399,6 +403,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+				    System.out.println("press last button on state "+curstate);
 					showMoreButtons();
 				}
 			});
@@ -407,6 +412,7 @@ public class GoJsActivity extends FragmentActivity {
 	        final Button button = (Button)findViewById(R.id.but1);
 	        button.setOnClickListener(new View.OnClickListener() {
 	            public void onClick(View v) {
+                    System.out.println("press button1 on state "+curstate);
 	                switch(curstate) {
 	                case nogame: // download games
 	                    downloadListOfGames();
@@ -447,6 +453,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+                    System.out.println("press button2 on state "+curstate);
 					switch(curstate) {
 					case nogame:
 					case play:
@@ -467,6 +474,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+                    System.out.println("press button3 on state "+curstate);
 					switch(curstate) {
 					case nogame:
 					case play:
@@ -486,6 +494,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+                    System.out.println("press button4 on state "+curstate);
                     switch(curstate) {
                     case nogame: // send message (TODO)
                     	changeState(guistate.message); break;
@@ -681,6 +690,8 @@ public class GoJsActivity extends FragmentActivity {
 		initServer();
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener l = new EventManager.EventListener() {
+            @Override
+            public String getName() {return "downloadListOfGames";}
 			@Override
 			public void reactToEvent() {
 				em.unregisterListener(eventType.downloadListGamesEnd, this);
@@ -744,6 +755,8 @@ System.out.println("in downloadList listener "+ngames);
 	    
 	    final EventManager em = EventManager.getEventManager();
 	    EventManager.EventListener waitDialogShower = new EventManager.EventListener() {
+            @Override
+            public String getName() {return "onStartShowWaitDialog";}
 	    	@Override
 	    	public synchronized void reactToEvent() {
 	    		try {
@@ -765,6 +778,8 @@ System.out.println("in downloadList listener "+ngames);
 		em.registerListener(eventType.moveSentStart, waitDialogShower);
 		
 		EventManager.EventListener waitDialogHider = new EventManager.EventListener() {
+            @Override
+            public String getName() {return "onStartHideWaitDialog";}
 			@Override
 			public synchronized void reactToEvent() {
 				try {

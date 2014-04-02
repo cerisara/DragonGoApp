@@ -165,6 +165,8 @@ public class ServerConnection {
 		if (httpclient==null) {
 			System.out.println("in sendcmd: no httpclient, trying login...");
 			em.registerListener(eventType.loginEnd, new EventManager.EventListener() {
+	            @Override
+	            public String getName() {return "sendCmdToServer";}
 				@Override
 				public void reactToEvent() {
 					em.unregisterListener(eventType.loginEnd, this);
@@ -234,6 +236,8 @@ public class ServerConnection {
 		if (httpclient==null) {
 			System.out.println("in getsgf: no httpclient, trying login...");
 			em.registerListener(eventType.loginEnd, new EventManager.EventListener() {
+	            @Override
+	            public String getName() {return "downloadSgf";}
 				@Override
 				public void reactToEvent() {
 					em.unregisterListener(eventType.loginEnd, this);
@@ -300,6 +304,8 @@ public class ServerConnection {
 		ServerConnection server = new ServerConnection(0,c[0],c[1]);
 		final EventManager em = EventManager.getEventManager();
 		em.registerListener(eventType.downloadListEnd, new EventManager.EventListener() {
+            @Override
+            public String getName() {return "maintest";}
 			@Override
 			public void reactToEvent() {
 				synchronized (c) {

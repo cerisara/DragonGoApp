@@ -21,18 +21,29 @@ public class EventManager {
 	
 	public interface EventListener {
 		public void reactToEvent();
+		public String getName();
 	}
-	HashMap<eventType, List<EventListener>> listeners = new HashMap<EventManager.eventType, List<EventListener>>();
+	private HashMap<eventType, List<EventListener>> listeners = new HashMap<EventManager.eventType, List<EventListener>>();
 	
 	public void registerListener(eventType e, EventListener f) {
+	    System.out.println("registering event listener "+e+" "+f.getName());
 		List<EventListener> l = listeners.get(e);
+		final String name = f.getName();
 		if (l==null) {
 			l=new ArrayList<EventManager.EventListener>();
 			listeners.put(e, l);
+		} else {
+		    for (EventListener el : l)
+		        if (el.getName().equals(name)) {
+		            System.out.println("refusing event "+el.getName());
+		            // refuse to register 2 times the same listener !
+		            return;
+		        }
 		}
 		l.add(f);
 	}
 	public void unregisterListener(eventType e, EventListener f) {
+        System.out.println("unregistering event listener "+e+" "+f.getName());
 		List<EventListener> l = listeners.get(e);
 		if (l!=null) {
 			l.remove(f);

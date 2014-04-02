@@ -40,6 +40,8 @@ public class Message {
 		messages.clear();
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
+            @Override
+            public String getName() {return "downloadMessages";}
 			@Override
 			public synchronized void reactToEvent() {
 				JSONObject o = server.o;

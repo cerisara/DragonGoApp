@@ -62,6 +62,8 @@ public class Game {
     			em.unregisterListener(eventType.downloadListEnd, this);
 			    em.sendEvent(eventType.downloadListGamesEnd);
 			}
+            @Override
+            public String getName() {return "loadStatusGame";}
 		};
     	em.registerListener(eventType.downloadListEnd, f);
     	server.sendCmdToServer(cmdGetListOfGames,eventType.downloadListStarted,eventType.downloadListEnd);
@@ -144,6 +146,8 @@ public class Game {
 		    	System.out.println("moveid "+moveid);
 		    	em.sendEvent(eventType.GameOK);
 			}
+            @Override
+            public String getName() {return "downloadGame";}
 		};
     	em.registerListener(eventType.downloadGameEnd, f);
     	server.downloadSgf(gid, true);
