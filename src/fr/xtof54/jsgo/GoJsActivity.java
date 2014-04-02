@@ -259,10 +259,10 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+		    System.out.println("mywebclient detecting command from javascript: "+url);
 		    int i=url.indexOf("androidcall01");
 		    if (i>=0) {
 		        int j=url.lastIndexOf('|')+1;
-		        String sgf = url.substring(i+14, j);
 		        String lastMove = url.substring(j);
 
 		        // this is trigerred when the user clicks the SEND button
@@ -388,6 +388,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+				    System.out.println("press last button on state "+curstate);
 					showMoreButtons();
 				}
 			});
@@ -396,6 +397,7 @@ public class GoJsActivity extends FragmentActivity {
 	        final Button button = (Button)findViewById(R.id.but1);
 	        button.setOnClickListener(new View.OnClickListener() {
 	            public void onClick(View v) {
+                    System.out.println("press button1 on state "+curstate);
 	                switch(curstate) {
 	                case nogame: // download games
 	                    downloadListOfGames();
@@ -436,6 +438,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+                    System.out.println("press button2 on state "+curstate);
 					switch(curstate) {
 					case nogame:
 					case play:
@@ -456,6 +459,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+                    System.out.println("press button3 on state "+curstate);
 					switch(curstate) {
 					case nogame:
 					case play:
@@ -475,6 +479,7 @@ public class GoJsActivity extends FragmentActivity {
 			button.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+                    System.out.println("press button4 on state "+curstate);
                     switch(curstate) {
                     case nogame: // send message (TODO)
                     	changeState(guistate.message); break;

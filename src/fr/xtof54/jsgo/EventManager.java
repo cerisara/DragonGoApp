@@ -26,6 +26,7 @@ public class EventManager {
 	private HashMap<eventType, List<EventListener>> listeners = new HashMap<EventManager.eventType, List<EventListener>>();
 	
 	public void registerListener(eventType e, EventListener f) {
+	    System.out.println("registering event listener "+e+" "+f.getName());
 		List<EventListener> l = listeners.get(e);
 		final String name = f.getName();
 		if (l==null) {
@@ -34,6 +35,7 @@ public class EventManager {
 		} else {
 		    for (EventListener el : l)
 		        if (el.getName().equals(name)) {
+		            System.out.println("refusing event "+el.getName());
 		            // refuse to register 2 times the same listener !
 		            return;
 		        }
@@ -41,6 +43,7 @@ public class EventManager {
 		l.add(f);
 	}
 	public void unregisterListener(eventType e, EventListener f) {
+        System.out.println("unregistering event listener "+e+" "+f.getName());
 		List<EventListener> l = listeners.get(e);
 		if (l!=null) {
 			l.remove(f);
