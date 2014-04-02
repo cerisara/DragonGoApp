@@ -274,9 +274,11 @@ public class GoJsActivity extends FragmentActivity {
 		            String deadstones=getMarkedStones(sgfdata);
 		            final EventManager em = EventManager.getEventManager();
 		            EventManager.EventListener f = new EventManager.EventListener() {
-		                @Override
-		                public synchronized void reactToEvent() {
-		                    em.unregisterListener(eventType.moveSentEnd, this);
+		            	@Override
+		            	public String getName() {return "mywebclient";}
+		            	@Override
+		            	public synchronized void reactToEvent() {
+		            		em.unregisterListener(eventType.moveSentEnd, this);
 		                    JSONObject o = server.o;
 		                    if (o==null) {
 		                        // error: do nothing
