@@ -103,7 +103,7 @@ public class GoJsActivity extends FragmentActivity {
 		System.out.println("inchangestate "+curstate+" .. "+newstate);
 	    switch (newstate) {
 	    case nogame: setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
-	    case play: setButtons("Send","Zoom+","Zoom-","Est.Score"); break;
+	    case play: setButtons("Send","Zoom+","Zoom-","Reset"); break;
 	    case markDeadStones:
             showMessage("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
 	    	// just in case the board is already rendered...
@@ -347,6 +347,21 @@ public class GoJsActivity extends FragmentActivity {
 		}   
 	}  
 
+	void showGame(Game g) {
+	    g.showGame();
+        // detect if in scoring phase
+        // TODO: replace this by checking the game STATUS !
+        if (g.isTwoPasses()) {
+            System.out.println("scoring phase detected !");
+            changeState(guistate.markDeadStones);
+        }
+
+        // show the board game
+        String f=eidogodir+"/example.html";
+        System.out.println("debugloadurl file://"+f);
+        wv.loadUrl("file://"+f);
+	}
+	
 	void downloadAndShowGame() {
 	    int ngames = Game.getGames().size();
 		if (curgidx2play>=ngames) {
@@ -369,17 +384,7 @@ public class GoJsActivity extends FragmentActivity {
             @Override
             public synchronized void reactToEvent() {
                 em.unregisterListener(eventType.GameOK, this);
-                g.showGame();
-                // detect if in scoring phase
-                if (g.isTwoPasses()) {
-                    System.out.println("scoring phase detected !");
-                    changeState(guistate.markDeadStones);
-                }
-
-                // show the board game
-                String f=eidogodir+"/example.html";
-                System.out.println("debugloadurl file://"+f);
-                wv.loadUrl("file://"+f);
+                showGame(g);
             }
         });
 	}
@@ -500,8 +505,8 @@ public class GoJsActivity extends FragmentActivity {
                     switch(curstate) {
                     case nogame: // send message (TODO)
                     	changeState(guistate.message); break;
-                    case play: // start evaluation of score
-        				changeState(guistate.markDeadStones);
+                    case play: // reset to the original download SGF
+        				showGame(Game.gameShown);
         				break;
                     case markDeadStones: // cancels marking stones and comes back to playing
                     	changeState(guistate.play);
