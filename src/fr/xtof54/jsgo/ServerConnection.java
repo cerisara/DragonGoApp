@@ -149,7 +149,13 @@ public class ServerConnection {
 		Thread loginthread = new Thread(r);
 		loginthread.start();
 	}
-
+	
+    public boolean isSentOk() {
+        if (o==null) return false;
+        String err = o.getString("error");
+        if (err!=null&&err.length()>0) return false;
+        return true;
+    }
 	public JSONObject o=null;
 	/**
 	 * send a command to the server and gets back a JSon object with the answer
@@ -159,6 +165,7 @@ public class ServerConnection {
 	 * @return
 	 */
 	public void sendCmdToServer(final String cmd, final eventType startEvent, final eventType endEvent) {
+        o=null;
 		System.out.println("begin send command, httpclient="+httpclient);
 		final EventManager em = EventManager.getEventManager();
 		if (startEvent!=null) em.sendEvent(startEvent);
@@ -212,7 +219,6 @@ public class ServerConnection {
 				if (endEvent!=null) em.sendEvent(endEvent);
 			}
 		};
-		o=null;
 		Thread t = new Thread(r);
 		t.start();
 		//    	if (GoJsActivity.main!=null) {
