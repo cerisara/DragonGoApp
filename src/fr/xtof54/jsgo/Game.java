@@ -21,7 +21,7 @@ public class Game {
     private int gid;
     private JSONArray gameinfo;
     List<String> sgf = null;
-    int moveid;
+    int moveid, boardsize;
     // contains the last dead stones used to compute the score
     // if the player accepts this score, then these same dead stones are sent again with command AGREE
     String deadst=null;
@@ -197,12 +197,17 @@ public class Game {
 				em.unregisterListener(eventType.downloadGameEnd, this);
 				sgf = new ArrayList<String>();
 				for (String s : server.sgf) sgf.add(""+s);
-				// look for move_id
+				// look for move_id and size
 		    	for (String s: sgf) {
 		    		int i=s.indexOf("XM[");
 		    		if (i>=0) {
 		    			int j=s.indexOf(']',i+3);
 		    			moveid = Integer.parseInt(s.substring(i+3, j));
+		    		}
+		    		i=s.indexOf("SZ[");
+		    		if (i>=0) {
+		    			int j=s.indexOf(']',i+3);
+		    			boardsize = Integer.parseInt(s.substring(i+3, j));
 		    		}
 		    	}
 		    	System.out.println("sgf: "+sgf);
@@ -216,7 +221,8 @@ public class Game {
     	server.downloadSgf(gid, true);
     }
 
-
+    public int getBoardSize() {return boardsize;}
+    
 //	    GoJsActivity.main.runInWaitingThread(new Runnable() {
 //			@Override
 //			public void run() {

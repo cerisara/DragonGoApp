@@ -1118,6 +1118,23 @@ eidogo.Player.prototype = {
         }
     },
 
+    detsoncleanT: function() {
+        var sz = this.board.boardSize;
+        for (var i = 0; i < sz; i++) {
+             for (var j = 0; j < sz; j++) {
+                 var pt = this.sgfCoordToPoint("aa");
+                 pt.x=i; pt.y=j;
+                 var coo = this.pointToSgfCoord(pt);
+                 if (this.cursor.node.hasPropertyValue("TW",coo)) {
+                      this.cursor.node.deletePropertyValue("TW",coo);
+                 }
+                 if (this.cursor.node.hasPropertyValue("TB",coo)) {
+                      this.cursor.node.deletePropertyValue("TB",coo);
+                 }
+             }
+        }
+    },
+
     /**
      * Called by the board renderer upon mouse up, with appropriate coordinate
     **/

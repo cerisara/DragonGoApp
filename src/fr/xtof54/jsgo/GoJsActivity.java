@@ -153,6 +153,7 @@ public class GoJsActivity extends FragmentActivity {
                 String coords = wt.substring(i, i+2);
                 wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"TW\",\""+coords+"\")");
             }
+            
             wv.loadUrl("javascript:eidogo.autoPlayers[0].refresh()");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -161,6 +162,22 @@ public class GoJsActivity extends FragmentActivity {
         return sc;
     }
 
+    void cleanTerritory() {
+		wv.loadUrl("javascript:eidogo.autoPlayers[0].detsoncleanT()");
+        wv.loadUrl("javascript:eidogo.autoPlayers[0].refresh()");
+//    	final Game g = Game.gameShown;
+//    	for (int i=0;i<g.getBoardSize();i++) {
+//        	for (int j=0;j<g.getBoardSize();j++) {
+//        		char x = (char)('a'+i);
+//        		char y = (char)('a'+j);
+//        		String coords = Character.toString(x)+Character.toString(y);
+//System.out.println("clean terr "+coords);
+//        		wv.loadUrl("javascript:if (eidogo.autoPlayers[0].cursor.node.hasPropertyValue(\"TW\", \""+coords+"\")) {eidogo.autoPlayers[0].cursor.node.deletePropertyValue(\"TW\", \""+coords+"\");}");
+//                wv.loadUrl("javascript:if (eidogo.autoPlayers[0].cursor.node.hasPropertyValue(\"TB\", \""+coords+"\")) {eidogo.autoPlayers[0].cursor.node.deletePropertyValue(\"TB\", \""+coords+"\");}");
+//        	}
+//    	}
+    }
+    
     void copyEidogo(final String edir, final File odir) {
         AssetManager mgr = getResources().getAssets();
         try {
@@ -690,11 +707,10 @@ public class GoJsActivity extends FragmentActivity {
         g.acceptScore(server);
     }
     private void refuseScore() {
-        // reset to the original download SGF without the marked dead stones
-        Game.gameShown.removeDeadStonesFromSgf();
-//        changeState(guistate.markDeadStones);
-        // showGame will automatically change to markdeadstont state because it will detect two passes
-        showGame(Game.gameShown);
+    	// reset to the original download SGF without the marked dead stones
+    	Game.gameShown.removeDeadStonesFromSgf();
+    	cleanTerritory();
+    	changeState(guistate.markDeadStones);
     }
 
     static class PrefUtils {
