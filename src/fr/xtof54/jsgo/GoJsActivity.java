@@ -137,7 +137,17 @@ public class GoJsActivity extends FragmentActivity {
                 String coords = bt.substring(i, i+2);
                 wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"TB\",\""+coords+"\")");
             }
+            bt = o.getString("white_dead").trim();
+            for (int i=0;i<bt.length();i+=2) {
+                String coords = bt.substring(i, i+2);
+                wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"TB\",\""+coords+"\")");
+            }
             String wt = o.getString("white_territory").trim();
+            for (int i=0;i<wt.length();i+=2) {
+                String coords = wt.substring(i, i+2);
+                wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"TW\",\""+coords+"\")");
+            }
+            wt = o.getString("black_dead").trim();
             for (int i=0;i<wt.length();i+=2) {
                 String coords = wt.substring(i, i+2);
                 wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"TW\",\""+coords+"\")");
