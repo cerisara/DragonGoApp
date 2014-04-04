@@ -24,7 +24,7 @@ public class Game {
     int moveid;
     // contains the last dead stones used to compute the score
     // if the player accepts this score, then these same dead stones are sent again with command AGREE
-    private String deadst=null;
+    String deadst=null;
     
     static void createDebugGame() {
     	Game g = new Game(null, 1);
@@ -86,6 +86,7 @@ public class Game {
     		System.out.println("ERROR impossible to show game "+gid);
     		return;
     	}
+    	checkIfDeadStonesMarked();
     	try {
     		PrintWriter fout = new PrintWriter(new FileWriter(GoJsActivity.main.eidogodir+"/example.html"));
     		for (String s : exampleFileHtmlHeader) fout.println(s);
@@ -97,8 +98,46 @@ public class Game {
     	}
     	gameShown=this;
     }
+    public boolean hasDeadStonesMarked() {
+        return deadst!=null;
+    }
+    /**
+     * Warning: once a first player has marked stone and send his agreement to the server, the dead stones are stored in the server
+     * and the new game status is SCORE2: this should be the correct way to detect this stage.
+     * And we cannot any more send new dead stones toknow the score (?)
+     */
+    private void checkIfDeadStonesMarked() {
+        int debdeadstones=-1, enddeadstones=-1, deadidx=-1;
+        for (int i=0;i<sgf.size();i++) {
+            String s=sgf.get(i);
+            int j=s.indexOf("MA[");
+            if (j>=0) {
+                // there are dead stones marked !
+                debdeadstones=j; deadidx=i;
+                deadst="";
+                j+=3;
+                while (j<s.length()) {
+                    deadst+=s.substring(j,j+2);
+                    if (j+3>=s.length()||s.charAt(j+3)!='[') break;
+                    j+=4;
+                }
+                enddeadstones=j+4;
+                break;
+            }
+        }
+        if (debdeadstones>=0) {
+            String s = sgf.get(deadidx);
+            // we don't want to draw the X markers on the stones...
+            // it's ok, they'll be overriden by territory markers...
+//            s=s.substring(0, debdeadstones);
+//            sgf.set(deadidx, s);
+            // but we want to draw territories
+        }
+    }
+    public void removeDeadStonesFromSgf() {
+        // TODO
+    }
     
-    // TODO: call this method when it shall be !
     public void finishedWithThisGame() {
         games2play.remove(this);
         gameShown=null;
