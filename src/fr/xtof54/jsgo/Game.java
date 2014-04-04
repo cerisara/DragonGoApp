@@ -135,7 +135,28 @@ public class Game {
         }
     }
     public void removeDeadStonesFromSgf() {
-        // TODO
+    	deadst=null;
+        int debdeadstones=-1, enddeadstones=-1, deadidx=-1;
+        for (int i=0;i<sgf.size();i++) {
+            String s=sgf.get(i);
+            int j=s.indexOf("MA[");
+            if (j>=0) {
+                // there are dead stones marked !
+                debdeadstones=j; deadidx=i;
+                j+=3;
+                while (j<s.length()) {
+                    if (j+3>=s.length()||s.charAt(j+3)!='[') break;
+                    j+=4;
+                }
+                enddeadstones=j+4;
+                break;
+            }
+        }
+        if (debdeadstones>=0) {
+            String s = sgf.get(deadidx);
+            s=s.substring(0, debdeadstones);
+            sgf.set(deadidx, s);
+        }
     }
     
     public void finishedWithThisGame() {

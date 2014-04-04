@@ -242,31 +242,16 @@ public class GoJsActivity extends FragmentActivity {
             }
         }
     }
+    
 
     private class myWebViewClient extends WebViewClient {
         @Override
         public void onPageFinished(final WebView view, String url) {
-            System.out.println("onpage finished "+showCounting+" "+curstate);
-            if (showCounting) {
-                // I have to call loadURL from within a different thread, otherwise it does not send the message at all !
-                Thread tt=new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        view.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
-                    }
-                });
-                tt.start();
-                showCounting=false;
-                return;
-            }
             view.loadUrl("javascript:eidogo.autoPlayers[0].last()");
             if (curstate==guistate.markDeadStones)
                 view.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
+            final EventManager em = EventManager.getEventManager();
+            em.sendEvent(eventType.gobanReady);
         }
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -346,15 +331,43 @@ public class GoJsActivity extends FragmentActivity {
         }   
     }  
 
-    private boolean showCounting=false;
     void showGame(Game g) {
         g.showGame();
         // detect if in scoring phase with dead stones marked
         if (g.hasDeadStonesMarked()) {
             System.out.println("Check score phase detected !");
-            // send NO stones to server to get the final score
             final EventManager em = EventManager.getEventManager();
+            // this listener is trigerred when the goban has finished displayed
+            final EventManager.EventListener drawTerritory = new EventManager.EventListener() {
+                @Override
+                public void reactToEvent() {
+                    em.unregisterListener(eventType.gobanReady, this);
+                    try {
+						Thread.sleep(4000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+                    JSONObject o = server.o;
+                    if (o==null) {
+                        // error: do nothing
+                        return;
+                    }
+                    String err = o.getString("error");
+                    if (err!=null&&err.length()>0) {
+                        // error: do nothing
+                        return;
+                    }
+                    // show territories
+                    String sc = showCounting(o);
+                    showMessage("dead stones sent; score="+sc);
+                    writeInLabel("score: "+sc);
+                    changeState(guistate.checkScore);
+                }
+                @Override
+                public String getName() {return "drawTerritory";}
+            };
             em.registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
+            	// this listener is triggered when the server sends back the score and dead stones
                 @Override
                 public void reactToEvent() {
                     em.unregisterListener(eventType.moveSentEnd, this);
@@ -362,12 +375,15 @@ public class GoJsActivity extends FragmentActivity {
                     // show the board game
                     String f=eidogodir+"/example.html";
                     System.out.println("debugloadurl file://"+f);
-                    showCounting=true;
+                    em.registerListener(eventType.gobanReady, drawTerritory);
+                    // we then ask the goban to show the game in lark deadstone mode, but the second listener
+                    // will be immediately trigerred once the goban is shown
                     wv.loadUrl("file://"+f);
                 }
                 @Override
                 public String getName() {return "showgamedeadstones";}
             });
+            // send NO stones to server to get the final score
             g.sendDeadstonesToServer("", server);
         } else {
             // detect if in scoring phase
@@ -674,9 +690,11 @@ public class GoJsActivity extends FragmentActivity {
         g.acceptScore(server);
     }
     private void refuseScore() {
-        // reset to the original download SGF
+        // reset to the original download SGF without the marked dead stones
+        Game.gameShown.removeDeadStonesFromSgf();
+//        changeState(guistate.markDeadStones);
+        // showGame will automatically change to markdeadstont state because it will detect two passes
         showGame(Game.gameShown);
-        changeState(guistate.markDeadStones);
     }
 
     static class PrefUtils {
