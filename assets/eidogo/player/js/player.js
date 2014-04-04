@@ -27,6 +27,8 @@ var t = eidogo.i18n,
 // Keep track of all the player instances we've created
 eidogo.players = eidogo.players || {};
 
+eidogo.modifBoard = 1;
+
 // Allow function calls to particular Player instances (for board rendering etc)
 eidogo.delegate = function(pid, fn /*, args*/) {
     var player = eidogo.players[pid];
@@ -224,7 +226,13 @@ eidogo.Player.prototype = {
             return this.hooks[hook].bind(this)(params);
         }
     },
-
+ 
+    detallowClicking: function() {
+        eidogo.modifBoard=1;
+    },
+    detforbidClicking: function() {
+        eidogo.modifBoard=0;
+    },
     detmarkx: function() {
         this.mode="x";
     },
@@ -1115,6 +1123,8 @@ eidogo.Player.prototype = {
     **/
     handleBoardMouseUp: function(x, y, e) {
         if (this.domLoading) return;
+ 
+        if (eidogo.modifBoard == 0) return;
         
         this.mouseDown = false;
     

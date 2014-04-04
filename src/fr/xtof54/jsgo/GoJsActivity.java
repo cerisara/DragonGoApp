@@ -98,17 +98,29 @@ public class GoJsActivity extends FragmentActivity {
 	    	wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkp()");
 		System.out.println("inchangestate "+curstate+" .. "+newstate);
 	    switch (newstate) {
-	    case nogame: setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
-	    case play: setButtons("Send","Zoom+","Zoom-","Reset"); break;
+	    case nogame:
+	        // we allow clicking just in case the user wants to play locally, disconnected
+            writeInLabel("click Getgame to download a game from DGS");
+            wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
+	        setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
+	    case play:
+            writeInLabel("click on the board to play");
+            wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
+	        setButtons("Send","Zoom+","Zoom-","Reset"); break;
 	    case markDeadStones:
-            showMessage("Scoring phase: put one X marker on each dead group and click SEND to check score (you can still change after)");
+            writeInLabel("click on the board to mark dead stones");
+            wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
+            showMessage("Scoring phase: put one X marker on each dead group and click SCORE to check score (you can still change after)");
 	    	// just in case the board is already rendered...
         	// normally, detmarkx() is called right after the board is displayed,
         	// but here, the board is displayed long ago, so we have to call it manually
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
 	    	setButtons("Score","Zoom+","Zoom-","Play"); break;
-	    case checkScore: setButtons("Accept","Zoom+","Zoom-","Refuse"); break;
+	    case checkScore: 
+            wv.loadUrl("javascript:eidogo.autoPlayers[0].detforbidClicking()");
+	        setButtons("Accept","Zoom+","Zoom-","Refuse"); break;
 	    case message:
+            wv.loadUrl("javascript:eidogo.autoPlayers[0].detforbidClicking()");
 	    	lastGameState=curstate;
 	    	setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
 	    default:
@@ -169,10 +181,20 @@ public class GoJsActivity extends FragmentActivity {
 		System.out.println("endof copy");
 	}
 
+	public void writeInLabel(final String s) {
+	    runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final TextView label = (TextView)findViewById(R.id.textView1);
+                label.setText(s);
+                label.invalidate();
+            }
+        });
+	}
+	
 	void initFinished() {
 		System.out.println("init finished");
-		final TextView wv = (TextView)findViewById(R.id.textView1);
-		wv.setText("init done. You can play !");
+		writeInLabel("init done. You can play !");
 		final Button button1 = (Button)findViewById(R.id.but1);
 		button1.setClickable(true);
 		button1.setEnabled(true);
@@ -185,7 +207,6 @@ public class GoJsActivity extends FragmentActivity {
 		button1.invalidate();
 		button2.invalidate();
 		button3.invalidate();
-		wv.invalidate();
 	}
 	
 	private String getMarkedStones(String sgf) {
@@ -288,6 +309,7 @@ public class GoJsActivity extends FragmentActivity {
 		                    // show territories
 		                    String sc = showCounting(o);
 		    				showMessage("dead stones sent; score="+sc);
+		    				writeInLabel("score: "+sc);
 		    				changeState(guistate.checkScore);
 		                }
 		            };
@@ -508,6 +530,7 @@ public class GoJsActivity extends FragmentActivity {
                     	changeState(guistate.play);
                         break;
                     case checkScore: // refuse score and continues to mark stones
+                        refuseScore();
                         break;
 					case message: // go back to last game mode
 						changeState(lastGameState);
@@ -559,38 +582,12 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 
-	private void downloadSgf(HttpClient httpclient, String url) {
-		try {
-			HttpGet httpget = new HttpGet(url);
-			HttpResponse response = httpclient.execute(httpget);
-			System.out.println(response.getStatusLine());
-			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				InputStream instream = entity.getContent();
-				try {
-					BufferedInputStream bis = new BufferedInputStream(instream);
-					String filePath = eidogodir+"/example.html";
-					BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(filePath)));
-					int inByte;
-					while ((inByte = bis.read()) != -1 ) {
-						bos.write(inByte);
-					}
-					bis.close();
-					bos.close();
-				} catch (IOException ex) {
-					throw ex;
-				} catch (RuntimeException ex) {
-					httpget.abort();
-					throw ex;
-				} finally {
-					instream.close();
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	private void refuseScore() {
+	    // reset to the original download SGF
+	    showGame(Game.gameShown);
+	    changeState(guistate.markDeadStones);
 	}
-	
+
 	static class PrefUtils {
 	    public static final String PREFS_LOGIN_USERNAME_KEY = "__USERNAME__" ;
 	    public static final String PREFS_LOGIN_PASSWORD_KEY = "__PASSWORD__" ;
