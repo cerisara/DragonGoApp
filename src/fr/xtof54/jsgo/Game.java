@@ -22,6 +22,9 @@ public class Game {
     private JSONArray gameinfo;
     List<String> sgf = null;
     int moveid;
+    // contains the last dead stones used to compute the score
+    // if the player accepts this score, then these same dead stones are sent again with command AGREE
+    private String deadst=null;
     
     static void createDebugGame() {
     	Game g = new Game(null, 1);
@@ -247,7 +250,14 @@ public class Game {
 			"</html>",
 	};
 
+	public void acceptScore(final ServerConnection server) {
+        System.out.println("deadstones "+deadst);
+        String cmd = "quick_do.php?obj=game&cmd=score&gid="+getGameID()+"&toggle=uniq&move="+deadst+"&move_id="+moveid;
+        server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
+	}
+	
 	public void sendDeadstonesToServer(String deadstones, final ServerConnection server) {
+	    deadst = ""+deadstones;
 		System.out.println("deadstones "+deadstones);
         String cmd = "quick_do.php?obj=game&cmd=status_score&gid="+getGameID()+"&toggle=uniq&move="+deadstones;
         server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);

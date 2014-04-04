@@ -17,33 +17,80 @@
         android:layout_height="wrap_content"
         android:text="resign game" />
 
-    <Button
-        android:id="@+id/loadSgf"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="debug don&apos;t press" />
+        android:gravity="center_horizontal" >
 
-    <Button
-        android:id="@+id/devServer"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="connect to devel server" />
-    
+        <RadioGroup
+            android:id="@+id/servers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkedButton="@+id/dgs" >
+
+            <RadioButton
+                android:id="@+id/dgs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:text="DGS"
+                android:textColor="#ffffff" />
+
+            <RadioButton
+                android:id="@+id/devdgs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/dgs"
+                android:text="DevDGS"
+                android:textColor="#ffffff" />
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/logins"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/servers"
+            android:checkedButton="@+id/log1" >
+
+            <RadioButton
+                android:id="@+id/log1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:text="login"
+                android:textColor="#ffffff" />
+
+            <RadioButton
+                android:id="@+id/log2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/log1"
+                android:text="devLogin"
+                android:textColor="#ffffff" />
+        </RadioGroup>
+    </RelativeLayout>
+
     <Button
         android:id="@+id/cycleStates"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="cycle thru states" />
-    
+
     <Button
         android:id="@+id/copyEidogo"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="(re)copy eidogo" />
-    
+
+    <Button
+        android:id="@+id/loadSgf"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="debug don&apos;t press" />
+
 </TableLayout>

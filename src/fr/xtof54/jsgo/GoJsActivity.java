@@ -36,6 +36,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
@@ -54,8 +55,8 @@ import android.support.v4.app.FragmentActivity;
  */
 public class GoJsActivity extends FragmentActivity {
 	ServerConnection server=null;
+	int chosenServer=0, chosenLogin=0;
 	
-	static int debugdevel=0;
 //    String server;
     enum guistate {nogame, play, markDeadStones, checkScore, message};
     guistate curstate = guistate.nogame;
@@ -242,43 +243,6 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 	
-//	private boolean sendCmd2server(String cmd, String msg) {
-//		HttpGet httpget = new HttpGet(server+cmd);
-//		try {
-//			HttpResponse response = httpclient.execute(httpget);
-//			System.out.println("answer to send move:");
-//			Header[] heds = response.getAllHeaders();
-//			for (Header s : heds)
-//				System.out.println("[HEADER] "+s);
-//			HttpEntity entity = response.getEntity();
-//			String jsonansw=null;
-//			if (entity != null) {
-//				InputStream instream = entity.getContent();
-//				BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
-//				for (;;) {
-//					String s = fin.readLine();
-//					if (s==null) break;
-//					System.out.println("LOGINlog "+s);
-//					if (s.contains("#Error")) showMessage("Error login; check credentials");
-//					if (s.length()>0&&s.charAt(0)=='{') jsonansw = s;
-//				}
-//				fin.close();
-//			}
-//			if (curstate==guistate.markDeadStones) {
-//			    String sc = showCounting(jsonansw);
-//				showMessage("dead stones sent; score="+sc);
-//				changeState(guistate.checkScore);
-//			} else {
-//				showMessage("sent to server: "+msg);
-//			}
-//			return true;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			showMessage(netErrMsg);
-//			return false;
-//		}
-//	}
-	
 	private class myWebViewClient extends WebViewClient {
 		@Override
 		public void onPageFinished(WebView view, String url) {
@@ -461,7 +425,7 @@ public class GoJsActivity extends FragmentActivity {
 	                    wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
 	                    break;
 	                case checkScore: // accept the current score evaluation
-//	                    acceptScore();
+	                    acceptScore();
 	                    break;
 	                case message: // get messages
 	                	initServer();
@@ -592,6 +556,37 @@ public class GoJsActivity extends FragmentActivity {
 		}
 	}
 
+	private void acceptScore() {
+	    final Game g = Game.gameShown;
+        final EventManager em = EventManager.getEventManager();
+        EventManager.EventListener f = new EventManager.EventListener() {
+            @Override
+            public String getName() {return "acceptScore";}
+            @Override
+            public synchronized void reactToEvent() {
+                em.unregisterListener(eventType.moveSentEnd, this);
+                JSONObject o = server.o;
+                if (o==null) {
+                    // error: don't switch game
+                    return;
+                }
+                String err = o.getString("error");
+                if (err!=null&&err.length()>0) {
+                    // error: don't switch game
+                    return;
+                }
+                // switch to next game
+                g.finishedWithThisGame();
+                if (Game.getGames().size()==0) {
+                    showMessage("No more games locally");
+                    changeState(guistate.nogame);
+                } else
+                    downloadAndShowGame();
+            }
+        };
+        em.registerListener(eventType.moveSentEnd, f);
+        g.acceptScore(server);
+	}
 	private void refuseScore() {
 	    // reset to the original download SGF
 	    showGame(Game.gameShown);
@@ -669,23 +664,22 @@ public class GoJsActivity extends FragmentActivity {
 	
 	private void initServer() {
 		if (server!=null) return;
-	    String tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME_KEY,null);
-	    String tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD_KEY,null);
-	    int numserver=0;
-	    if (tu==null||tp==null) {
+		String loginkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
+		String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
+		if (chosenLogin==1) {
+	        loginkey = PrefUtils.PREFS_LOGIN_USERNAME2_KEY;
+	        pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD2_KEY;
+		}
+	    String u = PrefUtils.getFromPrefs(this, loginkey ,null);
+	    String p = PrefUtils.getFromPrefs(this, pwdkey ,null);
+	    if (u==null||p==null) {
 	        showMessage("Please enter your credentials first via menu Settings");
 	        return;
 	    }
-	    if (debugdevel==1) {
-			tu = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_USERNAME2_KEY,null);
-			tp = PrefUtils.getFromPrefs(this, PrefUtils.PREFS_LOGIN_PASSWORD2_KEY,null);
-			numserver=1;
-		}
-		final String u = tu, p=tp;
 	    
 		System.out.println("credentials passed to server "+u+" "+p);
 		if (server==null) {
-			server = new ServerConnection(numserver, u, p);
+			server = new ServerConnection(chosenServer, u, p);
 			DetLogger l = new DetLogger() {
 				@Override
 				public void showMsg(String s) {
@@ -862,8 +856,16 @@ System.out.println("in downloadList listener "+ngames);
 						// sign in the user ...
 						TextView username = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.username);
 						TextView pwd = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.password);
-                        PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_USERNAME_KEY, username.getText().toString());
-                        PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_PASSWORD_KEY, (String)pwd.getText().toString());
+						String userkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
+						String pwdkey  = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
+						if (chosenLogin==1) {
+	                        System.out.println("saving creds 1");
+	                        userkey = PrefUtils.PREFS_LOGIN_USERNAME2_KEY;
+	                        pwdkey  = PrefUtils.PREFS_LOGIN_PASSWORD2_KEY;
+						} else
+		                      System.out.println("saving creds 0");
+                        PrefUtils.saveToPrefs(c, userkey, username.getText().toString());
+                        PrefUtils.saveToPrefs(c, pwdkey, (String)pwd.getText().toString());
                         showMessage("Credentials saved");
 					}
 				})
@@ -948,7 +950,6 @@ System.out.println("in downloadList listener "+ngames);
 	
 	private void showMoreButtons() {
 		System.out.println("showing more buttons");
-		final GoJsActivity c = this;
 		class MoreButtonsDialogFragment extends DialogFragment {
 			private final MoreButtonsDialogFragment dialog = this;
 			@Override
@@ -972,20 +973,50 @@ System.out.println("in downloadList listener "+ngames);
                         dialog.dismiss();
                     }
                 });
-                Button bserver2 = (Button)v.findViewById(R.id.devServer);
+                
+                RadioButton bserver1 = (RadioButton)v.findViewById(R.id.dgs);
+                bserver1.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        chosenServer=0;
+                        if (server!=null) server.closeConnection();
+                        server=null;
+                        dialog.dismiss();
+                    }
+                });
+                RadioButton bserver2 = (RadioButton)v.findViewById(R.id.devdgs);
+                if (chosenServer==1) bserver2.setChecked(true);
                 bserver2.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View vv) {
-                    	debugdevel=1-debugdevel;
-                    	showMessage("debug devel mode ON");
-                        System.out.println("next connections to devel server");
-//                        server = getString(R.string.server2);
-                	    final String u = PrefUtils.getFromPrefs(c, PrefUtils.PREFS_LOGIN_USERNAME2_KEY,null);
-                	    System.out.println("debugcred2 "+u);
+                        chosenServer=1;
+                        if (server!=null) server.closeConnection();
+                        server=null;
                         dialog.dismiss();
-                	    if (u==null) ask4credentials2();
                     }
                 });
+                RadioButton blogin1 = (RadioButton)v.findViewById(R.id.log1);
+                blogin1.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        chosenLogin=0;
+                        if (server!=null) server.closeConnection();
+                        server=null;
+                        dialog.dismiss();
+                    }
+                });
+                RadioButton blogin2 = (RadioButton)v.findViewById(R.id.log2);
+                if (chosenLogin==1) blogin2.setChecked(true);
+                blogin2.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        chosenLogin=1;
+                        if (server!=null) server.closeConnection();
+                        server=null;
+                        dialog.dismiss();
+                    }
+                });
+                
 				Button beidogo = (Button)v.findViewById(R.id.copyEidogo);
 				beidogo.setOnClickListener(new View.OnClickListener() {
 					@Override
