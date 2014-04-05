@@ -162,20 +162,21 @@ public class GoJsActivity extends FragmentActivity {
         return sc;
     }
 
+    /**
+     * we remove all territories and X in the goban but not in the sgf,
+     * because we'll need them to compute the "toggled dead stones" to estimate the score
+     * we then add back the X from the server onto the goban, so that the user knows which stones were
+     * marked dead and he can modify them. It should also make the toggle computing easier
+     */
     void cleanTerritory() {
 		wv.loadUrl("javascript:eidogo.autoPlayers[0].detsoncleanT()");
+        Game g = Game.gameShown;
+        String serverMarkedStones = g.deadstInSgf;
+        for (int i=0;i<serverMarkedStones.length();i+=2) {
+        	String coord = serverMarkedStones.substring(i,i+2);
+        	wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"MA\", \""+coord+"\")");
+        }
         wv.loadUrl("javascript:eidogo.autoPlayers[0].refresh()");
-//    	final Game g = Game.gameShown;
-//    	for (int i=0;i<g.getBoardSize();i++) {
-//        	for (int j=0;j<g.getBoardSize();j++) {
-//        		char x = (char)('a'+i);
-//        		char y = (char)('a'+j);
-//        		String coords = Character.toString(x)+Character.toString(y);
-//System.out.println("clean terr "+coords);
-//        		wv.loadUrl("javascript:if (eidogo.autoPlayers[0].cursor.node.hasPropertyValue(\"TW\", \""+coords+"\")) {eidogo.autoPlayers[0].cursor.node.deletePropertyValue(\"TW\", \""+coords+"\");}");
-//                wv.loadUrl("javascript:if (eidogo.autoPlayers[0].cursor.node.hasPropertyValue(\"TB\", \""+coords+"\")) {eidogo.autoPlayers[0].cursor.node.deletePropertyValue(\"TB\", \""+coords+"\");}");
-//        	}
-//    	}
     }
     
     void copyEidogo(final String edir, final File odir) {
@@ -308,7 +309,7 @@ public class GoJsActivity extends FragmentActivity {
                         }
                     };
                     em.registerListener(eventType.moveSentEnd, f);
-                    g.sendDeadstonesToServer(deadstones, server);
+                    g.sendDeadstonesToServer(deadstones, server, true);
                 } else {
                     final EventManager em = EventManager.getEventManager();
                     EventManager.EventListener f = new EventManager.EventListener() {
@@ -350,8 +351,8 @@ public class GoJsActivity extends FragmentActivity {
 
     void showGame(Game g) {
         g.showGame();
-        // detect if in scoring phase with dead stones marked
-        if (g.hasDeadStonesMarked()) {
+        // detect if the other player has already agreed on dead stones
+        if (g.getGameStatus().equals("SCORE2")) {
             System.out.println("Check score phase detected !");
             final EventManager em = EventManager.getEventManager();
             // this listener is trigerred when the goban has finished displayed
@@ -401,7 +402,7 @@ public class GoJsActivity extends FragmentActivity {
                 public String getName() {return "showgamedeadstones";}
             });
             // send NO stones to server to get the final score
-            g.sendDeadstonesToServer("", server);
+            g.sendDeadstonesToServer("", server, false);
         } else {
             // detect if in scoring phase
             // TODO: replace this by checking the game STATUS !
@@ -707,8 +708,6 @@ public class GoJsActivity extends FragmentActivity {
         g.acceptScore(server);
     }
     private void refuseScore() {
-    	// reset to the original download SGF without the marked dead stones
-    	Game.gameShown.removeDeadStonesFromSgf();
     	cleanTerritory();
     	changeState(guistate.markDeadStones);
     }

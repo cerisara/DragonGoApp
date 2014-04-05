@@ -1131,6 +1131,9 @@ eidogo.Player.prototype = {
                  if (this.cursor.node.hasPropertyValue("TB",coo)) {
                       this.cursor.node.deletePropertyValue("TB",coo);
                  }
+                 if (this.cursor.node.hasPropertyValue("MA",coo)) {
+                      this.cursor.node.deletePropertyValue("MA",coo);
+                 }
              }
         }
     },
