@@ -492,7 +492,7 @@ public class GoJsActivity extends FragmentActivity {
                         acceptScore();
                         break;
                     case message: // get messages
-                        initServer();
+                        if (!initServer()) return;
                         Message.downloadMessages(server,main);
                         break;
                     }
@@ -781,8 +781,9 @@ public class GoJsActivity extends FragmentActivity {
     }
     private Boolean waiterComputingFinished=true;
 
-    private void initServer() {
-        if (server!=null) return;
+    private boolean initServer() {
+    	System.out.println("call initserver "+server);
+        if (server!=null) return true;
         String loginkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
         String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
         if (chosenLogin==1) {
@@ -791,9 +792,10 @@ public class GoJsActivity extends FragmentActivity {
         }
         String u = PrefUtils.getFromPrefs(this, loginkey ,null);
         String p = PrefUtils.getFromPrefs(this, pwdkey ,null);
+        System.out.println("credsdebug "+u+" "+p+" "+chosenLogin);
         if (u==null||p==null) {
             showMessage("Please enter your credentials first via menu Settings");
-            return;
+            return false;
         }
 
         System.out.println("credentials passed to server "+u+" "+p);
@@ -807,10 +809,11 @@ public class GoJsActivity extends FragmentActivity {
             };
             server.setLogget(l);
         }
+        return true;
     }
 
     private void downloadListOfGames() {
-        initServer();
+        if (!initServer()) return;
         final EventManager em = EventManager.getEventManager();
         EventManager.EventListener l = new EventManager.EventListener() {
             @Override
