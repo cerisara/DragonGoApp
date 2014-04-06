@@ -109,7 +109,8 @@ public class Game {
 	 * And we cannot any more send new dead stones to know the score (?)
 	 */
 	private void checkIfDeadStonesMarked() {
-		for (int i=0;i<sgf.size();i++) {
+		// start from the end, because there may be several sets of dead stones marked
+		for (int i=sgf.size()-1;i>=0;i--) {
 			String s=sgf.get(i);
 			int j=s.indexOf("MA[");
 			if (j>=0) {
@@ -311,7 +312,7 @@ public class Game {
 	};
 
 	public void acceptScore(final ServerConnection server) {
-		System.out.println("deadstones "+deadstProposal);
+		System.out.println("acceptScore deadstones "+deadstProposal);
 		String cmd = "quick_do.php?obj=game&cmd=score&gid="+getGameID()+"&toggle=uniq&move="+deadstProposal+"&move_id="+moveid;
 		server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
 	}

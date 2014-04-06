@@ -172,6 +172,7 @@ public class GoJsActivity extends FragmentActivity {
 		wv.loadUrl("javascript:eidogo.autoPlayers[0].detsoncleanT()");
         Game g = Game.gameShown;
         String serverMarkedStones = g.deadstInSgf;
+        System.out.println("clean territory: serverMarkedStones: "+serverMarkedStones);
         for (int i=0;i<serverMarkedStones.length();i+=2) {
         	String coord = serverMarkedStones.substring(i,i+2);
         	wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"MA\", \""+coord+"\")");
@@ -239,7 +240,7 @@ public class GoJsActivity extends FragmentActivity {
     }
 
     private String getMarkedStones(String sgf) {
-        String res = null;
+        String res = "";
         int i=0;
         for (;;) {
             System.out.println("debug "+sgf.substring(i));
@@ -253,8 +254,7 @@ public class GoJsActivity extends FragmentActivity {
                     j=sgf.indexOf(']',i);
                     if (j<0) break;
                     String stone = sgf.substring(i+1,j);
-                    if (res==null) res=stone;
-                    else res+=stone;
+                    res+=stone;
                     i=j+1;
                 }
             }
@@ -279,7 +279,7 @@ public class GoJsActivity extends FragmentActivity {
                 int j=url.lastIndexOf('|')+1;
                 String lastMove = url.substring(j);
 
-                // this is trigerred when the user clicks the SEND button
+                // this is trigerred when the user clicks the SEND button or by the sgf downloader when detecting a SCORE2 phase
                 final Game g = Game.gameShown;
                 if (curstate==guistate.markDeadStones) {
                     String sgfdata = url.substring(i+14, j);
@@ -485,7 +485,7 @@ public class GoJsActivity extends FragmentActivity {
                         wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
                         break;
                     case markDeadStones: // send a request to the server to compute the score
-                        // ask eidogo to send sgf, which shall contain X
+                        // ask eidogo to give sgf, which shall contain X
                         wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
                         break;
                     case checkScore: // accept the current score evaluation
