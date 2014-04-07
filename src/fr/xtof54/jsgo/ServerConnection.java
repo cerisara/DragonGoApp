@@ -58,7 +58,7 @@ public class ServerConnection {
 			System.out.println(s);
 		}
 	};
-	public void setLogget(DetLogger l) {logger=l;}
+	public void setLogger(DetLogger l) {logger=l;}
 
 
 	final String[] serverNames = {
@@ -150,12 +150,6 @@ public class ServerConnection {
 		loginthread.start();
 	}
 	
-    public boolean isSentOk() {
-        if (o==null) return false;
-        String err = o.getString("error");
-        if (err!=null&&err.length()>0) return false;
-        return true;
-    }
 	public JSONObject o=null;
 	/**
 	 * send a command to the server and gets back a JSon object with the answer
@@ -188,6 +182,7 @@ public class ServerConnection {
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
+			    boolean hasError = false;
 				try {
 					System.out.println("debug send cmd "+server+cmd);
 					HttpGet httpget = new HttpGet(server+cmd);
@@ -210,13 +205,22 @@ public class ServerConnection {
 							}
 						}
 						fin.close();
+						String s = o.getString("error");
+						if (s!=null&&s.length()>0) {
+						    hasError=true;
+						    handleNetError(cmd,endEvent);
+						}
+					} else {
+                        hasError=true;
+					    handleNetError(cmd,endEvent);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					logger.showMsg(netErrMsg);
+                    hasError=true;
+					handleNetError(cmd,endEvent);
 				}
 				System.out.println("server runnable terminated");
-				if (endEvent!=null) em.sendEvent(endEvent);
+				if (!hasError&&endEvent!=null) em.sendEvent(endEvent);
 			}
 		};
 		Thread t = new Thread(r);
@@ -229,6 +233,10 @@ public class ServerConnection {
 		//    	}
 	}
 
+	private void handleNetError(String cmd, final eventType endEvent) {
+        logger.showMsg("Net error|"+cmd+"|"+endEvent);
+	}
+	
 	public List<String> sgf = null;
 	/**
 	 * because download sgf does not return a JSON object, we have to use a dedicated function to do it
@@ -303,6 +311,16 @@ public class ServerConnection {
 		}
 		String[] res = {u,p};
 		return res;
+	}
+	
+	public String getUrl() {
+	    return server;
+	}
+	public String getLogin() {
+	    return u;
+	}
+	public String getPwd() {
+	    return p;
 	}
 
 	public static void main(String args[]) throws Exception {

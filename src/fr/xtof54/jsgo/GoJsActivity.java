@@ -1,14 +1,11 @@
 package fr.xtof54.jsgo;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -349,68 +346,92 @@ public class GoJsActivity extends FragmentActivity {
         }   
     }  
 
-    void showGame(Game g) {
+    void showGame(final Game g) {
+        if (g.getGameStatus().startsWith("SCORE")) {
+            // TODO: I tried, but it's really difficult to handle correctly the scoring phase;
+            // so for now, I just call the browser to resolve this stage !
+//            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(server.getUrl()+"game.php?gid="+g.getGameID()));
+//            startActivity(browserIntent);
+            
+            EventManager.getEventManager().registerListener(eventType.gobanReady, new EventManager.EventListener() {
+                @Override
+                public void reactToEvent() {
+                    EventManager.getEventManager().unregisterListener(eventType.gobanReady, this);
+                    wv.loadUrl(server.getUrl()+"game.php?gid="+g.getGameID());
+                }
+                @Override
+                public String getName() {
+                    return "SCORE_phase";
+                }
+            });
+            changeState(guistate.nogame);
+            wv.loadUrl(server.getUrl()+"login.php?userid="+server.getLogin()+"&passwd="+server.getPwd());
+            
+//            skipGame();
+            return;
+        }
+        
         g.showGame();
         // detect if the other player has already agreed on dead stones
-        if (g.getGameStatus().equals("SCORE2")) {
-            System.out.println("Check score phase detected !");
-            final EventManager em = EventManager.getEventManager();
-            // this listener is trigerred when the goban has finished displayed
-            final EventManager.EventListener drawTerritory = new EventManager.EventListener() {
-                @Override
-                public void reactToEvent() {
-                    em.unregisterListener(eventType.gobanReady, this);
-                    try {
-						Thread.sleep(4000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-                    JSONObject o = server.o;
-                    if (o==null) {
-                        // error: do nothing
-                        return;
-                    }
-                    String err = o.getString("error");
-                    if (err!=null&&err.length()>0) {
-                        // error: do nothing
-                        return;
-                    }
-                    // show territories
-                    String sc = showCounting(o);
-                    showMessage("dead stones sent; score="+sc);
-                    writeInLabel("score: "+sc);
-                    changeState(guistate.checkScore);
-                }
-                @Override
-                public String getName() {return "drawTerritory";}
-            };
-            em.registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
-            	// this listener is triggered when the server sends back the score and dead stones
-                @Override
-                public void reactToEvent() {
-                    em.unregisterListener(eventType.moveSentEnd, this);
-                    curstate=guistate.markDeadStones;
-                    // show the board game
-                    String f=eidogodir+"/example.html";
-                    System.out.println("debugloadurl file://"+f);
-                    em.registerListener(eventType.gobanReady, drawTerritory);
-                    // we then ask the goban to show the game in lark deadstone mode, but the second listener
-                    // will be immediately trigerred once the goban is shown
-                    wv.loadUrl("file://"+f);
-                }
-                @Override
-                public String getName() {return "showgamedeadstones";}
-            });
-            // send NO stones to server to get the final score
-            g.sendDeadstonesToServer("", server, false);
-        } else {
-            // detect if in scoring phase
-            // TODO: replace this by checking the game STATUS !
-            if (g.isTwoPasses()) {
-                System.out.println("scoring phase detected !");
-                changeState(guistate.markDeadStones);
-            }
-        }
+//        if (g.getGameStatus().equals("SCORE2")) {
+//            System.out.println("Check score phase detected !");
+//            final EventManager em = EventManager.getEventManager();
+//            // this listener is trigerred when the goban has finished displayed
+//            final EventManager.EventListener drawTerritory = new EventManager.EventListener() {
+//                @Override
+//                public void reactToEvent() {
+//                    em.unregisterListener(eventType.gobanReady, this);
+//                    try {
+//						Thread.sleep(4000);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//                    JSONObject o = server.o;
+//                    if (o==null) {
+//                        // error: do nothing
+//                        return;
+//                    }
+//                    String err = o.getString("error");
+//                    if (err!=null&&err.length()>0) {
+//                        // error: do nothing
+//                        return;
+//                    }
+//                    // show territories
+//                    String sc = showCounting(o);
+//                    showMessage("dead stones sent; score="+sc);
+//                    writeInLabel("score: "+sc);
+//                    changeState(guistate.checkScore);
+//                }
+//                @Override
+//                public String getName() {return "drawTerritory";}
+//            };
+//            em.registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
+//            	// this listener is triggered when the server sends back the score and dead stones
+//                @Override
+//                public void reactToEvent() {
+//                    em.unregisterListener(eventType.moveSentEnd, this);
+//                    curstate=guistate.markDeadStones;
+//                    // show the board game
+//                    String f=eidogodir+"/example.html";
+//                    System.out.println("debugloadurl file://"+f);
+//                    em.registerListener(eventType.gobanReady, drawTerritory);
+//                    // we then ask the goban to show the game in lark deadstone mode, but the second listener
+//                    // will be immediately trigerred once the goban is shown
+//                    wv.loadUrl("file://"+f);
+//                }
+//                @Override
+//                public String getName() {return "showgamedeadstones";}
+//            });
+//            // send NO stones to server to get the final score
+//            g.sendDeadstonesToServer("", server, false);
+//        } else {
+//            // detect if in scoring phase
+//            // TODO: replace this by checking the game STATUS !
+//            if (g.isTwoPasses()) {
+//                System.out.println("scoring phase detected !");
+//                changeState(guistate.markDeadStones);
+//            }
+//        }
 
         // show the board game
         String f=eidogodir+"/example.html";
@@ -781,6 +802,42 @@ public class GoJsActivity extends FragmentActivity {
     }
     private Boolean waiterComputingFinished=true;
 
+    public class ErrDialogFragment extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            // Get the layout inflater
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+
+            // Inflate and set the layout for the dialog
+            // Pass null as the parent view because its going in the dialog layout
+            builder.setView(inflater.inflate(R.layout.error, null))
+            // Add action buttons
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    EventManager.getEventManager().sendEvent(eventTobesent);
+                    // TODO: maybe the action reacting to the eventTobesent will change the state after the following state...
+                    Thread.yield();
+                    switch (curstate) {
+                    default: changeState(guistate.nogame);
+                    }
+                    changeState(guistate.nogame);
+                    ErrDialogFragment.this.getDialog().cancel();
+                }
+            })
+            .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    server.sendCmdToServer(cmdSentBeforeNetErr, null, eventTobesent);
+                    ErrDialogFragment.this.getDialog().cancel();
+                }
+            });
+            return builder.create();
+        }
+    }
+    private ErrDialogFragment errdialog = null;
+    private String cmdSentBeforeNetErr = null;
+    private eventType eventTobesent = null;
+    
     private boolean initServer() {
     	System.out.println("call initserver "+server);
         if (server!=null) return true;
@@ -804,10 +861,17 @@ public class GoJsActivity extends FragmentActivity {
             DetLogger l = new DetLogger() {
                 @Override
                 public void showMsg(String s) {
-                    showMessage(s);
+                    if (s.startsWith("Net error|")) {
+                        int i=s.lastIndexOf('|');
+                        cmdSentBeforeNetErr = s.substring(10, i);
+                        eventTobesent = eventType.valueOf(s.substring(i+1));
+                        errdialog = new ErrDialogFragment();
+                        errdialog.show(getSupportFragmentManager(),"Net_error");
+                    } else 
+                        showMessage(s);
                 }
             };
-            server.setLogget(l);
+            server.setLogger(l);
         }
         return true;
     }
@@ -1096,8 +1160,8 @@ public class GoJsActivity extends FragmentActivity {
                     public void onClick(View vv) {
                         switch (curstate) {
                         case nogame: changeState(guistate.play); break;
-                        case play: changeState(guistate.markDeadStones); break;
-                        case markDeadStones: changeState(guistate.checkScore); break;
+                        case play: // changeState(guistate.markDeadStones); break;
+                        case markDeadStones: // changeState(guistate.checkScore); break;
                         case checkScore: changeState(guistate.nogame); break;
                         default:
                         }

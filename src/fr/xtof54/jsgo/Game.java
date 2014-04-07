@@ -157,6 +157,13 @@ public class Game {
 		gameShown=null;
 	}
 
+	public boolean isInScoring() {
+	    if (getGameStatus().startsWith("SCORE")) {
+	        return true;
+	    }
+	    return false;
+	}
+	
 	public boolean isTwoPasses() {
 		if (sgf==null) return false;
 		String lastb="12", lastw="32";
