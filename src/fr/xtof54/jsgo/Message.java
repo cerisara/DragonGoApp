@@ -1,5 +1,6 @@
 package fr.xtof54.jsgo;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -22,7 +23,7 @@ import fr.xtof54.jsgo.EventManager.eventType;
 
 public class Message {
 	private final static String cmdGetListOfMessages = "quick_do.php?obj=message&cmd=list&filter_folders=2";
-	
+
 	private static GoJsActivity c;
 	private static JSONArray headers, jsonmsgs;
 	private static int curmsg=0;
@@ -30,18 +31,54 @@ public class Message {
 
 	public int getMessageId() {return msgid;}
 
-	public static void send() {
-		String cmd = "quick_do.php?obj=message&cmd=send_msg&ouser=xtof54&msg=salut&subj=test";
-		// TODO
+	public static void send(final ServerConnection server, final GoJsActivity main) {
+		c=main;
+		class EditMsgDialogFragment extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because it's going in the dialog layout
+				final View msgview = inflater.inflate(R.layout.editmsg, null);
+				builder.setView(msgview);
+
+				builder.setPositiveButton("send", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						EditMsgDialogFragment.this.getDialog().dismiss();
+						TextView t = (TextView)msgview.findViewById(R.id.editMsgTo);
+						String touser = t.getText().toString();
+						t = (TextView)msgview.findViewById(R.id.editMsgSubj);
+						String subj = (String)t.getText().toString();
+						t = (TextView)msgview.findViewById(R.id.editMsgTxt);
+						String txt = (String)t.getText().toString();
+						String cmd = "quick_do.php?obj=message&cmd=send_msg&ouser="+
+						URLEncoder.encode(touser)+"&msg="+
+						URLEncoder.encode(txt)+"&subj="+
+						URLEncoder.encode(subj);
+						server.sendCmdToServer(cmd, eventType.msgSendStart, eventType.msgSendEnd);
+					}
+				})
+				.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						EditMsgDialogFragment.this.getDialog().dismiss();
+					}
+				});
+				return builder.create();
+			}
+		}
+		final EditMsgDialogFragment msgdialog = new EditMsgDialogFragment();
+		msgdialog.show(c.getSupportFragmentManager(),"message");
 	}
 
 	public static void downloadMessages(final ServerConnection server, GoJsActivity main) {
-    	c=main;
+		c=main;
 		messages.clear();
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
-            @Override
-            public String getName() {return "downloadMessages";}
+			@Override
+			public String getName() {return "downloadMessages";}
 			@Override
 			public synchronized void reactToEvent() {
 				JSONObject o = server.o;

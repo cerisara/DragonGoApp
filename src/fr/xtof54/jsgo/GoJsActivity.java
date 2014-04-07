@@ -567,7 +567,10 @@ public class GoJsActivity extends FragmentActivity {
                         wv.zoomOut();
                         wv.invalidate();
                     case message: // send message
-                        Message.send();
+                    	if (!initServer()) {
+                    		showMessage("Connection problem");
+                    	} else
+                    		Message.send(server,main);
                         break;
                     }
                 }
@@ -802,7 +805,15 @@ public class GoJsActivity extends FragmentActivity {
     }
     private Boolean waiterComputingFinished=true;
 
-    public class ErrDialogFragment extends DialogFragment {
+    public static class ErrDialogFragment extends DialogFragment {
+    	String cmdSentBeforeNetErr;
+    	eventType eventTobesent;
+    	GoJsActivity main;
+    	public void setArguments(String s, eventType e, GoJsActivity m) {
+    		cmdSentBeforeNetErr = s;
+    		eventTobesent = e;
+    		main=m;
+    	}
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -818,16 +829,16 @@ public class GoJsActivity extends FragmentActivity {
                     EventManager.getEventManager().sendEvent(eventTobesent);
                     // TODO: maybe the action reacting to the eventTobesent will change the state after the following state...
                     Thread.yield();
-                    switch (curstate) {
-                    default: changeState(guistate.nogame);
+                    switch (main.curstate) {
+                    default: main.changeState(guistate.nogame);
                     }
-                    changeState(guistate.nogame);
+                    main.changeState(guistate.nogame);
                     ErrDialogFragment.this.getDialog().cancel();
                 }
             })
             .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    server.sendCmdToServer(cmdSentBeforeNetErr, null, eventTobesent);
+                    main.server.sendCmdToServer(cmdSentBeforeNetErr, null, eventTobesent);
                     ErrDialogFragment.this.getDialog().cancel();
                 }
             });
@@ -835,8 +846,6 @@ public class GoJsActivity extends FragmentActivity {
         }
     }
     private ErrDialogFragment errdialog = null;
-    private String cmdSentBeforeNetErr = null;
-    private eventType eventTobesent = null;
     
     private boolean initServer() {
     	System.out.println("call initserver "+server);
@@ -855,6 +864,7 @@ public class GoJsActivity extends FragmentActivity {
             return false;
         }
 
+        final GoJsActivity m = this;
         System.out.println("credentials passed to server "+u+" "+p);
         if (server==null) {
             server = new ServerConnection(chosenServer, u, p);
@@ -863,9 +873,10 @@ public class GoJsActivity extends FragmentActivity {
                 public void showMsg(String s) {
                     if (s.startsWith("Net error|")) {
                         int i=s.lastIndexOf('|');
-                        cmdSentBeforeNetErr = s.substring(10, i);
-                        eventTobesent = eventType.valueOf(s.substring(i+1));
+                        String cmdSentBeforeNetErr = s.substring(10, i);
+                        eventType eventTobesent = eventType.valueOf(s.substring(i+1));
                         errdialog = new ErrDialogFragment();
+                        errdialog.setArguments(cmdSentBeforeNetErr, eventTobesent, m);
                         errdialog.show(getSupportFragmentManager(),"Net_error");
                     } else 
                         showMessage(s);
