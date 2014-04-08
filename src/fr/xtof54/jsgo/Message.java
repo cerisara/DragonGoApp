@@ -22,7 +22,7 @@ import com.example.testbrowser.R;
 import fr.xtof54.jsgo.EventManager.eventType;
 
 public class Message {
-	private final static String cmdGetListOfMessages = "quick_do.php?obj=message&cmd=list&filter_folders=2";
+	private final static String cmdGetListOfMessages = "quick_do.php?obj=message&cmd=list&filter_folders=2&with=user_id";
 
 	private static GoJsActivity c;
 	private static JSONArray headers, jsonmsgs;
@@ -117,7 +117,7 @@ public class Message {
 			String h = headers.getString(i);
 			System.out.println("jsonheader "+i+" "+h);
 			if (h.equals("id")) msgididx=i;
-			else if (h.equals("user_from.id")) fromididx=i;
+			else if (h.equals("user_from.handle")) fromididx=i;
 			else if (h.equals("type")) typeidx=i;
 			else if (h.equals("text")) txtidx=i;
 			else if (h.equals("subject")) subjectidx=i;
@@ -126,15 +126,15 @@ public class Message {
 		msgs.add(m);
 		m.msgid = jsonmsg.getInt(msgididx);
 		m.type = jsonmsg.getString(typeidx);
-		m.fromid = jsonmsg.getInt(fromididx);
+		m.from = jsonmsg.getString(fromididx);
 		m.subject = jsonmsg.getString(subjectidx);
 		m.text = jsonmsg.getString(txtidx);
 		m.show();
 	}
 
 	// ==================================================================
-	private int msgid, fromid;
-	private String type, subject, text;
+	private int msgid;
+	private String type, subject, text, from;
 
 	private Message() {}
 	private void show() {
@@ -152,7 +152,7 @@ public class Message {
 				TextView t = (TextView)msgview.findViewById(R.id.msgLabel);
 				t.setMovementMethod(new ScrollingMovementMethod());
 				String s = "You have the following message:\n";
-				s+= "From: "+fromid+"\n";
+				s+= "From: "+from+"\n";
 				s+= "subject: "+subject+"\n";
 				s+= "text: "+text+"\n";
 				t.setText(s);
