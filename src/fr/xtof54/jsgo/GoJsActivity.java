@@ -60,7 +60,6 @@ public class GoJsActivity extends FragmentActivity {
 
     File eidogodir;
     final boolean forcecopy=false;
-    HttpClient httpclient=null;
     WebView wv;
     ArrayList<Game> games2play = new ArrayList<Game>();
     int curgidx2play=0,moveid=0;
@@ -1067,19 +1066,24 @@ public class GoJsActivity extends FragmentActivity {
         downloadAndShowGame();
     }
     private void resignGame() {
-        String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+moveid;
-        HttpGet httpget = new HttpGet(server+cmd);
-        try {
-            HttpResponse response = httpclient.execute(httpget);
-            // TODO: check if move has correctly been sent
-            showMessage("resign sent !");
-            moveid=0;
-            games2play.remove(curgidx2play);
-            downloadAndShowGame();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showMessage(netErrMsg);
-        }
+        // TODO: propose a message to write !
+        String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+Game.gameShown.moveid;
+        EventManager.getEventManager().registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
+            @Override
+            public void reactToEvent() {
+                EventManager.getEventManager().unregisterListener(eventType.moveSentEnd,this);
+                // switch to next game
+                Game.gameShown.finishedWithThisGame();
+                if (Game.getGames().size()==0) {
+                    showMessage("No more games locally");
+                    changeState(guistate.nogame);
+                } else
+                    downloadAndShowGame();
+            }
+            @Override
+            public String getName() {return "resign";}
+        });
+        server.sendCmdToServer(cmd, eventType.moveSentStart, eventType.moveSentEnd);
     }
 
     private void loadSgf() {
