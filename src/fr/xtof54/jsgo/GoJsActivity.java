@@ -566,6 +566,7 @@ public class GoJsActivity extends FragmentActivity {
                     case checkScore:
                         wv.zoomOut();
                         wv.invalidate();
+                        break;
                     case message: // send message
                     	if (!initServer()) {
                     		showMessage("Connection problem");
