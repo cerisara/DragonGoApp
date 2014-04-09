@@ -1118,35 +1118,27 @@ public class GoJsActivity extends FragmentActivity {
 				})
 				.setPositiveButton("Add message", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						RadioButton r = (RadioButton)v.findViewById(R.id.noMsg);
+						RadioButton r = (RadioButton)v.findViewById(R.id.introMsg);
 						if (r.isChecked()) {
-							System.out.println("debug no message selected");
-							Game.gameShown.setMessage(null);
+							CharSequence msg = r.getText();
+							Game.gameShown.setMessage(msg);
 						} else {
-							r = (RadioButton)v.findViewById(R.id.introMsg);
+							r = (RadioButton)v.findViewById(R.id.endMsg);
 							if (r.isChecked()) {
-								System.out.println("debug intro msg selected");
-								EditText tt = (EditText)v.findViewById(R.id.textIntroMsg);
-								CharSequence msg = tt.getText();
+								CharSequence msg = r.getText();
 								Game.gameShown.setMessage(msg);
 							} else {
-								r = (RadioButton)v.findViewById(R.id.endMsg);
+								r = (RadioButton)v.findViewById(R.id.otherMsg);
 								if (r.isChecked()) {
-									System.out.println("debug end msg selected");
-									EditText tt = (EditText)v.findViewById(R.id.textEndMsg);
+									EditText tt = (EditText)v.findViewById(R.id.textOtherMsg);
 									CharSequence msg = tt.getText();
-									Game.gameShown.setMessage(msg);
-								} else {
-									r = (RadioButton)v.findViewById(R.id.otherMsg);
-									if (r.isChecked()) {
-										System.out.println("debug other msg selected");
-										EditText tt = (EditText)v.findViewById(R.id.textOtherMsg);
-										CharSequence msg = tt.getText();
+									if (msg.toString().trim().length()==0)
+										Game.gameShown.setMessage(null);
+									else
 										Game.gameShown.setMessage(msg);
-									} else {
-										System.out.println("debug nothing selected !!");
-									} 
-								}
+								} else {
+									System.out.println("gamemsg nothing selected !!");
+								} 
 							}
 						}
 						GameMessageDialogFragment.this.getDialog().cancel();

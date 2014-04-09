@@ -8,42 +8,20 @@
         android:id="@+id/radioGroupGameMsg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:checkedButton="@+id/noMsg" >
+        android:checkedButton="@+id/otherMsg" >
 
         <RadioButton
             android:id="@+id/introMsg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Intro:"
+            android:text="Hi, good game !"
             android:textColor="#ffffff" />
-
-        <EditText
-            android:id="@+id/textIntroMsg"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2mm"
-            android:text="Hi, good game !" >
-        </EditText>
 
         <RadioButton
             android:id="@+id/endMsg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ending:"
-            android:textColor="#ffffff" />
-
-        <EditText
-            android:id="@+id/textEndMsg"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2mm"
-            android:text="Thank you for the game !" />
-
-        <RadioButton
-            android:id="@+id/noMsg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No message"
+            android:text="Thank you for the game !"
             android:textColor="#ffffff" />
 
         <RadioButton
