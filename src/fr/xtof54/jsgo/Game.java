@@ -3,6 +3,7 @@ package fr.xtof54.jsgo;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,11 @@ public class Game {
 	// contains the new stones that should be marked as dead
 	String deadstProposal=null;
 
+	private CharSequence msg = null;
+
+	public CharSequence getMessage() {return msg;}
+	public void setMessage(CharSequence m) {msg=m;}
+	
 	static void createDebugGame() {
 		Game g = new Game(null, 1);
 		games2play.add(g);
@@ -383,6 +389,8 @@ public class Game {
 	public void sendMove2server(String move, final ServerConnection server) {
 		System.out.println("move "+move);
 		String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move="+move;
+		if (msg!=null)
+		    cmd+="&msg="+URLEncoder.encode(msg.toString());
 		if (move.toLowerCase().startsWith("tt")) {
 			// pass move
 			cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move=pass";

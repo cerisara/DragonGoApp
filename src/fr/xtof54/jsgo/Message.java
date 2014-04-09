@@ -101,6 +101,7 @@ public class Message {
 	}
 
 	private static void showNextMsg() {
+	    System.out.println("shownextmsg "+curmsg+" "+jsonmsgs.length());
 		if (curmsg>=jsonmsgs.length()) return;
 		JSONArray jsonmsg = jsonmsgs.getJSONArray(curmsg);
 		Message.newMessage(headers, jsonmsg);
@@ -115,7 +116,7 @@ public class Message {
 		int msgididx=-1, fromididx=-1, typeidx=-1, subjectidx=-1, txtidx=-1;
 		for (int i=0;i<headers.length();i++) {
 			String h = headers.getString(i);
-			System.out.println("jsonheader "+i+" "+h);
+			System.out.println("jsonheader "+i+" ["+h+"]");
 			if (h.equals("id")) msgididx=i;
 			else if (h.equals("user_from.handle")) fromididx=i;
 			else if (h.equals("type")) typeidx=i;
@@ -126,7 +127,8 @@ public class Message {
 		msgs.add(m);
 		m.msgid = jsonmsg.getInt(msgididx);
 		m.type = jsonmsg.getString(typeidx);
-		m.from = jsonmsg.getString(fromididx);
+        if (fromididx<0) m.from = "unknown";
+        else m.from = jsonmsg.getString(fromididx);
 		m.subject = jsonmsg.getString(subjectidx);
 		m.text = jsonmsg.getString(txtidx);
 		m.show();

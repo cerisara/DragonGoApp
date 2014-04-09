@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RadioGroup
+        android:id="@+id/radioGroupGameMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/noMsg" >
+
+        <RadioButton
+            android:id="@+id/introMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Intro:"
+            android:textColor="#ffffff" />
+
+        <EditText
+            android:id="@+id/textIntroMsg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2mm"
+            android:text="Hi, good game !" >
+        </EditText>
+
+        <RadioButton
+            android:id="@+id/endMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ending:"
+            android:textColor="#ffffff" />
+
+        <EditText
+            android:id="@+id/textEndMsg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2mm"
+            android:text="Thank you for the game !" />
+
+        <RadioButton
+            android:id="@+id/noMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No message"
+            android:textColor="#ffffff" />
+
+        <RadioButton
+            android:id="@+id/otherMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Other:"
+            android:textColor="#ffffff" />
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/textOtherMsg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="" />
+
+</LinearLayout>

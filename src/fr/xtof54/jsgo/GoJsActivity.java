@@ -30,6 +30,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -146,7 +147,7 @@ public class GoJsActivity extends FragmentActivity {
                 String coords = wt.substring(i, i+2);
                 wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"TW\",\""+coords+"\")");
             }
-            
+
             wv.loadUrl("javascript:eidogo.autoPlayers[0].refresh()");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -162,17 +163,17 @@ public class GoJsActivity extends FragmentActivity {
      * marked dead and he can modify them. It should also make the toggle computing easier
      */
     void cleanTerritory() {
-		wv.loadUrl("javascript:eidogo.autoPlayers[0].detsoncleanT()");
+        wv.loadUrl("javascript:eidogo.autoPlayers[0].detsoncleanT()");
         Game g = Game.gameShown;
         String serverMarkedStones = g.deadstInSgf;
         System.out.println("clean territory: serverMarkedStones: "+serverMarkedStones);
         for (int i=0;i<serverMarkedStones.length();i+=2) {
-        	String coord = serverMarkedStones.substring(i,i+2);
-        	wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"MA\", \""+coord+"\")");
+            String coord = serverMarkedStones.substring(i,i+2);
+            wv.loadUrl("javascript:eidogo.autoPlayers[0].cursor.node.pushProperty(\"MA\", \""+coord+"\")");
         }
         wv.loadUrl("javascript:eidogo.autoPlayers[0].refresh()");
     }
-    
+
     void copyEidogo(final String edir, final File odir) {
         AssetManager mgr = getResources().getAssets();
         try {
@@ -253,7 +254,7 @@ public class GoJsActivity extends FragmentActivity {
             }
         }
     }
-    
+
 
     private class myWebViewClient extends WebViewClient {
         @Override
@@ -346,9 +347,9 @@ public class GoJsActivity extends FragmentActivity {
         if (g.getGameStatus().startsWith("SCORE")) {
             // TODO: I tried, but it's really difficult to handle correctly the scoring phase;
             // so for now, I just call the browser to resolve this stage !
-//            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(server.getUrl()+"game.php?gid="+g.getGameID()));
-//            startActivity(browserIntent);
-            
+            //            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(server.getUrl()+"game.php?gid="+g.getGameID()));
+            //            startActivity(browserIntent);
+
             EventManager.getEventManager().registerListener(eventType.gobanReady, new EventManager.EventListener() {
                 @Override
                 public void reactToEvent() {
@@ -362,72 +363,72 @@ public class GoJsActivity extends FragmentActivity {
             });
             changeState(guistate.nogame);
             wv.loadUrl(server.getUrl()+"login.php?userid="+server.getLogin()+"&passwd="+server.getPwd());
-            
-//            skipGame();
+
+            //            skipGame();
             return;
         }
-        
+
         g.showGame();
         // detect if the other player has already agreed on dead stones
-//        if (g.getGameStatus().equals("SCORE2")) {
-//            System.out.println("Check score phase detected !");
-//            final EventManager em = EventManager.getEventManager();
-//            // this listener is trigerred when the goban has finished displayed
-//            final EventManager.EventListener drawTerritory = new EventManager.EventListener() {
-//                @Override
-//                public void reactToEvent() {
-//                    em.unregisterListener(eventType.gobanReady, this);
-//                    try {
-//						Thread.sleep(4000);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//                    JSONObject o = server.o;
-//                    if (o==null) {
-//                        // error: do nothing
-//                        return;
-//                    }
-//                    String err = o.getString("error");
-//                    if (err!=null&&err.length()>0) {
-//                        // error: do nothing
-//                        return;
-//                    }
-//                    // show territories
-//                    String sc = showCounting(o);
-//                    showMessage("dead stones sent; score="+sc);
-//                    writeInLabel("score: "+sc);
-//                    changeState(guistate.checkScore);
-//                }
-//                @Override
-//                public String getName() {return "drawTerritory";}
-//            };
-//            em.registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
-//            	// this listener is triggered when the server sends back the score and dead stones
-//                @Override
-//                public void reactToEvent() {
-//                    em.unregisterListener(eventType.moveSentEnd, this);
-//                    curstate=guistate.markDeadStones;
-//                    // show the board game
-//                    String f=eidogodir+"/example.html";
-//                    System.out.println("debugloadurl file://"+f);
-//                    em.registerListener(eventType.gobanReady, drawTerritory);
-//                    // we then ask the goban to show the game in lark deadstone mode, but the second listener
-//                    // will be immediately trigerred once the goban is shown
-//                    wv.loadUrl("file://"+f);
-//                }
-//                @Override
-//                public String getName() {return "showgamedeadstones";}
-//            });
-//            // send NO stones to server to get the final score
-//            g.sendDeadstonesToServer("", server, false);
-//        } else {
-//            // detect if in scoring phase
-//            // TODO: replace this by checking the game STATUS !
-//            if (g.isTwoPasses()) {
-//                System.out.println("scoring phase detected !");
-//                changeState(guistate.markDeadStones);
-//            }
-//        }
+        //        if (g.getGameStatus().equals("SCORE2")) {
+        //            System.out.println("Check score phase detected !");
+        //            final EventManager em = EventManager.getEventManager();
+        //            // this listener is trigerred when the goban has finished displayed
+        //            final EventManager.EventListener drawTerritory = new EventManager.EventListener() {
+        //                @Override
+        //                public void reactToEvent() {
+        //                    em.unregisterListener(eventType.gobanReady, this);
+        //                    try {
+        //						Thread.sleep(4000);
+        //					} catch (InterruptedException e) {
+        //						e.printStackTrace();
+        //					}
+        //                    JSONObject o = server.o;
+        //                    if (o==null) {
+        //                        // error: do nothing
+        //                        return;
+        //                    }
+        //                    String err = o.getString("error");
+        //                    if (err!=null&&err.length()>0) {
+        //                        // error: do nothing
+        //                        return;
+        //                    }
+        //                    // show territories
+        //                    String sc = showCounting(o);
+        //                    showMessage("dead stones sent; score="+sc);
+        //                    writeInLabel("score: "+sc);
+        //                    changeState(guistate.checkScore);
+        //                }
+        //                @Override
+        //                public String getName() {return "drawTerritory";}
+        //            };
+        //            em.registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
+        //            	// this listener is triggered when the server sends back the score and dead stones
+        //                @Override
+        //                public void reactToEvent() {
+        //                    em.unregisterListener(eventType.moveSentEnd, this);
+        //                    curstate=guistate.markDeadStones;
+        //                    // show the board game
+        //                    String f=eidogodir+"/example.html";
+        //                    System.out.println("debugloadurl file://"+f);
+        //                    em.registerListener(eventType.gobanReady, drawTerritory);
+        //                    // we then ask the goban to show the game in lark deadstone mode, but the second listener
+        //                    // will be immediately trigerred once the goban is shown
+        //                    wv.loadUrl("file://"+f);
+        //                }
+        //                @Override
+        //                public String getName() {return "showgamedeadstones";}
+        //            });
+        //            // send NO stones to server to get the final score
+        //            g.sendDeadstonesToServer("", server, false);
+        //        } else {
+        //            // detect if in scoring phase
+        //            // TODO: replace this by checking the game STATUS !
+        //            if (g.isTwoPasses()) {
+        //                System.out.println("scoring phase detected !");
+        //                changeState(guistate.markDeadStones);
+        //            }
+        //        }
 
         // show the board game
         String f=eidogodir+"/example.html";
@@ -564,10 +565,10 @@ public class GoJsActivity extends FragmentActivity {
                         wv.invalidate();
                         break;
                     case message: // send message
-                    	if (!initServer()) {
-                    		showMessage("Connection problem");
-                    	} else
-                    		Message.send(server,main);
+                        if (!initServer()) {
+                            showMessage("Connection problem");
+                        } else
+                            Message.send(server,main);
                         break;
                     }
                 }
@@ -729,8 +730,8 @@ public class GoJsActivity extends FragmentActivity {
         g.acceptScore(server);
     }
     private void refuseScore() {
-    	cleanTerritory();
-    	changeState(guistate.markDeadStones);
+        cleanTerritory();
+        changeState(guistate.markDeadStones);
     }
 
     static class PrefUtils {
@@ -803,14 +804,14 @@ public class GoJsActivity extends FragmentActivity {
     private Boolean waiterComputingFinished=true;
 
     public static class ErrDialogFragment extends DialogFragment {
-    	String cmdSentBeforeNetErr;
-    	eventType eventTobesent;
-    	GoJsActivity main;
-    	public void setArguments(String s, eventType e, GoJsActivity m) {
-    		cmdSentBeforeNetErr = s;
-    		eventTobesent = e;
-    		main=m;
-    	}
+        String cmdSentBeforeNetErr;
+        eventType eventTobesent;
+        GoJsActivity main;
+        public void setArguments(String s, eventType e, GoJsActivity m) {
+            cmdSentBeforeNetErr = s;
+            eventTobesent = e;
+            main=m;
+        }
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -843,9 +844,9 @@ public class GoJsActivity extends FragmentActivity {
         }
     }
     private ErrDialogFragment errdialog = null;
-    
+
     private boolean initServer() {
-    	System.out.println("call initserver "+server);
+        System.out.println("call initserver "+server);
         if (server!=null) return true;
         String loginkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
         String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
@@ -1089,6 +1090,76 @@ public class GoJsActivity extends FragmentActivity {
         wv.loadUrl("file://"+f);
     }
 
+    private void addGameMessage() {
+        if (Game.gameShown==null) {
+            showMessage("you have no game to attach a message to");
+            return;
+        }
+        class GameMessageDialogFragment extends DialogFragment {
+            GoJsActivity main;
+            public void setArguments(GoJsActivity m) {
+                main=m;
+            }
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                // Get the layout inflater
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+
+                // Inflate and set the layout for the dialog
+                // Pass null as the parent view because its going in the dialog layout
+                final View v = inflater.inflate(R.layout.gamemsg, null);
+                builder.setView(v)
+                // Add action buttons
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        GameMessageDialogFragment.this.getDialog().cancel();
+                    }
+                })
+                .setPositiveButton("Add message", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        RadioButton r = (RadioButton)v.findViewById(R.id.noMsg);
+                        if (r.isSelected()) {
+                            Game.gameShown.setMessage(null);
+                        } else {
+                            r = (RadioButton)v.findViewById(R.id.introMsg);
+                            if (r.isSelected()) {
+                                EditText tt = (EditText)v.findViewById(R.id.textIntroMsg);
+                                CharSequence msg = tt.getText();
+                                Game.gameShown.setMessage(msg);
+                            } else {
+                                r = (RadioButton)v.findViewById(R.id.endMsg);
+                                if (r.isSelected()) {
+                                    EditText tt = (EditText)v.findViewById(R.id.textEndMsg);
+                                    CharSequence msg = tt.getText();
+                                    Game.gameShown.setMessage(msg);
+                                } else {
+                                    r = (RadioButton)v.findViewById(R.id.otherMsg);
+                                    if (r.isSelected()) {
+                                        EditText tt = (EditText)v.findViewById(R.id.textOtherMsg);
+                                        CharSequence msg = tt.getText();
+                                        Game.gameShown.setMessage(msg);
+                                    }
+                                }
+                            }
+                        }
+                        GameMessageDialogFragment.this.getDialog().cancel();
+                    }
+                });
+                return builder.create();
+            }
+        }
+        GameMessageDialogFragment gameMsgDialog = new GameMessageDialogFragment();
+        gameMsgDialog.setArguments(this);
+        if (Game.gameShown.getMessage()!=null) {
+            RadioButton r = (RadioButton)gameMsgDialog.getDialog().findViewById(R.id.otherMsg);
+            r.setSelected(true);
+            TextView msg = (TextView)gameMsgDialog.getDialog().findViewById(R.id.textOtherMsg);
+            msg.setText(Game.gameShown.getMessage());
+        }
+        gameMsgDialog.show(getSupportFragmentManager(),"game messages");
+    }
+
     private void showMoreButtons() {
         System.out.println("showing more buttons");
         class MoreButtonsDialogFragment extends DialogFragment {
@@ -1102,6 +1173,15 @@ public class GoJsActivity extends FragmentActivity {
                 // Inflate and set the layout for the dialog
                 // Pass null as the parent view because its going in the dialog layout
                 View v = inflater.inflate(R.layout.other_buttons, null);
+
+                Button bgamemsg = (Button)v.findViewById(R.id.gamemsg);
+                bgamemsg.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        addGameMessage();
+                        dialog.dismiss();
+                    }
+                });
 
                 Button bdebug = (Button)v.findViewById(R.id.loadSgf);
                 bdebug.setOnClickListener(new View.OnClickListener() {
