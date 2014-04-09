@@ -1249,14 +1249,7 @@ public class GoJsActivity extends FragmentActivity {
 				bcycle.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View vv) {
-						switch (curstate) {
-						case nogame: changeState(guistate.play); break;
-						case play: // changeState(guistate.markDeadStones); break;
-						case markDeadStones: // changeState(guistate.checkScore); break;
-						case checkScore: changeState(guistate.nogame); break;
-						default:
-						}
-						System.out.println("cycle state "+curstate);
+						changeState(guistate.nogame);
 					}
 				});
 				Button bskip = (Button)v.findViewById(R.id.skipGame);
