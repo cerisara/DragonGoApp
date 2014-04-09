@@ -389,12 +389,12 @@ public class Game {
 	public void sendMove2server(String move, final ServerConnection server) {
 		System.out.println("move "+move);
 		String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move="+move;
-		if (msg!=null)
-		    cmd+="&msg="+URLEncoder.encode(msg.toString());
 		if (move.toLowerCase().startsWith("tt")) {
 			// pass move
 			cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move=pass";
 		}
+		if (msg!=null)
+		    cmd+="&msg="+URLEncoder.encode(msg.toString());
 		server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
 	}
 }

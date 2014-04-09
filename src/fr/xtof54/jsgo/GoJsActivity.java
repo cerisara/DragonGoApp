@@ -95,7 +95,7 @@ public class GoJsActivity extends FragmentActivity {
 		switch (newstate) {
 		case nogame:
 			// we allow clicking just in case the user wants to play locally, disconnected
-			writeInLabel("click Getgame to download a game from DGS");
+			writeInLabel("Getgame: download game from DGS");
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
 			setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
 		case play:
