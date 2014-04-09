@@ -45,6 +45,7 @@ public class ServerConnection {
 
     private String u,p,server;
     private HttpClient httpclient=null;
+    private HttpClient httpclientdirect=null;
 
     /**
      * We define this interface so that all logging info can be simply displayed on the console,
@@ -210,12 +211,13 @@ public class ServerConnection {
                             }
                         }
                         fin.close();
-                        String s = o.getString("error");
-                        if (s!=null&&s.length()>0) {
+                        String errmsg = o.getString("error");
+                        if (errmsg!=null&&errmsg.length()>0) {
                             hasError=true;
-                            handleNetError(cmd,endEvent);
+                            handleNetError(errmsg,cmd,endEvent);
                         }
                     } else {
+                    	// entity==null
                         hasError=true;
                         handleNetError(cmd,endEvent);
                     }
@@ -239,6 +241,13 @@ public class ServerConnection {
     }
 
     private void handleNetError(String cmd, final eventType endEvent) {
+    	handleNetError("unknown error", cmd, endEvent);
+    }
+    private void handleNetError(String err, String cmd, final eventType endEvent) {
+    	if (err.contains("not_logged_in")) {
+    		// restart connection session, so that login is redone next time
+    		closeConnection();
+    	}
         logger.showMsg("Net error|"+cmd+"|"+endEvent);
     }
 
@@ -334,19 +343,19 @@ public class ServerConnection {
      */
 
     private String directConnectExecute(HttpPost post, HttpGet get) {
-        if (httpclient==null) {
+        if (httpclientdirect==null) {
             HttpParams httpparms = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
             HttpConnectionParams.setSoTimeout(httpparms, 6000);
-            httpclient = new DefaultHttpClient(httpparms);
+            httpclientdirect = new DefaultHttpClient(httpparms);
         }
         HttpResponse response;
         String res="";
         try {
             if (post!=null)
-                response = httpclient.execute(post);
+                response = httpclientdirect.execute(post);
             else
-                response = httpclient.execute(get);
+                response = httpclientdirect.execute(get);
             Header[] heds = response.getAllHeaders();
             for (Header s : heds)
                 System.out.println("[HEADER] "+s);
