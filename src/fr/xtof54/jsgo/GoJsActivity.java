@@ -1067,8 +1067,8 @@ public class GoJsActivity extends FragmentActivity {
 	// TODO: move this method into Game !
 	private void resignGame() {
 		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+Game.gameShown.moveid;
-		if (Game.gameShown.msg!=null)
-		    cmd+="&msg="+URLEncoder.encode(Game.gameShown.msg.toString());
+		if (Game.gameShown.getMessage()!=null)
+		    cmd+="&msg="+URLEncoder.encode(Game.gameShown.getMessage().toString());
 		EventManager.getEventManager().registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
 			@Override
 			public void reactToEvent() {
@@ -1147,17 +1147,17 @@ public class GoJsActivity extends FragmentActivity {
 						GameMessageDialogFragment.this.getDialog().cancel();
 					}
 				});
+				if (Game.gameShown.getMessage()!=null) {
+					RadioButton r = (RadioButton)v.findViewById(R.id.otherMsg);
+					r.setSelected(true);
+					TextView msg = (TextView)v.findViewById(R.id.textOtherMsg);
+					msg.setText(Game.gameShown.getMessage());
+				}
 				return builder.create();
 			}
 		}
 		GameMessageDialogFragment gameMsgDialog = new GameMessageDialogFragment();
 		gameMsgDialog.setArguments(this);
-		if (Game.gameShown.getMessage()!=null) {
-			RadioButton r = (RadioButton)gameMsgDialog.getDialog().findViewById(R.id.otherMsg);
-			r.setSelected(true);
-			TextView msg = (TextView)gameMsgDialog.getDialog().findViewById(R.id.textOtherMsg);
-			msg.setText(Game.gameShown.getMessage());
-		}
 		gameMsgDialog.show(getSupportFragmentManager(),"game messages");
 	}
 

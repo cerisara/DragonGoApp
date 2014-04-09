@@ -29,7 +29,7 @@ public class Game {
 	// contains the new stones that should be marked as dead
 	String deadstProposal=null;
 
-	CharSequence msg = null;
+	private CharSequence msg = null;
 
 	public CharSequence getMessage() {return msg;}
 	public void setMessage(CharSequence m) {msg=m;}
