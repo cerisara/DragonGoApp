@@ -10,8 +10,10 @@ This is a new experimental android app to use for DGS, with the following featur
 * Minimize bandwidth usage: this is especially useful when you have a limited quota of 3G data connection;
 * Full-featured SGF editor/player based on the open-source eidogo code. Also shows game information and game comments.
 * Support dual servers/credentials (DGS and develDGS)
-* Playing moves (obviously !), send/receive messages, invite/accept/refuse challenges
+* Playing moves (obviously !), send/receive messages, invite/accept/refuse challenges, attach a public comment to a move
 
-Note that ending game (territory agreement, scoring) is supported by displaying the DGS website, for now.
+Limitations:
 
+* Ending game (territory agreement, scoring) is supported by displaying the DGS website, for now.
+* When inviting or accepting a game, you cannot change the game settings (handicap...) for now
 
