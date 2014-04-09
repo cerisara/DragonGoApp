@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1063,9 +1064,11 @@ public class GoJsActivity extends FragmentActivity {
 		if (++curgidx2play>=Game.getGames().size()) curgidx2play=0;
 		downloadAndShowGame();
 	}
+	// TODO: move this method into Game !
 	private void resignGame() {
-		// TODO: propose a message to write !
 		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+Game.gameShown.moveid;
+		if (Game.gameShown.msg!=null)
+		    cmd+="&msg="+URLEncoder.encode(Game.gameShown.msg.toString());
 		EventManager.getEventManager().registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
 			@Override
 			public void reactToEvent() {
