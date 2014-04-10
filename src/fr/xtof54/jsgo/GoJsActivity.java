@@ -10,8 +10,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.testbrowser.R;
-
+import fr.xtof54.dragonGoApp.R;
 import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.ServerConnection.DetLogger;
 import android.os.AsyncTask;
