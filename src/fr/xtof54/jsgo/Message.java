@@ -31,46 +31,81 @@ public class Message {
 
 	public int getMessageId() {return msgid;}
 
-	public static void send(final ServerConnection server, final GoJsActivity main) {
-		c=main;
-		class EditMsgDialogFragment extends DialogFragment {
-			@Override
-			public Dialog onCreateDialog(Bundle savedInstanceState) {
-				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-				LayoutInflater inflater = getActivity().getLayoutInflater();
+    public static void send(final ServerConnection server, final GoJsActivity main) {
+        c=main;
+        class EditMsgDialogFragment extends DialogFragment {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = getActivity().getLayoutInflater();
 
-				// Inflate and set the layout for the dialog
-				// Pass null as the parent view because it's going in the dialog layout
-				final View msgview = inflater.inflate(R.layout.editmsg, null);
-				builder.setView(msgview);
+                // Inflate and set the layout for the dialog
+                // Pass null as the parent view because it's going in the dialog layout
+                final View msgview = inflater.inflate(R.layout.editmsg, null);
+                builder.setView(msgview);
 
-				builder.setPositiveButton("send", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						EditMsgDialogFragment.this.getDialog().dismiss();
-						TextView t = (TextView)msgview.findViewById(R.id.editMsgTo);
-						String touser = t.getText().toString();
-						t = (TextView)msgview.findViewById(R.id.editMsgSubj);
-						String subj = (String)t.getText().toString();
-						t = (TextView)msgview.findViewById(R.id.editMsgTxt);
-						String txt = (String)t.getText().toString();
-						String cmd = "quick_do.php?obj=message&cmd=send_msg&ouser="+
-						URLEncoder.encode(touser)+"&msg="+
-						URLEncoder.encode(txt)+"&subj="+
-						URLEncoder.encode(subj);
-						server.sendCmdToServer(cmd, eventType.msgSendStart, eventType.msgSendEnd);
-					}
-				})
-				.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						EditMsgDialogFragment.this.getDialog().dismiss();
-					}
-				});
-				return builder.create();
-			}
-		}
-		final EditMsgDialogFragment msgdialog = new EditMsgDialogFragment();
-		msgdialog.show(c.getSupportFragmentManager(),"message");
-	}
+                builder.setPositiveButton("send", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditMsgDialogFragment.this.getDialog().dismiss();
+                        TextView t = (TextView)msgview.findViewById(R.id.editMsgTo);
+                        String touser = t.getText().toString();
+                        t = (TextView)msgview.findViewById(R.id.editMsgSubj);
+                        String subj = t.getText().toString();
+                        t = (TextView)msgview.findViewById(R.id.editMsgTxt);
+                        String txt = t.getText().toString();
+                        String cmd = "quick_do.php?obj=message&cmd=send_msg&ouser="+
+                        URLEncoder.encode(touser)+"&msg="+
+                        URLEncoder.encode(txt)+"&subj="+
+                        URLEncoder.encode(subj);
+                        server.sendCmdToServer(cmd, eventType.msgSendStart, eventType.msgSendEnd);
+                    }
+                })
+                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditMsgDialogFragment.this.getDialog().dismiss();
+                    }
+                });
+                return builder.create();
+            }
+        }
+        final EditMsgDialogFragment msgdialog = new EditMsgDialogFragment();
+        msgdialog.show(c.getSupportFragmentManager(),"message");
+    }
+
+    public static void invite(final ServerConnection server, final GoJsActivity main) {
+        c=main;
+        class EditMsgDialogFragment extends DialogFragment {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+
+                // Inflate and set the layout for the dialog
+                // Pass null as the parent view because it's going in the dialog layout
+                final View msgview = inflater.inflate(R.layout.editmsg, null);
+                builder.setView(msgview);
+
+                builder.setPositiveButton("invite", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditMsgDialogFragment.this.getDialog().dismiss();
+                        TextView t = (TextView)msgview.findViewById(R.id.editMsgTo);
+                        String touser = t.getText().toString();
+                        t = (TextView)msgview.findViewById(R.id.editMsgTxt);
+                        String txt = t.getText().toString();
+                        server.directInvite(touser,txt);
+                    }
+                })
+                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditMsgDialogFragment.this.getDialog().dismiss();
+                    }
+                });
+                return builder.create();
+            }
+        }
+        final EditMsgDialogFragment msgdialog = new EditMsgDialogFragment();
+        msgdialog.show(c.getSupportFragmentManager(),"message");
+    }
 
 	public static void downloadMessages(final ServerConnection server, GoJsActivity main) {
 		c=main;
@@ -87,6 +122,7 @@ public class Message {
 					if (o.getInt("list_size")>0) {
 						headers = o.getJSONArray("list_header");
 						jsonmsgs = o.getJSONArray("list_result");
+// TODO: the app crashes after declining a game invite, maybe because the next message is empty ?
 						curmsg=0;
 						showNextMsg();
 					}

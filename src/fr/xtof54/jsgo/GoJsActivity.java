@@ -545,7 +545,8 @@ public class GoJsActivity extends FragmentActivity {
 						wv.invalidate();
 						break;
 					case message: // send invitation
-						// TODO
+                        if (!initServer()) return;
+						Message.invite(server, main);
 						break;
 					}
 				}

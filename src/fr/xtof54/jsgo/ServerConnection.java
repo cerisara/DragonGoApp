@@ -341,6 +341,7 @@ public class ServerConnection {
     /*
      * you'll find below direct connection to the DGS server, without using the quicksuite !
      */
+    private boolean isAlreadyDirectLogged = false;
 
     private String directConnectExecute(HttpPost post, HttpGet get) {
         if (httpclientdirect==null) {
@@ -386,13 +387,72 @@ public class ServerConnection {
             entity = new UrlEncodedFormEntity(formparams, "UTF-8");
             HttpPost httppost = new HttpPost(getUrl()+"login.php");
             httppost.setEntity(entity);
-            return directConnectExecute(httppost, null);
+            String answ = directConnectExecute(httppost, null);
+            // TODO: check if login succeeded
+            isAlreadyDirectLogged=true;
+            return answ;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return "";
     }
 
+    public String directInvite(String user, String msg) {
+        if (!isAlreadyDirectLogged) directLogin();
+        
+        // TODO: do we need senderid ? Shall we URLencode ?
+        // no, it looks like we don't need to URLEncode, and we don't need to fill-in all slots !
+//      =&=&=0&senderid=180&&=&=
+        
+        try {
+            List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+            formparams.add(new BasicNameValuePair("ruleset", "JAPANESE"));
+            formparams.add(new BasicNameValuePair("size", "19"));
+            formparams.add(new BasicNameValuePair("cat_htype", "manual"));
+            formparams.add(new BasicNameValuePair("color_m", "nigiri"));
+            formparams.add(new BasicNameValuePair("handicap_m", "0"));
+            formparams.add(new BasicNameValuePair("komi_m", "6.5"));
+            formparams.add(new BasicNameValuePair("fk_htype", "auko_opn"));
+            formparams.add(new BasicNameValuePair("stdhandicap", "Y"));
+            formparams.add(new BasicNameValuePair("adj_handicap", "0"));
+            formparams.add(new BasicNameValuePair("min_handicap", "0"));
+            formparams.add(new BasicNameValuePair("max_handicap", "-1"));
+            formparams.add(new BasicNameValuePair("adj_komi", "0"));
+            formparams.add(new BasicNameValuePair("jigo_mode", "KEEP_KOMI"));
+            formparams.add(new BasicNameValuePair("timevalue", "30"));
+            formparams.add(new BasicNameValuePair("timeunit", "days"));
+            formparams.add(new BasicNameValuePair("byotimevalue_jap", "1"));
+            formparams.add(new BasicNameValuePair("timeunit_jap", "days"));
+            formparams.add(new BasicNameValuePair("byoperiods_jap", "10"));
+            formparams.add(new BasicNameValuePair("byotimevalue_can", "15"));
+            formparams.add(new BasicNameValuePair("timeunit_can", "days"));
+            formparams.add(new BasicNameValuePair("byoperiods_can", "15"));
+            formparams.add(new BasicNameValuePair("byoyomitype", "FIS"));
+            formparams.add(new BasicNameValuePair("byotimevalue_fis", "1"));
+            formparams.add(new BasicNameValuePair("timeunit_fis", "days"));
+            formparams.add(new BasicNameValuePair("weekendclock", "Y"));
+            formparams.add(new BasicNameValuePair("to", user));
+            formparams.add(new BasicNameValuePair("message", msg));
+            formparams.add(new BasicNameValuePair("send_message", "Send+Invitation"));
+            formparams.add(new BasicNameValuePair("mode", "Invite"));
+//            formparams.add(new BasicNameValuePair("mid", "0"));
+            formparams.add(new BasicNameValuePair("view", "0"));
+            formparams.add(new BasicNameValuePair("gsc", "1"));
+            formparams.add(new BasicNameValuePair("subject", "Game+invitation"));
+            formparams.add(new BasicNameValuePair("type", "INVITATION"));
+            
+            UrlEncodedFormEntity entity;
+            entity = new UrlEncodedFormEntity(formparams, "UTF-8");
+            HttpPost httppost = new HttpPost(getUrl()+"message.php");
+            httppost.setEntity(entity);
+            String answ = directConnectExecute(httppost, null);
+            // TODO: check if success
+            return answ;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
     private static void test1() throws Exception {
         final String[] c = loadCredsFromFile("creds.txt");
@@ -423,9 +483,9 @@ public class ServerConnection {
         System.out.println("login answer: "+ans);
         System.out.println();
         
-        HttpGet httpget = new HttpGet("http://dragongoserver.sourceforge.net/status.php");
-        ans = server.directConnectExecute(null, httpget);
-        System.out.println("status answer: "+ans);
+        ans = server.directInvite("xtof54","");
+        System.out.println("invite answer");
+        
         server.closeConnection();
     }
     public static void main(String args[]) throws Exception {
