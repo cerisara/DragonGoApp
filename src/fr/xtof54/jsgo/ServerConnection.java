@@ -396,6 +396,62 @@ public class ServerConnection {
         }
         return "";
     }
+    
+    /**
+     * @return the players that you can challenge in the ladder, and only them !
+     */
+    public String[] getLadder() {
+        if (!isAlreadyDirectLogged) directLogin();
+        HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/view.php?tid=3");
+        String answ = directConnectExecute(null, get);
+        String[] tt = answ.split("\n");
+        int co=0;
+        for (int i=0;i<tt.length;i++) {
+            if (tt[i].contains("Challenge this user")) co++;
+        }
+        String[] res = new String[co];
+        for (int i=0;i<tt.length;i++) {
+            if (tt[i].contains("Challenge this user")) {
+                int userFirstLine=-1, userLastLine=-1;
+                String userline = "";
+                // go back to find the begin of the HTML table row
+                for (int j=i;j>=0;j--) {
+                    if (tt[i].contains("<tr ")) {
+                        userFirstLine = j;
+                    }
+                }
+                for (int j=i;j<tt.length;j++) {
+                    if (tt[i].contains("</tr")) {
+                        userLastLine = j;
+                    }
+                }
+                if (userFirstLine>=0&&userLastLine>=0) {
+                    for (int j=userFirstLine;j<=userLastLine;j++) {
+                        int z=tt[j].indexOf("name=\"rank");
+                        if (z>=0) {
+                            int z1=tt[j].indexOf('>',z)+1;
+                            int z2=tt[j].indexOf('<',z1);
+                            userline+=tt[j].substring(z1,z2)+" ";
+                        }
+                        z=tt[j].indexOf("class=\"User");
+                        if (z>=0) {
+                            int z1=tt[j].indexOf('>',z)+1;
+                            int z2=tt[j].indexOf('<',z1);
+                            userline+=tt[j].substring(z1,z2)+" ";
+                        }
+                        z=tt[j].indexOf("class=\"Rating");
+                        if (z>=0) {
+                            int z1=tt[j].indexOf('>',z)+1;
+                            int z2=tt[j].indexOf('<',z1);
+                            userline+=tt[j].substring(z1,z2)+" ";
+                        }
+                    }
+                }
+                res[i]=userline.trim();
+            }
+        }
+        return res;
+    }
 
     public String directInvite(String user, String msg) {
         if (!isAlreadyDirectLogged) directLogin();
@@ -453,6 +509,8 @@ public class ServerConnection {
         }
         return "";
     }
+    
+    // ====================================================
 
     private static void test1() throws Exception {
         final String[] c = loadCredsFromFile("creds.txt");

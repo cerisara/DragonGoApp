@@ -29,13 +29,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.text.method.ScrollingMovementMethod;
 
 /**
  * TODO:
@@ -1179,6 +1182,44 @@ public class GoJsActivity extends FragmentActivity {
 		gameMsgDialog.show(getSupportFragmentManager(),"game messages");
 	}
 
+	private void viewLadder() {
+        if (!initServer()) return;
+	    final String[] users = server.getLadder();
+	    if (users==null||users.length==0) {
+	        showMessage("Probleme: are your registered in the ladder ? can you still challenge ?");
+	        return;
+	    }
+        class ListDialogFragment extends DialogFragment {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                // Get the layout inflater
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(main, android.R.layout.simple_list_item_1, users);
+                // Inflate and set the layout for the dialog
+                // Pass null as the parent view because it's going in the dialog layout
+                View listFrameview = inflater.inflate(R.layout.ladder, null);
+                ListView ladder = (ListView)listFrameview.findViewById(R.id.ladderList);
+                ladder.setAdapter(adapter);
+                builder.setView(listFrameview);
+
+                builder.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ListDialogFragment.this.getDialog().dismiss();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ListDialogFragment.this.getDialog().dismiss();
+                    }
+                });
+                return builder.create();
+            }
+        }
+        final ListDialogFragment msgdialog = new ListDialogFragment();
+        msgdialog.show(main.getSupportFragmentManager(),"message");
+	}
+	
 	private void showMoreButtons() {
 		System.out.println("showing more buttons");
 		class MoreButtonsDialogFragment extends DialogFragment {
@@ -1193,15 +1234,6 @@ public class GoJsActivity extends FragmentActivity {
 				// Pass null as the parent view because its going in the dialog layout
 				View v = inflater.inflate(R.layout.other_buttons, null);
 
-				Button bgamemsg = (Button)v.findViewById(R.id.gamemsg);
-				bgamemsg.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View vv) {
-						addGameMessage();
-						dialog.dismiss();
-					}
-				});
-
 				Button bdebug = (Button)v.findViewById(R.id.loadSgf);
 				bdebug.setOnClickListener(new View.OnClickListener() {
 					@Override
@@ -1213,6 +1245,24 @@ public class GoJsActivity extends FragmentActivity {
 						dialog.dismiss();
 					}
 				});
+
+                Button bgamemsg = (Button)v.findViewById(R.id.gamemsg);
+                bgamemsg.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        addGameMessage();
+                        dialog.dismiss();
+                    }
+                });
+
+                Button bladder = (Button)v.findViewById(R.id.ladder);
+                bladder.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        viewLadder();
+                        dialog.dismiss();
+                    }
+                });
 
 				RadioButton bserver1 = (RadioButton)v.findViewById(R.id.dgs);
 				bserver1.setOnClickListener(new View.OnClickListener() {
