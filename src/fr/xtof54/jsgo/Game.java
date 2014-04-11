@@ -88,7 +88,12 @@ public class Game {
 	}
 
 	public String getGameStatus() {
-		return gameinfo.getString(4);
+		try {
+            return gameinfo.getString(4);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
 	}
 
 	public int getGameID() {return gid;}

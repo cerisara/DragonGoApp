@@ -137,10 +137,16 @@ public class Message {
 
 	private static void showNextMsg() {
 	    System.out.println("shownextmsg "+curmsg+" "+jsonmsgs.length());
-		if (curmsg>=jsonmsgs.length()) return;
-		JSONArray jsonmsg = jsonmsgs.getJSONArray(curmsg);
-		Message.newMessage(headers, jsonmsg);
-		curmsg++;
+	    if (curmsg>=jsonmsgs.length()) return;
+	    JSONArray jsonmsg;
+	    try {
+	        jsonmsg = jsonmsgs.getJSONArray(curmsg);
+	        Message.newMessage(headers, jsonmsg);
+	        curmsg++;
+	    } catch (JSONException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+	    }
 	}
 
 	// ==================================================================
@@ -148,25 +154,31 @@ public class Message {
 	private static ArrayList<Message> msgs = new ArrayList<Message>();
 
 	private static void newMessage(JSONArray headers, JSONArray jsonmsg) {
-		int msgididx=-1, fromididx=-1, typeidx=-1, subjectidx=-1, txtidx=-1;
-		for (int i=0;i<headers.length();i++) {
-			String h = headers.getString(i);
-			System.out.println("jsonheader "+i+" ["+h+"]");
-			if (h.equals("id")) msgididx=i;
-			else if (h.equals("user_from.handle")) fromididx=i;
-			else if (h.equals("type")) typeidx=i;
-			else if (h.equals("text")) txtidx=i;
-			else if (h.equals("subject")) subjectidx=i;
-		}
-		Message m = new Message();
-		msgs.add(m);
-		m.msgid = jsonmsg.getInt(msgididx);
-		m.type = jsonmsg.getString(typeidx);
-        if (fromididx<0) m.from = "unknown";
-        else m.from = jsonmsg.getString(fromididx);
-		m.subject = jsonmsg.getString(subjectidx);
-		m.text = jsonmsg.getString(txtidx);
-		m.show();
+	    int msgididx=-1, fromididx=-1, typeidx=-1, subjectidx=-1, txtidx=-1;
+	    try {
+	        for (int i=0;i<headers.length();i++) {
+	            String h;
+	            h = headers.getString(i);
+	            System.out.println("jsonheader "+i+" ["+h+"]");
+	            if (h.equals("id")) msgididx=i;
+	            else if (h.equals("user_from.handle")) fromididx=i;
+	            else if (h.equals("type")) typeidx=i;
+	            else if (h.equals("text")) txtidx=i;
+	            else if (h.equals("subject")) subjectidx=i;
+	        }
+	        Message m = new Message();
+	        msgs.add(m);
+	        m.msgid = jsonmsg.getInt(msgididx);
+	        m.type = jsonmsg.getString(typeidx);
+	        if (fromididx<0) m.from = "unknown";
+	        else m.from = jsonmsg.getString(fromididx);
+	        m.subject = jsonmsg.getString(subjectidx);
+	        m.text = jsonmsg.getString(txtidx);
+	        m.show();
+	    } catch (JSONException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+	    }
 	}
 
 	// ==================================================================

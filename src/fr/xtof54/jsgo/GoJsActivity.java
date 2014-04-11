@@ -287,13 +287,19 @@ public class GoJsActivity extends FragmentActivity {
 							em.unregisterListener(eventType.moveSentEnd, this);
 							JSONObject o = server.o;
 							if (o==null) {
-								// error: do nothing
-								return;
+							    // error: do nothing
+							    return;
 							}
-							String err = o.getString("error");
-							if (err!=null&&err.length()>0) {
-								// error: do nothing
-								return;
+							String err;
+							try {
+							    err = o.getString("error");
+							    if (err!=null&&err.length()>0) {
+							        // error: do nothing
+							        return;
+							    }
+							} catch (JSONException e) {
+							    // TODO Auto-generated catch block
+							    e.printStackTrace();
 							}
 							// show territories
 							String sc = showCounting(o);
@@ -314,13 +320,19 @@ public class GoJsActivity extends FragmentActivity {
 							em.unregisterListener(eventType.moveSentEnd, this);
 							JSONObject o = server.o;
 							if (o==null) {
-								// error: don't switch game
-								return;
+							    // error: don't switch game
+							    return;
 							}
-							String err = o.getString("error");
-							if (err!=null&&err.length()>0) {
-								// error: don't switch game
-								return;
+							String err;
+							try {
+							    err = o.getString("error");
+							    if (err!=null&&err.length()>0) {
+							        // error: don't switch game
+							        return;
+							    }
+							} catch (JSONException e) {
+							    // TODO Auto-generated catch block
+							    e.printStackTrace();
 							}
 							// switch to next game
 							g.finishedWithThisGame();
@@ -710,19 +722,25 @@ public class GoJsActivity extends FragmentActivity {
 				em.unregisterListener(eventType.moveSentEnd, this);
 				JSONObject o = server.o;
 				if (o==null) {
-					// error: don't switch game
-					return;
+				    // error: don't switch game
+				    return;
 				}
-				String err = o.getString("error");
-				if (err!=null&&err.length()>0) {
-					// error: don't switch game
-					return;
+				String err;
+				try {
+				    err = o.getString("error");
+				    if (err!=null&&err.length()>0) {
+				        // error: don't switch game
+				        return;
+				    }
+				} catch (JSONException e) {
+				    // TODO Auto-generated catch block
+				    e.printStackTrace();
 				}
 				// switch to next game
 				g.finishedWithThisGame();
 				if (Game.getGames().size()==0) {
-					showMessage("No more games locally");
-					changeState(guistate.nogame);
+				    showMessage("No more games locally");
+				    changeState(guistate.nogame);
 				} else
 					downloadAndShowGame();
 			}
