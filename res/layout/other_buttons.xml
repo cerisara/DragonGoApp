@@ -1,111 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:scrollbarAlwaysDrawVerticalTrack="true" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <Button
-        android:id="@+id/skipGame"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="skip this game" />
-
-    <Button
-        android:id="@+id/resign"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="resign game" />
-
-    <Button
-        android:id="@+id/gamemsg"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add a game message" />
-
-    <Button
-        android:id="@+id/ladder"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="View 19x19 ladder" />
-
-    <RelativeLayout
+    <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal" >
+        android:layout_height="match_parent"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbars="vertical" >
 
-        <RadioGroup
-            android:id="@+id/servers"
+        <Button
+            android:id="@+id/skipGame"
+            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checkedButton="@+id/dgs" >
+            android:text="skip this game" />
 
-            <RadioButton
-                android:id="@+id/dgs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:text="DGS"
-                android:textColor="#ffffff" />
-
-            <RadioButton
-                android:id="@+id/devdgs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/dgs"
-                android:text="DevDGS"
-                android:textColor="#ffffff" />
-        </RadioGroup>
-
-        <RadioGroup
-            android:id="@+id/logins"
+        <Button
+            android:id="@+id/resign"
+            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/servers"
-            android:checkedButton="@+id/log1" >
+            android:text="resign game" />
 
-            <RadioButton
-                android:id="@+id/log1"
+        <Button
+            android:id="@+id/gamemsg"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add a game message" />
+
+        <Button
+            android:id="@+id/ladder"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View 19x19 ladder" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal" >
+
+            <RadioGroup
+                android:id="@+id/servers"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:text="login"
-                android:textColor="#ffffff" />
+                android:checkedButton="@+id/dgs" >
 
-            <RadioButton
-                android:id="@+id/log2"
+                <RadioButton
+                    android:id="@+id/dgs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:text="DGS"
+                    android:textColor="#ffffff" />
+
+                <RadioButton
+                    android:id="@+id/devdgs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/dgs"
+                    android:text="DevDGS"
+                    android:textColor="#ffffff" />
+            </RadioGroup>
+
+            <RadioGroup
+                android:id="@+id/logins"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/log1"
-                android:text="devLogin"
-                android:textColor="#ffffff" />
-        </RadioGroup>
-    </RelativeLayout>
+                android:layout_toRightOf="@+id/servers"
+                android:checkedButton="@+id/log1" >
 
-    <Button
-        android:id="@+id/cycleStates"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="reset GUI" />
+                <RadioButton
+                    android:id="@+id/log1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:text="login"
+                    android:textColor="#ffffff" />
 
-    <Button
-        android:id="@+id/copyEidogo"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="(re)copy eidogo" />
+                <RadioButton
+                    android:id="@+id/log2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/log1"
+                    android:text="devLogin"
+                    android:textColor="#ffffff" />
+            </RadioGroup>
+        </RelativeLayout>
 
-    <Button
-        android:id="@+id/loadSgf"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="debug don&apos;t press" />
+        <Button
+            android:id="@+id/cycleStates"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="reset GUI" />
 
-</TableLayout>
+        <Button
+            android:id="@+id/copyEidogo"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="(re)copy eidogo" />
+
+        <Button
+            android:id="@+id/loadSgf"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="debug don&apos;t press" />
+    </TableLayout>
+
+</ScrollView>
