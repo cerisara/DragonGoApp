@@ -398,79 +398,6 @@ public class ServerConnection {
         return "";
     }
     
-    /**
-     * @return the players that you can challenge in the ladder, and only them !
-     * - no way to do it synchronous, far too long...
-     * - asymchronous works no desktop, but not on mobile: resulting file is more than 1Mb, too much computing intensive.
-     *   may be an option is to treat the HTML chunks as soon as they arrive, but I'm not sure httpclient can do that
-     *   
-     * Other option: handle the ladder all in cache, only query the server with challenge() to get info, and immediately cancel the challenge
-     * challenge must be called with the target user id: challenge.php?tid=3&amp;rid=916
-     * 
-     * - It's easy to know our rank by challenging ourself
-     * 
-     * 
-     */
-    private String answ;
-    public String[] ladder;
-    public void startLadderView() {
-    	EventManager.getEventManager().sendEvent(eventType.ladderStart);
-    	EventManager.getEventManager().registerListener(eventType.ladderDownloadEnd, new EventManager.EventListener() {
-			@Override
-			public void reactToEvent() {
-				EventManager.getEventManager().unregisterListener(eventType.ladderDownloadEnd,this);
-				ArrayList<String> reslist = new ArrayList<String>();
-				int i=answ.indexOf("Challenge this user");
-				while (i>=0) {
-					String userline="";
-					int debline = answ.lastIndexOf("<tr ", i);
-					int endline = answ.indexOf("</tr", i);
-					if (debline>=0&&endline>=0) {
-					    int z=answ.indexOf("name=\"rank",debline);
-                        if (z>=0) {
-                            int z1=answ.indexOf('>',z)+1;
-                            int z2=answ.indexOf('<',z1);
-                            userline+=answ.substring(z1,z2)+" ";
-                        }
-                        z=answ.indexOf("class=\"User",debline);
-                        if (z>=0) {
-                            int z1=answ.indexOf('>',z)+1;
-                            int z2=answ.indexOf('<',z1);
-                            userline+=answ.substring(z1,z2)+" ";
-                        }
-                        z=answ.indexOf("class=\"Rating",debline);
-                        if (z>=0) {
-                            int z1=answ.indexOf('>',z)+1;
-                            int z2=answ.indexOf('<',z1);
-                            userline+=answ.substring(z1,z2)+" ";
-                        }
-                        reslist.add(userline.trim());
-					}
-					int j=answ.indexOf("Challenge this user",endline);
-					i=j;
-				}
-				ladder = new String[reslist.size()];
-				reslist.toArray(ladder);
-		    	EventManager.getEventManager().sendEvent(eventType.ladderEnd);
-			}
-			@Override
-			public String getName() {return "ladder";}
-		});
-    	Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-		        if (!isAlreadyDirectLogged) directLogin();
-		        System.out.println("getladder - getlogin passed");
-		        HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/view.php?tid=3");
-		        answ = directConnectExecute(null, get);
-		        System.out.println("getladder - got server answer");
-		        System.out.println(answ);
-		    	EventManager.getEventManager().sendEvent(eventType.ladderDownloadEnd);
-			}
-		});
-    	t.start();
-    }
-
     public String directInvite(String user, String msg) {
         if (!isAlreadyDirectLogged) directLogin();
         
@@ -559,9 +486,6 @@ public class ServerConnection {
         System.out.println("login answer: "+ans);
         System.out.println();
 
-        server.startLadderView();
-        Thread.sleep(600000);
-        
 //        ans = server.directInvite("xtof54","");
 //        System.out.println("invite answer");
         

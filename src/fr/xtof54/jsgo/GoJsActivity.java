@@ -1065,42 +1065,6 @@ public class GoJsActivity extends FragmentActivity {
 		LoginDialogFragment dialog = new LoginDialogFragment();
 		dialog.show(getSupportFragmentManager(),"dgs signin");
 	}
-	private void ask4credentials2() {
-		System.out.println("calling debug settings");
-		final Context c = this;
-		class LoginDialogFragment extends DialogFragment {
-			@Override
-			public Dialog onCreateDialog(Bundle savedInstanceState) {
-				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-				// Get the layout inflater
-				LayoutInflater inflater = getActivity().getLayoutInflater();
-
-				// Inflate and set the layout for the dialog
-				// Pass null as the parent view because its going in the dialog layout
-				builder.setView(inflater.inflate(R.layout.dialog_signin, null))
-				// Add action buttons
-				.setPositiveButton(R.string.signin, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-						// sign in the user ...
-						TextView username = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.username);
-						TextView pwd = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.password);
-						PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_USERNAME2_KEY, username.getText().toString());
-						PrefUtils.saveToPrefs(c, PrefUtils.PREFS_LOGIN_PASSWORD2_KEY, (String)pwd.getText().toString());
-						showMessage("Credentials2 saved");
-					}
-				})
-				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						LoginDialogFragment.this.getDialog().cancel();
-					}
-				});
-				return builder.create();
-			}
-		}
-		LoginDialogFragment dialog = new LoginDialogFragment();
-		dialog.show(getSupportFragmentManager(),"dgs signin");
-	}
 
 	private void skipGame() {
 		if (Game.getGames().size()<=1) {
@@ -1214,17 +1178,17 @@ public class GoJsActivity extends FragmentActivity {
 			@Override
 			public void reactToEvent() {
 				EventManager.getEventManager().unregisterListener(eventType.ladderEnd,this);
-				if (androidServer.ladder==null||androidServer.ladder.length==0) {
+				if (androidServer.ladd==null||androidServer.ladd.getCachedLadder()==null||androidServer.ladd.getCachedLadder().length==0) {
 					showMessage("Probleme: are your registered in the ladder ? can you still challenge ?");
 			        return;
 				}
-		        class ListDialogFragment extends DialogFragment {
+		        class DetListDialogFragment extends DialogFragment {
 		            @Override
 		            public Dialog onCreateDialog(Bundle savedInstanceState) {
 		                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		                // Get the layout inflater
 		                LayoutInflater inflater = getActivity().getLayoutInflater();
-		                ArrayAdapter<String> adapter = new ArrayAdapter<String>(main, android.R.layout.simple_list_item_1, androidServer.ladder);
+		                ArrayAdapter<String> adapter = new ArrayAdapter<String>(main, android.R.layout.simple_list_item_1, androidServer.ladd.getCachedLadder());
 		                // Inflate and set the layout for the dialog
 		                // Pass null as the parent view because it's going in the dialog layout
 		                View listFrameview = inflater.inflate(R.layout.ladder, null);
@@ -1234,23 +1198,31 @@ public class GoJsActivity extends FragmentActivity {
 
 		                builder.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
 		                    public void onClick(DialogInterface dialog, int id) {
-		                        ListDialogFragment.this.getDialog().dismiss();
+		                    	DetListDialogFragment.this.getDialog().dismiss();
+		                    }
+		                })
+		                .setNeutralButton("Reload", new DialogInterface.OnClickListener() {
+		                    public void onClick(DialogInterface dialog, int id) {
+		                    	androidServer.ladd.resetCache();
+		                    	androidServer.startLadderView();
+		                    	DetListDialogFragment.this.getDialog().dismiss();
 		                    }
 		                })
 		                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 		                    public void onClick(DialogInterface dialog, int id) {
-		                        ListDialogFragment.this.getDialog().dismiss();
+		                    	DetListDialogFragment.this.getDialog().dismiss();
 		                    }
 		                });
 		                return builder.create();
 		            }
 		        }
-		        final ListDialogFragment msgdialog = new ListDialogFragment();
+		        final DetListDialogFragment msgdialog = new DetListDialogFragment();
 		        msgdialog.show(main.getSupportFragmentManager(),"message");
 			}
 			@Override
 			public String getName() {return "ladder";}
 		});
+        androidServer.ladd.checkCache(eidogodir);
         androidServer.startLadderView();
 	}
 	

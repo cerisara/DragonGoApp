@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:textColor="#ffffff" 
         android:scrollbars="vertical" >
     </ListView>
 

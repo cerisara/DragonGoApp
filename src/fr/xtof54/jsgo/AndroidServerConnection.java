@@ -1,12 +1,15 @@
 package fr.xtof54.jsgo;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.Header;
@@ -155,17 +158,21 @@ public class AndroidServerConnection {
 	/*
 	 * you'll find below direct connection to the DGS server, without using the quicksuite !
 	 */
-	private boolean isAlreadyDirectLogged = false;
 
-	private void directConnectExecute(HttpUriRequest req) {
+	Ladder ladd = new Ladder();
+	String res;
+	
+	private String directConnectExecute(HttpUriRequest req) {
+		res=null;
 		try {
-			// TODO: is it synchronous or not ??
+			// is it synchronous or not ?? Yes, it seems that it is synchronous
 			httpclientdirect.execute(req,new ResponseHandler<String>() {
 				@Override
 				public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
 					StatusLine status = response.getStatusLine();
 					System.out.println("httpclient execute status "+status.toString());
 					HttpEntity entity = response.getEntity();
+					// no because I got a status>=300 but login succeeds...
 //					if (status.getStatusCode() >= 300) {
 //						throw new HttpResponseException(status.getStatusCode(),status.getReasonPhrase());
 //					}
@@ -178,11 +185,11 @@ public class AndroidServerConnection {
 					for (;;) {
 						String s = fin.readLine();
 						if (s==null) break;
-						System.out.println("request answer "+s);
+//						System.out.println("request answer "+s);
 						sb.append(s);
 					}
 					fin.close();
-					String res = sb.toString();
+					res = sb.toString();
 					return res;
 				}
 			},httpctxt);
@@ -190,68 +197,18 @@ public class AndroidServerConnection {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return res;
 	}
 
 	/**
 	 * @return the players that you can challenge in the ladder, and only them !
-	 * - no way to do it synchronous, far too long...
-	 * - asymchronous works no desktop, but not on mobile: resulting file is more than 1Mb, too much computing intensive.
-	 *   may be an option is to treat the HTML chunks as soon as they arrive, but I'm not sure httpclient can do that
-	 *   
-	 * Other option: handle the ladder all in cache, only query the server with challenge() to get info, and immediately cancel the challenge
-	 * challenge must be called with the target user id: challenge.php?tid=3&amp;rid=916
-	 * 
-	 * - It's easy to know our rank by challenging ourself
-	 * 
-	 * 
 	 */
-	private String answ=null;
-	public String[] ladder;
 	public void startLadderView() {
 		EventManager.getEventManager().sendEvent(eventType.ladderStart);
-		EventManager.getEventManager().registerListener(eventType.ladderDownloadEnd, new EventManager.EventListener() {
-			@Override
-			public void reactToEvent() {
-				EventManager.getEventManager().unregisterListener(eventType.ladderDownloadEnd,this);
-				if (answ!=null) {
-					ArrayList<String> reslist = new ArrayList<String>();
-					int i=answ.indexOf("Challenge this user");
-					while (i>=0) {
-						String userline="";
-						int debline = answ.lastIndexOf("<tr ", i);
-						int endline = answ.indexOf("</tr", i);
-						if (debline>=0&&endline>=0) {
-							int z=answ.indexOf("name=\"rank",debline);
-							if (z>=0) {
-								int z1=answ.indexOf('>',z)+1;
-								int z2=answ.indexOf('<',z1);
-								userline+=answ.substring(z1,z2)+" ";
-							}
-							z=answ.indexOf("class=\"User",debline);
-							if (z>=0) {
-								int z1=answ.indexOf('>',z)+1;
-								int z2=answ.indexOf('<',z1);
-								userline+=answ.substring(z1,z2)+" ";
-							}
-							z=answ.indexOf("class=\"Rating",debline);
-							if (z>=0) {
-								int z1=answ.indexOf('>',z)+1;
-								int z2=answ.indexOf('<',z1);
-								userline+=answ.substring(z1,z2)+" ";
-							}
-							reslist.add(userline.trim());
-						}
-						int j=answ.indexOf("Challenge this user",endline);
-						i=j;
-					}
-					ladder = new String[reslist.size()];
-					reslist.toArray(ladder);
-				}
-				EventManager.getEventManager().sendEvent(eventType.ladderEnd);
-			}
-			@Override
-			public String getName() {return "ladder";}
-		});
+		if (ladd.isLadderCached()) {
+			EventManager.getEventManager().sendEvent(eventType.ladderEnd);
+			return;
+		}
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -259,10 +216,10 @@ public class AndroidServerConnection {
 				System.out.println("getladder - getlogin passed");
 				
 				HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/view.php?tid=3");
-				directConnectExecute(get);
+				String res = directConnectExecute(get);
+				ladd.setHTML(res);
 				System.out.println("getladder - got server answer");
-				System.out.println(answ);
-				EventManager.getEventManager().sendEvent(eventType.ladderDownloadEnd);
+				EventManager.getEventManager().sendEvent(eventType.ladderEnd);
 			}
 		});
 		t.start();
