@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +23,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
+
 import fr.xtof54.jsgo.EventManager.eventType;
 
 /**
@@ -219,12 +219,12 @@ public class ServerConnection {
                     } else {
                     	// entity==null
                         hasError=true;
-                        handleNetError(cmd,endEvent);
+                        handleNetError("no server reply", cmd,endEvent);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     hasError=true;
-                    handleNetError(cmd,endEvent);
+                    handleNetError(e.toString(),cmd,endEvent);
                 }
                 System.out.println("server runnable terminated");
                 if (!hasError&&endEvent!=null) em.sendEvent(endEvent);
@@ -388,6 +388,7 @@ public class ServerConnection {
             HttpPost httppost = new HttpPost(getUrl()+"login.php");
             httppost.setEntity(entity);
             String answ = directConnectExecute(httppost, null);
+            System.out.println("direct login anws: "+answ);
             // TODO: check if login succeeded
             isAlreadyDirectLogged=true;
             return answ;
@@ -399,58 +400,75 @@ public class ServerConnection {
     
     /**
      * @return the players that you can challenge in the ladder, and only them !
+     * - no way to do it synchronous, far too long...
+     * - asymchronous works no desktop, but not on mobile: resulting file is more than 1Mb, too much computing intensive.
+     *   may be an option is to treat the HTML chunks as soon as they arrive, but I'm not sure httpclient can do that
+     *   
+     * Other option: handle the ladder all in cache, only query the server with challenge() to get info, and immediately cancel the challenge
+     * challenge must be called with the target user id: challenge.php?tid=3&amp;rid=916
+     * 
+     * - It's easy to know our rank by challenging ourself
+     * 
+     * 
      */
-    public String[] getLadder() {
-        if (!isAlreadyDirectLogged) directLogin();
-        HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/view.php?tid=3");
-        String answ = directConnectExecute(null, get);
-        String[] tt = answ.split("\n");
-        int co=0;
-        for (int i=0;i<tt.length;i++) {
-            if (tt[i].contains("Challenge this user")) co++;
-        }
-        String[] res = new String[co];
-        for (int i=0;i<tt.length;i++) {
-            if (tt[i].contains("Challenge this user")) {
-                int userFirstLine=-1, userLastLine=-1;
-                String userline = "";
-                // go back to find the begin of the HTML table row
-                for (int j=i;j>=0;j--) {
-                    if (tt[i].contains("<tr ")) {
-                        userFirstLine = j;
-                    }
-                }
-                for (int j=i;j<tt.length;j++) {
-                    if (tt[i].contains("</tr")) {
-                        userLastLine = j;
-                    }
-                }
-                if (userFirstLine>=0&&userLastLine>=0) {
-                    for (int j=userFirstLine;j<=userLastLine;j++) {
-                        int z=tt[j].indexOf("name=\"rank");
+    private String answ;
+    public String[] ladder;
+    public void startLadderView() {
+    	EventManager.getEventManager().sendEvent(eventType.ladderStart);
+    	EventManager.getEventManager().registerListener(eventType.ladderDownloadEnd, new EventManager.EventListener() {
+			@Override
+			public void reactToEvent() {
+				EventManager.getEventManager().unregisterListener(eventType.ladderDownloadEnd,this);
+				ArrayList<String> reslist = new ArrayList<String>();
+				int i=answ.indexOf("Challenge this user");
+				while (i>=0) {
+					String userline="";
+					int debline = answ.lastIndexOf("<tr ", i);
+					int endline = answ.indexOf("</tr", i);
+					if (debline>=0&&endline>=0) {
+					    int z=answ.indexOf("name=\"rank",debline);
                         if (z>=0) {
-                            int z1=tt[j].indexOf('>',z)+1;
-                            int z2=tt[j].indexOf('<',z1);
-                            userline+=tt[j].substring(z1,z2)+" ";
+                            int z1=answ.indexOf('>',z)+1;
+                            int z2=answ.indexOf('<',z1);
+                            userline+=answ.substring(z1,z2)+" ";
                         }
-                        z=tt[j].indexOf("class=\"User");
+                        z=answ.indexOf("class=\"User",debline);
                         if (z>=0) {
-                            int z1=tt[j].indexOf('>',z)+1;
-                            int z2=tt[j].indexOf('<',z1);
-                            userline+=tt[j].substring(z1,z2)+" ";
+                            int z1=answ.indexOf('>',z)+1;
+                            int z2=answ.indexOf('<',z1);
+                            userline+=answ.substring(z1,z2)+" ";
                         }
-                        z=tt[j].indexOf("class=\"Rating");
+                        z=answ.indexOf("class=\"Rating",debline);
                         if (z>=0) {
-                            int z1=tt[j].indexOf('>',z)+1;
-                            int z2=tt[j].indexOf('<',z1);
-                            userline+=tt[j].substring(z1,z2)+" ";
+                            int z1=answ.indexOf('>',z)+1;
+                            int z2=answ.indexOf('<',z1);
+                            userline+=answ.substring(z1,z2)+" ";
                         }
-                    }
-                }
-                res[i]=userline.trim();
-            }
-        }
-        return res;
+                        reslist.add(userline.trim());
+					}
+					int j=answ.indexOf("Challenge this user",endline);
+					i=j;
+				}
+				ladder = new String[reslist.size()];
+				reslist.toArray(ladder);
+		    	EventManager.getEventManager().sendEvent(eventType.ladderEnd);
+			}
+			@Override
+			public String getName() {return "ladder";}
+		});
+    	Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+		        if (!isAlreadyDirectLogged) directLogin();
+		        System.out.println("getladder - getlogin passed");
+		        HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/view.php?tid=3");
+		        answ = directConnectExecute(null, get);
+		        System.out.println("getladder - got server answer");
+		        System.out.println(answ);
+		    	EventManager.getEventManager().sendEvent(eventType.ladderDownloadEnd);
+			}
+		});
+    	t.start();
     }
 
     public String directInvite(String user, String msg) {
@@ -536,13 +554,16 @@ public class ServerConnection {
     }
     private static void test2() throws Exception {
         final String[] c = loadCredsFromFile("creds.txt");
-        final ServerConnection server = new ServerConnection(1,c[0],c[1]);
+        final ServerConnection server = new ServerConnection(0,c[0],c[1]);
         String ans = server.directLogin();
         System.out.println("login answer: "+ans);
         System.out.println();
+
+        server.startLadderView();
+        Thread.sleep(600000);
         
-        ans = server.directInvite("xtof54","");
-        System.out.println("invite answer");
+//        ans = server.directInvite("xtof54","");
+//        System.out.println("invite answer");
         
         server.closeConnection();
     }

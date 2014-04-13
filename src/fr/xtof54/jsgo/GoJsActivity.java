@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+
+import org.apache.http.client.protocol.ClientContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,10 +44,10 @@ import android.text.method.ScrollingMovementMethod;
 
 /**
  * TODO:
- * - create a dir in externalStorage - done
- * - copy in there the eidogo dir - done
- * - load games from DGS - done
- * - create an example.html file with the sgf inline - done
+ * - quicksuite: use status to get in a single command both the games and messages
+ * - support new msgs in forums
+ * - don't download the sgf at every move, but rather cache the sgf and only use the last move given by status (what about if a comment is made on the last move ?)
+ * - better graphics / pictures
  * - init goban zoom from physical screen size
  * 
  * @author xtof
@@ -53,6 +55,7 @@ import android.text.method.ScrollingMovementMethod;
  */
 public class GoJsActivity extends FragmentActivity {
 	ServerConnection server=null;
+	AndroidServerConnection androidServer = null;
 	int chosenServer=0, chosenLogin=0;
 
 	//    String server;
@@ -481,7 +484,7 @@ public class GoJsActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		// ====================================
 		setContentView(R.layout.activity_main);
 
@@ -684,6 +687,7 @@ public class GoJsActivity extends FragmentActivity {
 		em.registerListener(eventType.downloadListStarted, waitDialogShower);
 		em.registerListener(eventType.loginStarted, waitDialogShower);
 		em.registerListener(eventType.moveSentStart, waitDialogShower);
+		em.registerListener(eventType.ladderStart, waitDialogShower);
 
 		EventManager.EventListener waitDialogHider = new EventManager.EventListener() {
 			@Override
@@ -709,6 +713,7 @@ public class GoJsActivity extends FragmentActivity {
 		em.registerListener(eventType.downloadListEnd, waitDialogHider);
 		em.registerListener(eventType.loginEnd, waitDialogHider);
 		em.registerListener(eventType.moveSentEnd, waitDialogHider);
+		em.registerListener(eventType.ladderEnd, waitDialogHider);
 
 		// initialize guistate
 		changeState(guistate.nogame);
@@ -903,6 +908,27 @@ public class GoJsActivity extends FragmentActivity {
 				}
 			};
 			server.setLogger(l);
+		}
+		return true;
+	}
+	private boolean initAndroidServer() {
+		if (androidServer!=null) return true;
+		String loginkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
+		String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
+		if (chosenLogin==1) {
+			loginkey = PrefUtils.PREFS_LOGIN_USERNAME2_KEY;
+			pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD2_KEY;
+		}
+		String u = PrefUtils.getFromPrefs(this, loginkey ,null);
+		String p = PrefUtils.getFromPrefs(this, pwdkey ,null);
+		System.out.println("credsdebug "+u+" "+p+" "+chosenLogin);
+		if (u==null||p==null) {
+			showMessage("Please enter your credentials first via menu Settings");
+			return false;
+		}
+		System.out.println("credentials passed to server "+u+" "+p);
+		if (androidServer==null) {
+			androidServer = new AndroidServerConnection(chosenServer, u, p);
 		}
 		return true;
 	}
@@ -1183,41 +1209,49 @@ public class GoJsActivity extends FragmentActivity {
 	}
 
 	private void viewLadder() {
-        if (!initServer()) return;
-	    final String[] users = server.getLadder();
-	    if (users==null||users.length==0) {
-	        showMessage("Probleme: are your registered in the ladder ? can you still challenge ?");
-	        return;
-	    }
-        class ListDialogFragment extends DialogFragment {
-            @Override
-            public Dialog onCreateDialog(Bundle savedInstanceState) {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                // Get the layout inflater
-                LayoutInflater inflater = getActivity().getLayoutInflater();
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(main, android.R.layout.simple_list_item_1, users);
-                // Inflate and set the layout for the dialog
-                // Pass null as the parent view because it's going in the dialog layout
-                View listFrameview = inflater.inflate(R.layout.ladder, null);
-                ListView ladder = (ListView)listFrameview.findViewById(R.id.ladderList);
-                ladder.setAdapter(adapter);
-                builder.setView(listFrameview);
+        if (!initAndroidServer()) return;
+        EventManager.getEventManager().registerListener(eventType.ladderEnd, new EventManager.EventListener() {
+			@Override
+			public void reactToEvent() {
+				EventManager.getEventManager().unregisterListener(eventType.ladderEnd,this);
+				if (androidServer.ladder==null||androidServer.ladder.length==0) {
+					showMessage("Probleme: are your registered in the ladder ? can you still challenge ?");
+			        return;
+				}
+		        class ListDialogFragment extends DialogFragment {
+		            @Override
+		            public Dialog onCreateDialog(Bundle savedInstanceState) {
+		                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		                // Get the layout inflater
+		                LayoutInflater inflater = getActivity().getLayoutInflater();
+		                ArrayAdapter<String> adapter = new ArrayAdapter<String>(main, android.R.layout.simple_list_item_1, androidServer.ladder);
+		                // Inflate and set the layout for the dialog
+		                // Pass null as the parent view because it's going in the dialog layout
+		                View listFrameview = inflater.inflate(R.layout.ladder, null);
+		                ListView ladder = (ListView)listFrameview.findViewById(R.id.ladderList);
+		                ladder.setAdapter(adapter);
+		                builder.setView(listFrameview);
 
-                builder.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ListDialogFragment.this.getDialog().dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ListDialogFragment.this.getDialog().dismiss();
-                    }
-                });
-                return builder.create();
-            }
-        }
-        final ListDialogFragment msgdialog = new ListDialogFragment();
-        msgdialog.show(main.getSupportFragmentManager(),"message");
+		                builder.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
+		                    public void onClick(DialogInterface dialog, int id) {
+		                        ListDialogFragment.this.getDialog().dismiss();
+		                    }
+		                })
+		                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		                    public void onClick(DialogInterface dialog, int id) {
+		                        ListDialogFragment.this.getDialog().dismiss();
+		                    }
+		                });
+		                return builder.create();
+		            }
+		        }
+		        final ListDialogFragment msgdialog = new ListDialogFragment();
+		        msgdialog.show(main.getSupportFragmentManager(),"message");
+			}
+			@Override
+			public String getName() {return "ladder";}
+		});
+        androidServer.startLadderView();
 	}
 	
 	private void showMoreButtons() {
