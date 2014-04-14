@@ -8,8 +8,9 @@
         android:id="@+id/ladderList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#fff"
+        android:cacheColorHint="#fff"
         android:scrollbarAlwaysDrawVerticalTrack="true"
-        android:textColor="#ffffff" 
         android:scrollbars="vertical" >
     </ListView>
 
