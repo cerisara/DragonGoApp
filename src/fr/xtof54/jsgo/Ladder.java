@@ -12,6 +12,7 @@ public class Ladder {
 	String html;
 	String[] userList=null;
 	File cacheFile=null;
+	String userRank = "unk";
 
 	public void checkCache(File dir) {
 		File f = new File(dir+"/ladder.txt");
@@ -93,6 +94,16 @@ public class Ladder {
 			System.out.println("end ladder to array:");
 			for (int a=0;a<15;a++)
 				System.out.println("\t"+a+"\t"+userList[a]);
+		}
+		// get user rank
+		int i=html.indexOf("TourneyUser");
+		if (i>=0) {
+		    int z=html.indexOf("name=\"rank",i);
+            if (z>=0) {
+                int z1=html.indexOf('>',z)+1;
+                int z2=html.indexOf('<',z1);
+                userRank=html.substring(z1, z2);
+            }
 		}
 	}
 	

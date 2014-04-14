@@ -4,6 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <TextView
+        android:id="@+id/ladderlab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#d3d3d3"
+        android:text="19x19 ladder, your rank: " />
+
     <ListView
         android:id="@+id/ladderList"
         android:layout_width="match_parent"

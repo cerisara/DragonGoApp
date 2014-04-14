@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-import org.apache.http.client.protocol.ClientContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,7 +39,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.text.method.ScrollingMovementMethod;
 
 /**
  * TODO:
@@ -1188,10 +1186,16 @@ public class GoJsActivity extends FragmentActivity {
 		                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		                // Get the layout inflater
 		                LayoutInflater inflater = getActivity().getLayoutInflater();
-		                ArrayAdapter<String> adapter = new ArrayAdapter<String>(main, android.R.layout.simple_list_item_1, androidServer.ladd.getCachedLadder());
+		                ArrayAdapter<String> adapter = new ArrayAdapter<String>(main, R.layout.detlistitem, androidServer.ladd.getCachedLadder());
 		                // Inflate and set the layout for the dialog
 		                // Pass null as the parent view because it's going in the dialog layout
 		                View listFrameview = inflater.inflate(R.layout.ladder, null);
+		                {
+	                        TextView ladderlab = (TextView)listFrameview.findViewById(R.id.ladderlab);
+	                        CharSequence s = ladderlab.getText();
+	                        s = s+androidServer.ladd.userRank;
+	                        ladderlab.setText(s);
+		                }
 		                ListView ladder = (ListView)listFrameview.findViewById(R.id.ladderList);
 		                ladder.setAdapter(adapter);
 		                builder.setView(listFrameview);
