@@ -180,7 +180,7 @@ public class AndroidServerConnection {
 						throw new ClientProtocolException("Response contains no content");
 					}
 					InputStream instream = entity.getContent();
-					BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+					BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("ISO-8859-1")));
 					StringBuilder sb = new StringBuilder();
 					for (;;) {
 						String s = fin.readLine();
