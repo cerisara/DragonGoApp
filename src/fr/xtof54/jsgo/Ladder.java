@@ -7,13 +7,21 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class Ladder {
 	String html;
-	String[] userList=null;
+	String[] userList=null, ridList;
 	File cacheFile=null;
 	String userRank = "unk";
+	int lastClicked = -1;
+    // year, month, day, hour, minutes
+	int[] cacheTime = {0,0,0,0,0};
 
+	public CharSequence getCacheTime(){
+	    return cacheTime[0]+"-"+cacheTime[1]+"-"+cacheTime[2]+"."+cacheTime[3]+":"+cacheTime[4];
+	}
+	
 	public void checkCache(File dir) {
 		File f = new File(dir+"/ladder.txt");
 		cacheFile=f;
@@ -25,6 +33,11 @@ public class Ladder {
 			userList=new String[n];
 			for (int i=0;i<n;i++)
 				userList[i] = ff.readUTF();
+			ridList=new String[n];
+            for (int i=0;i<n;i++)
+                ridList[i] = ff.readUTF();
+            userRank = ff.readUTF();
+            for (int i=0;i<5;i++) cacheTime[i]=ff.readInt();
 			ff.close();
 			System.out.println("ladder read from cache "+n);
 		} catch (Exception e) {
@@ -57,8 +70,16 @@ public class Ladder {
 	private void processHTML() {
 		if (html!=null) {
 			ArrayList<String> reslist = new ArrayList<String>();
+			ArrayList<String> rids = new ArrayList<String>();
 			int i=html.indexOf("Challenge this user");
 			while (i>=0) {
+			    String rid = null;
+			    int j=html.lastIndexOf("rid=", i);
+			    if (j>=0) {
+			        j+=4;
+			        int z=html.indexOf('"',j);
+			        if (z-j>0) rid = html.substring(j, z);
+			    }
 				StringBuilder userline = new StringBuilder();
 				int debline = html.lastIndexOf("<tr ", i);
 				int endline = html.indexOf("</tr", i);
@@ -85,12 +106,15 @@ public class Ladder {
 						userline.append(' ');
 					}
 					reslist.add(userline.toString().trim());
+					rids.add(rid);
 				}
-				int j=html.indexOf("Challenge this user",endline);
+				j=html.indexOf("Challenge this user",endline);
 				i=j;
 			}
 			userList = new String[reslist.size()];
 			reslist.toArray(userList);
+            ridList  = new String[reslist.size()];
+            rids.toArray(ridList);
 			System.out.println("end ladder to array:");
 			for (int a=0;a<15;a++)
 				System.out.println("\t"+a+"\t"+userList[a]);
@@ -117,8 +141,27 @@ public class Ladder {
 		try {
 			DataOutputStream ff = new DataOutputStream(new FileOutputStream(cacheFile));
 			ff.writeInt(userList.length);
-			for (int i=0;i<userList.length;i++)
-				ff.writeUTF(userList[i]);
+            for (int i=0;i<userList.length;i++)
+                ff.writeUTF(userList[i]);
+            for (int i=0;i<userList.length;i++)
+                ff.writeUTF(ridList[i]);
+            ff.writeUTF(userRank);
+            Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            int hour = c.get(Calendar.HOUR);
+            int min = c.get(Calendar.MINUTE);
+            ff.writeInt(year);
+            cacheTime[0]=year;
+            ff.writeInt(month);
+            cacheTime[1]=month;
+            ff.writeInt(day);
+            cacheTime[2]=day;
+            ff.writeInt(hour);
+            cacheTime[3]=hour;
+            ff.writeInt(min);
+            cacheTime[4]=min;
 			ff.close();
 			System.out.println("ladder saved on cache");
 		} catch (Exception e) {

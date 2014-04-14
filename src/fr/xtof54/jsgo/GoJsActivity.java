@@ -28,8 +28,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -1192,17 +1195,27 @@ public class GoJsActivity extends FragmentActivity {
 		                View listFrameview = inflater.inflate(R.layout.ladder, null);
 		                {
 	                        TextView ladderlab = (TextView)listFrameview.findViewById(R.id.ladderlab);
-	                        CharSequence s = ladderlab.getText();
-	                        s = s+androidServer.ladd.userRank;
+	                        String s = "on "+androidServer.ladd.getCacheTime()+" your rk: "+androidServer.ladd.userRank;
 	                        ladderlab.setText(s);
 		                }
-		                ListView ladder = (ListView)listFrameview.findViewById(R.id.ladderList);
+		                final ListView ladder = (ListView)listFrameview.findViewById(R.id.ladderList);
 		                ladder.setAdapter(adapter);
+		                ladder.setOnItemClickListener(new OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
+                                androidServer.ladd.lastClicked = position;
+                            }
+                        });
 		                builder.setView(listFrameview);
 
 		                builder.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
 		                    public void onClick(DialogInterface dialog, int id) {
-		                    	DetListDialogFragment.this.getDialog().dismiss();
+		                        int i = androidServer.ladd.lastClicked;
+                                showMessage("selected item "+i);
+		                        if (i>=0) {
+		                            // challenge
+		                        }
+                                DetListDialogFragment.this.getDialog().dismiss();
 		                    }
 		                })
 		                .setNeutralButton("Reload", new DialogInterface.OnClickListener() {
