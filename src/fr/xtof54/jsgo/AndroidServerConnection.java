@@ -200,7 +200,7 @@ public class AndroidServerConnection {
 		return res;
 	}
 
-	public void ladderChallenge(final String rid) {
+	public void ladderChallenge(final String rid, final int pos) {
         EventManager.getEventManager().sendEvent(eventType.ladderChallengeStart);
         Thread t = new Thread(new Runnable() {
             @Override
@@ -208,11 +208,34 @@ public class AndroidServerConnection {
                 initHttp();
                 System.out.println("challengeladder - getlogin passed");
                 
-//                HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tid=3&rid="+rid);
-                HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tid=3&rid=-25622111");
+                HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tid=3&rid="+rid);
                 String res = directConnectExecute(get);
                 System.out.println("challengeladder - got server answer");
-                System.out.println(res);
+                
+                // check if challenge possible
+                int i=res.indexOf("Defender is not");
+                if (i>=0) {
+                    EventManager.getEventManager().sendEvent(eventType.ladderChallengeEnd);
+                    EventManager.getEventManager().sendEvent(eventType.showMessage,"Defender is not any more challengeable");
+                    return;
+                }
+                i=res.indexOf("Please confirm if you want to challenge this user");
+                if (i<0) {
+                    EventManager.getEventManager().sendEvent(eventType.ladderChallengeEnd);
+                    EventManager.getEventManager().sendEvent(eventType.showMessage,"Error when trying to challenge user");
+                    return;
+                }
+                // challenge is possible.
+                {
+                    HttpGet cget = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tl_challenge=Confirm+Challenge&tid=3&rid="+rid+"&confirm=1");
+                    String cres = directConnectExecute(cget);
+                    System.out.println("challengeladder - got server answer to challenge confirm");
+                    System.out.println(cres);
+                    EventManager.getEventManager().sendEvent(eventType.showMessage,"Challenge "+ladd.userList[pos]+" ok");
+                }
+                
+                // warning: displaying this String may not be done completely, why ?
+//                System.out.println(res);
                 EventManager.getEventManager().sendEvent(eventType.ladderChallengeEnd);
             }
         });

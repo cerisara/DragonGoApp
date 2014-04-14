@@ -716,8 +716,18 @@ public class GoJsActivity extends FragmentActivity {
 		em.registerListener(eventType.loginEnd, waitDialogHider);
 		em.registerListener(eventType.moveSentEnd, waitDialogHider);
 		em.registerListener(eventType.ladderEnd, waitDialogHider);
-        em.registerListener(eventType.ladderChallengeEnd, waitDialogShower);
+        em.registerListener(eventType.ladderChallengeEnd, waitDialogHider);
 
+        // to show message
+        em.registerListener(eventType.showMessage, new EventManager.EventListener() {
+            @Override
+            public void reactToEvent() {
+                showMessage(EventManager.getEventManager().message);
+            }
+            @Override
+            public String getName() {return "showMessage";}
+        });
+        
 		// initialize guistate
 		changeState(guistate.nogame);
 	}
@@ -1213,7 +1223,7 @@ public class GoJsActivity extends FragmentActivity {
 		                builder.setPositiveButton("Challenge", new DialogInterface.OnClickListener() {
 		                    public void onClick(DialogInterface dialog, int id) {
 		                        int i = androidServer.ladd.lastClicked;
-                                showMessage("selected item "+i);
+//                                showMessage("selected item "+i);
 		                        if (i>=0) {
 		                            ladderChallenge(i);
 		                        }
@@ -1252,7 +1262,7 @@ public class GoJsActivity extends FragmentActivity {
         }
         String rid = androidServer.ladd.ridList[pos];
         System.out.println("challenging "+rid);
-        androidServer.ladderChallenge(rid);
+        androidServer.ladderChallenge(rid,pos);
     }
 	
 	private void showMoreButtons() {

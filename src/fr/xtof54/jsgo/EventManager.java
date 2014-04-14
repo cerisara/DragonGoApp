@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class EventManager {
 	enum eventType {loginStarted, loginEnd, downloadListStarted, downloadListEnd, downloadListGamesEnd, downloadGameStarted, downloadGameEnd, GameOK, moveSentStart, moveSentEnd, gobanReady,
-		msgSendStart, msgSendEnd, ladderStart, ladderEnd, ladderChallengeStart, ladderChallengeEnd};
+		msgSendStart, msgSendEnd, ladderStart, ladderEnd, ladderChallengeStart, ladderChallengeEnd, showMessage};
 	
 	private static EventManager em = new EventManager();
 	public static EventManager getEventManager() {
@@ -52,6 +52,11 @@ public class EventManager {
 		}
 	}
 	
+	public String message=null;
+    public void sendEvent(final eventType e, String msg) {
+        message=""+msg;
+        sendEvent(e);
+    }
 	public void sendEvent(final eventType e) {
 		Thread tt = new Thread(new Runnable() {
 			@Override
