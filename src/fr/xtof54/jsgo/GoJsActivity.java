@@ -688,7 +688,8 @@ public class GoJsActivity extends FragmentActivity {
 		em.registerListener(eventType.downloadListStarted, waitDialogShower);
 		em.registerListener(eventType.loginStarted, waitDialogShower);
 		em.registerListener(eventType.moveSentStart, waitDialogShower);
-		em.registerListener(eventType.ladderStart, waitDialogShower);
+        em.registerListener(eventType.ladderStart, waitDialogShower);
+        em.registerListener(eventType.ladderChallengeStart, waitDialogShower);
 
 		EventManager.EventListener waitDialogHider = new EventManager.EventListener() {
 			@Override
@@ -715,6 +716,7 @@ public class GoJsActivity extends FragmentActivity {
 		em.registerListener(eventType.loginEnd, waitDialogHider);
 		em.registerListener(eventType.moveSentEnd, waitDialogHider);
 		em.registerListener(eventType.ladderEnd, waitDialogHider);
+        em.registerListener(eventType.ladderChallengeEnd, waitDialogShower);
 
 		// initialize guistate
 		changeState(guistate.nogame);
@@ -1213,7 +1215,7 @@ public class GoJsActivity extends FragmentActivity {
 		                        int i = androidServer.ladd.lastClicked;
                                 showMessage("selected item "+i);
 		                        if (i>=0) {
-		                            // challenge
+		                            ladderChallenge(i);
 		                        }
                                 DetListDialogFragment.this.getDialog().dismiss();
 		                    }
@@ -1242,6 +1244,16 @@ public class GoJsActivity extends FragmentActivity {
         androidServer.ladd.checkCache(eidogodir);
         androidServer.startLadderView();
 	}
+	
+	private void ladderChallenge(int pos) {
+        if (pos<0||pos>=androidServer.ladd.ridList.length) {
+            showMessage("Problem with item at pos "+pos);
+            return;
+        }
+        String rid = androidServer.ladd.ridList[pos];
+        System.out.println("challenging "+rid);
+        androidServer.ladderChallenge(rid);
+    }
 	
 	private void showMoreButtons() {
 		System.out.println("showing more buttons");

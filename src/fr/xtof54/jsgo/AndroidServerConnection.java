@@ -200,6 +200,25 @@ public class AndroidServerConnection {
 		return res;
 	}
 
+	public void ladderChallenge(final String rid) {
+        EventManager.getEventManager().sendEvent(eventType.ladderChallengeStart);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                initHttp();
+                System.out.println("challengeladder - getlogin passed");
+                
+//                HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tid=3&rid="+rid);
+                HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tid=3&rid=-25622111");
+                String res = directConnectExecute(get);
+                System.out.println("challengeladder - got server answer");
+                System.out.println(res);
+                EventManager.getEventManager().sendEvent(eventType.ladderChallengeEnd);
+            }
+        });
+        t.start();
+	}
+	
 	/**
 	 * @return the players that you can challenge in the ladder, and only them !
 	 */
