@@ -10,7 +10,8 @@ This is a new experimental android app to use for DGS, with the following featur
 * Minimize bandwidth usage: this is especially useful when you have a limited quota of 3G data connection;
 * Full-featured SGF editor/player based on the open-source eidogo code. Also shows game information and game comments.
 * Support dual servers/credentials (DGS and develDGS)
-* Playing moves (obviously !), send/receive messages, invite/accept/refuse challenges, attach a public comment to a move
+* Playing moves (obviously !), send/receive messages, attach a public comment to a move
+* invite/accept/refuse challenges, challenge in 19x19 ladder
 
 Limitations:
 
