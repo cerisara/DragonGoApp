@@ -1,0 +1,529 @@
+(
+;
+EV[28th Tokyo Cup]
+RO[1st round, 8th game]
+RE[W+R]
+PW[Yuki Satoshi]WR[9 dan]
+PB[Otake Hideo]BR[9 dan]
+PC[Japan]DT[1997-07-13]
+KM[5.5]
+US[Jan.van.der.Steen@cwi.nl]
+
+;B[qe]C[
+ jansteen 3d*:  This is not at all like Otake :)
+]
+;W[dd]
+;B[qo]
+;W[dp]C[
+ jansteen 3d*:  Interesting fuseki pattern
+]
+;B[fc]
+;W[df]
+;B[jd]
+;W[hc]
+;B[hd]
+;W[id]
+;B[ie]
+;W[ic]
+;B[gd]
+;W[jc]
+;B[kd]
+;W[lc]
+;B[hf]C[
+ jansteen 3d*:  Next move is important, where?
+ colombe 2d*: e17 ?
+ jansteen 3d*:  e17 is correct "direction", but not most efficient
+ colombe 2d*: or n17
+ colombe 2d*: d18 ?
+]
+;W[ci]C[
+ jansteen 3d*:  This move prevents black's very annoying c12 kakari (attack)
+ jansteen 3d*:  It's in combination with white's invasion at the top a complete sequence
+]
+;B[fq]
+;W[ip]C[
+ jansteen 3d*:  Which joseki should black choose here?
+ jansteen 3d*:  f5, c6, h5 or c3?
+ colombe 2d*: dunno
+ Grandad 6k*: c6
+ jansteen 3d*:  Consider whole board turtle
+ jansteen 3d*:  Grandad is correct
+ chouette NR : f5 mapping a big framework?
+ jansteen 3d*:  SOrry, Grandad is not correct, chouette is
+]
+;B[fo]C[
+ jansteen 3d*:  This stone makes all black stones on right side work
+ colombe 2d*: chouette is another french bird
+ jansteen 3d*:  White j4 suddenly in a black sea
+ chouette NR : uhu
+ jansteen 3d*:  chouette = small stone?
+]
+;W[eq]
+;B[fr]C[
+ colombe 2d*: chouette is like hibou
+]
+;W[dn]C[
+ colombe 2d*: j6
+ jansteen 3d*:  I don't know the word hibou
+ jansteen 3d*:  Next black move?
+ colombe 2d*: if not j6, i give away 1d*
+ colombe 2d*: oupss wait
+ jansteen 3d*:  I wait ....
+ colombe 2d*: l3 first ?
+ chouette NR : chouette=owl
+ jansteen 3d*:  I agree with l3 direction but I have a tip for you....
+ colombe 2d*: difficult btw
+ colombe 2d*: c5 first ?
+ jansteen 3d*:  If you are choosing between l3 or l4 play the high one when there is no good reason for the low one
+ jansteen 3d*:  So, in this case low or high?
+ colombe 2d*: low
+ jansteen 3d*:  Good turtle!
+ jansteen 3d*:  So l4 then?
+ Grandad 6k*: high cos of r5
+ colombe 2d*: g4
+ jansteen 3d*:  No Grandad, high because of f2
+ jansteen 3d*:  Ok, high is correct, now choose between l4 and m4
+]
+;B[lp]C[
+ jansteen 3d*:  This choice is partly feeling but also another reason
+ colombe 2d*: the corner ?
+ jansteen 3d*:  Since black's lower-right quite open, black doesn't want to spend too many extra moves
+ jansteen 3d*:  Right colombe
+ jansteen 3d*:  Black wants *one* extra move
+ jansteen 3d*:  With l4 you need two extra moves
+ jansteen 3d*:  Therefore a little bit more distance
+ jansteen 3d*:  White's next acknowledges black's potential in lower-right
+ colombe 2d*: j6 for white ?
+ jansteen 3d*:  He starts a very nice sabaki manoeuvre leading to high-light of this game
+ jansteen 3d*:  Pls try to find a move in lower-right with a clear miai meaning
+ jansteen 3d*:  Not j6 colombe, a small combination
+ colombe 2d*: o3 making miai of m3 and r3 ?
+ jansteen 3d*:  Good!!
+]
+;W[nq]
+;B[pq]
+;W[lq]
+;B[kq]
+;W[kp]C[
+ jansteen 3d*:  This is white's sabaki manoeuvre
+]
+;B[jq]
+;W[ko]
+;B[lo]
+;W[ln]
+;B[mq]
+;W[lr]
+;B[mr]C[
+ jansteen 3d*:  Black fights back as hard as possible
+ jansteen 3d*:  So, white to play here, which one?
+ colombe 2d*: j6 ?
+ Grandad 6k*: o5
+ colombe 2d*: or o6
+]
+;W[mp]
+;B[mo]C[
+ jansteen 3d*:  Next?
+ siedler 3d*: hi Jan :)
+ jansteen 3d*:  Hi siedler
+ colombe 2d*: o4
+ jansteen 3d*:  right!
+]
+;W[np]C[
+ jansteen 3d*:  Using all stones locally
+ colombe 2d*: geta then
+]
+;B[kr]
+;W[nn]C[
+ jansteen 3d*:  This combination was easy to overlook, therefore I asked
+]
+;B[mn]
+;W[mm]
+;B[ls]
+;W[lq]
+;B[lr]
+;W[no]
+;B[lq]
+;W[lm]C[
+ jansteen 3d*:  Next?
+ Grandad 6k*: must o7
+ colombe 2d*: cut is overplay ?
+ jansteen 3d*:  Yes, good
+]
+;B[nm]C[
+ jansteen 3d*:  Cut has to, was planned when black played n6
+ jansteen 3d*:  In a position like this one shouldn't panic
+ jansteen 3d*:  q6 is good idea, trying to keep corner busy while aiming at o8 or escape
+]
+;W[qn]
+;B[om]
+;W[po]
+;B[qp]
+;W[pm]C[
+ jansteen 3d*:  Black cannot cut now because of ladder, so....
+]
+;B[ok]
+;W[pp]
+;B[qq]
+;W[qk]C[
+ jansteen 3d*:  White managed to get around the o7 stone
+ jansteen 3d*:  But anyway, the o7 cut is very severe on white
+]
+;B[on]
+;W[pn]C[
+ jansteen 3d*:  Next?
+ jansteen 3d*:  (only move)
+ suzhou 3k*: q10?
+ colombe 2d*: r10 is severest
+ suzhou 3k*: o2?
+ jansteen 3d*:  q10 is soft, white can r10 and slide
+ colombe 2d*: or atacking m7
+ siedler 3d*: r 11
+ jansteen 3d*:  Yes, r11 is severe
+]
+;B[qi]C[
+ suzhou 3k*: ya
+ jansteen 3d*:  Preventing white to make a base for this group, driving it out
+]
+;W[pj]C[
+ jansteen 3d*:  Next?
+ siedler 3d*: n9
+ jansteen 3d*:  Good siedler!
+]
+;B[mk]C[
+ jansteen 3d*:  Nice sequence by black
+ jansteen 3d*:  Make own position strong and make opponent feel weak and treatened
+ suzhou 3k*: q11
+ jansteen 3d*:  Of course n9 is also aiming at attack on lower-side (bottom) white group
+]
+;W[jm]
+;B[jp]C[
+ suzhou 3k*: o7 cut severe
+]
+;W[jo]
+;B[io]
+;W[or]
+;B[rn]
+;W[rm]
+;B[sn]C[
+ suzhou 3k*: but you need to live first:)
+ jansteen 3d*:  Next move looks very aggressive :)
+ jansteen 3d*:  Anyone idea for aggressiveness here?
+ colombe 2d*: o11 ?
+ Grandad 6k*: m10
+ siedler 3d*: t4
+ suzhou 3k*: h4or h5?
+ jansteen 3d*:  Yes, suzhou
+]
+;W[hp]C[
+ suzhou 3k*: hahaha, what a guess:)))
+ jansteen 3d*:  Aiming h6 capture and j2
+ suzhou 3k*: since w has p2 already
+ colombe 2d*: h5 not work ?
+ jansteen 3d*:  Otake Hideo is from
+ jansteen 3d*:              12/05/1942
+ colombe 2d*: black h5 now
+ colombe 2d*: no, sorry
+]
+;B[in]
+;W[ir]C[
+ suzhou 3k*: cool
+ jansteen 3d*:  Yuki is known for his extremely aggressive style
+ colombe 2d*: semeai ?
+ jansteen 3d*:  Compromise is a word not found in his dictionary
+ suzhou 3k*: hmm, sure he is
+ jansteen 3d*:  People in Kansai district adore him for this
+]
+;B[iq]
+;W[hq]
+;B[hr]
+;W[gr]
+;B[hs]
+;W[gq]C[
+ jansteen 3d*:  Next move?
+ suzhou 3k*: k1?
+ jansteen 3d*:  k1, then white happy with f4 connection
+ joachim 3k*: g5
+ jansteen 3d*:  When white gets f4 then black's stones are drifting in the center
+]
+;B[gp]C[
+ jansteen 3d*:  g5 right idea, but taking liberty is essential here
+]
+;W[gs]
+;B[ho]
+;W[is]C[
+ joachim 3k*: seems so :-)
+ jansteen 3d*:  Next?
+ suzhou 3k*: seki?
+ jansteen 3d*:  (only one move)
+ colombe 2d*: r1 ?
+ colombe 2d*: typo, k1
+]
+;B[js]C[
+ colombe 2d*: ko ?
+ suzhou 3k*: ko
+ jansteen 3d*:  Yes
+]
+;W[ep]
+;B[fp]C[
+ jansteen 3d*:  e4 pays attention to detail, this kikashi is gone when ko is activated
+ colombe 2d*: but bl will play k2
+]
+;W[jr]
+;B[fs]
+;W[ks]
+;B[hr]
+;W[hs]C[
+ colombe 2d*: bl take first
+]
+;B[js]
+;W[ro]C[
+ colombe 2d*: and two step
+]
+;B[rp]
+;W[ks]C[
+ colombe 2d*: bl will win
+ jansteen 3d*:  It's one-step, colombe
+]
+;B[jn]
+;W[kn]
+;B[js]
+;W[nl]
+;B[ol]
+;W[ks]
+;B[nk]
+;W[pr]
+;B[qr]
+;W[nr]C[
+ colombe 2d*: i call this 2 steps :)
+]
+;B[js]C[
+ jansteen 3d*:  ok :)
+ jansteen 3d*:  White now?
+ colombe 2d*: " t3
+ suzhou 3k*: r1
+]
+;W[sm]
+;B[hr]
+;W[so]C[
+ jansteen 3d*:  White t7 is simple, since black's coner is dead shape
+ colombe 2d*: simplier
+ joachim 3k*: o17
+ suzhou 3k*: b gained a lot
+ colombe 2d*: ok go and sleep now bye all
+ jansteen 3d*:  Who gained in this fight? :)
+ jansteen 3d*:  colombe, in one hour live pro game on IGS!
+ suzhou 3k*: but w's L7 group is 70% dead
+ jansteen 3d*:  Otake Hideo (9p,B) vs Yuki Satoshi (8p,W)
+ joachim 3k*: Otake is happy, he likes thickness
+ jansteen 3d*:  ok, answer: black slightly better in this position
+ jansteen 3d*:  Next move?
+ jansteen 3d*:  (black to use thickness)
+ suzhou 3k*: maybe lack in cash, but b has lots investment there :)
+ suzhou 3k*: long term investements:)
+ suzhou 3k*: q10 is shining now, hehe,
+]
+;B[nc]
+;W[ld]
+;B[le]
+;W[me]
+;B[lf]
+;W[nd]
+;B[oc]C[
+ suzhou 3k*: hmm, learn one more thing: always find some weak group to start:)
+]
+;W[mf]
+;B[lg]
+;W[mg]
+;B[mh]
+;W[je]C[
+ jansteen 3d*:  This move is a testing move
+ jansteen 3d*:  Black k14 is safe, but then l17 is sente, l15 is aggressive, but the white has aji
+]
+;B[jf]C[
+ jansteen 3d*:  Next move?
+ jansteen 3d*:  (Yuki-style)
+ suzhou 3k*: q16
+ jansteen 3d*:  Yes :)
+]
+;W[pd]C[
+ suzhou 3k*: gee, I am not aggressive:)
+ jansteen 3d*:  This move splits up black's position completely
+ jansteen 3d*:  Right side and top
+ suzhou 3k*: w center group is 70-80% dead, no benefits to drive it out directly, enrico
+ jansteen 3d*:  Yes, enrico, anyway useless stones
+]
+;B[od]
+;W[pe]
+;B[oe]
+;W[pf]
+;B[of]
+;W[qd]
+;B[pg]
+;W[qg]
+;B[mc]
+;W[kc]
+;B[ke]
+;W[gb]
+;B[qb]
+;W[ph]C[
+ suzhou 3k*: hibenate:) like turtle:)
+ jansteen 3d*:  Ok, black sente again
+ jansteen 3d*:  Where to play next? (left side)
+ jansteen 3d*:  (black took quite a decision here)
+ suzhou 3k*: looks like b has the control of the game?
+ suzhou 3k*: d8?
+ suzhou 3k*: around c8,9 d8,9 area:)
+ joachim 3k*: e7
+]
+;B[dj]C[
+ jansteen 3d*:  Considering this is a lightning game the players have to access position quickly
+ jansteen 3d*:  One reason for *not* invading left side is....
+ suzhou 3k*: is this quick game?
+ jansteen 3d*:  c2 is open, and c17 still open
+ jansteen 3d*:  Next white move is not an automatic one, but considers the main area, ideas?
+ suzhou 3k*: jan's comments is cool
+]
+;W[em]C[
+ jansteen 3d*:  White decided to enter black's center from this side
+]
+;B[di]
+;W[ch]
+;B[cj]C[
+ jansteen 3d*:  Next move?
+ jansteen 3d*:  enrico, you commented both corners were open, very good!
+ jansteen 3d*:  And about your last question: d10 was considered "overplay" by the commentary
+ jansteen 3d*:  Yes, dahui :)
+ jansteen 3d*:  Instead of d10 black should have enclosed the center in a safe way
+ jansteen 3d*:  f10 too aggresive dahui, try again (direction is ok)
+ jansteen 3d*:  Zal ik een zin Nederlands praten? Of jullie dat nou echt leuk vinden... :)
+ jansteen 3d*:  and?
+ jansteen 3d*:  g8 leaves a cutting point
+ jansteen 3d*:  f8 as well
+ jansteen 3d*:  I mean f9 as wel
+]
+;W[fl]C[
+ jansteen 3d*:  Safety first in this case
+ jansteen 3d*:  White cannot allow a cut considering black's center power
+]
+;B[dh]
+;W[dg]
+;B[fb]
+;W[db]
+;B[lb]
+;W[kb]
+;B[ma]C[
+ jansteen 3d*:  White to live, how?
+]
+;W[ib]C[
+ jansteen 3d*:  Black can get a seki later with k19 etc
+ jansteen 3d*:  That's latin, right?
+ jansteen 3d*:  What does it mean, enrico?
+ joachim 3k*: dice are thrown
+ joachim 3k*: nothing can be done from now on
+ jansteen 3d*:  Smething like: destiny is set?
+ jansteen 3d*:  I see, ok :)
+]
+;B[bn]
+;W[bo]
+;B[cc]
+;W[dc]
+;B[cb]
+;W[cd]
+;B[gc]
+;W[ga]
+;B[fa]
+;W[ka]
+;B[da]C[
+ jansteen 3d*:  Black knew f19 was sente, so he invaded :)
+]
+;W[bj]
+;B[bk]
+;W[bi]C[
+ jansteen 3d*:  :)
+]
+;B[hl]
+;W[gk]
+;B[fh]
+;W[hk]
+;B[ik]
+;W[ij]
+;B[jk]
+;W[og]
+;B[rc]
+;W[gh]
+;B[gi]
+;W[hi]
+;B[hh]
+;W[jj]
+;B[kj]
+;W[ck]
+;B[oo]
+;W[op]
+;B[ha]
+;W[hb]
+;B[cq]
+;W[bp]
+;B[gj]
+;W[hj]
+;B[oi]
+;W[pi]
+;B[dr]
+;W[dk]
+;B[re]
+;W[bc]
+;B[bb]
+;W[ki]
+;B[lj]
+;W[hm]
+;B[im]
+;W[gg]
+;B[fg]
+;W[hg]
+;B[ig]
+;W[ih]
+;B[gf]
+;W[hh]
+;B[sh]
+;W[ff]
+;B[ef]
+;W[fe]
+;B[ee]
+;W[eg]
+;B[ge]
+;W[eh]
+;B[fi]
+;W[fj]
+;B[fd]
+;W[ei]
+;B[bd]
+;W[be]
+;B[ac]
+;W[rd]
+;B[sd]
+;W[rh]
+;B[ff]
+;W[ae]
+;B[sf]
+;W[si]
+;B[bq]
+;W[gl]
+;B[il]
+;W[sg]
+;B[kh]
+;W[aq]C[
+ jansteen 3d*:  How's the score?
+ jansteen 3d*:  I have no time to count, sorry
+ jansteen 3d*:  Anyone did?
+ jansteen 3d*:  Correct
+ jansteen 3d*:  White 83, black 76 without komi I count
+ jansteen 3d*:  correct (english) = correct (dutch)
+ jansteen 3d*:  :)
+ jansteen 3d*:  So black resigned here
+ jansteen 3d*:  An interesting start of this game
+ jansteen 3d*:  Thank you, my pleasure :)
+ Pollux 11k :  ;Vielen Dank
+ jansteen 3d*:  Nice warming up for live pro game in a few minutes
+ jansteen 3d*:  Gern geschehen
+];
+
+)

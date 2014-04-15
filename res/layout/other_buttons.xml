@@ -96,6 +96,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="reset GUI" />
+        
+        <Button
+            android:id="@+id/reviews"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open game reviews" />
 
         <Button
             android:id="@+id/copyEidogo"

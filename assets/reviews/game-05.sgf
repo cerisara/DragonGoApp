@@ -1,0 +1,361 @@
+(
+;
+EV[41st NHK title]
+RE[B+1.5]
+PW[Ryu Shikun]
+WR[5 dan]
+PB[Rin Kaiho]
+BR[9 dan]
+PC[Japan]
+DT[1993]
+TM[600]
+KM[5.5]
+US[Jan.van.der.Steen@cwi.nl]
+
+C[
+ jansteen 3d*: This is the 41st NHK: Rin Kaiho (b,9p) vs. Ryu Shikun (w,5p)
+ jansteen 3d*: (Chinese: Lin Haifeng vs. Liu Shixun)
+ jansteen 3d*: Thinking time: 10 min, Byo-Yomi: 30 sec.
+]
+;B[pd]
+;W[dd]
+;B[pq]
+;W[cp]
+;B[ep]
+;W[po]
+;B[qo]
+;W[qn]
+;B[qp]C[
+ jansteen 3d*: Where does white play next?
+ jansteen 3d*: Let me explain about the shape along the right
+ jansteen 3d*: side White seeks efficiency along the right side
+ jansteen 3d*: The point is that when white would simply play
+ jansteen 3d*: joseki with q7 now, black could eventually play
+ jansteen 3d*: the perfect move at r13.
+]
+;W[nc]C[
+ jansteen 3d*: So white forces black to take a decision *before*
+ jansteen 3d*: the right side shape is settled When black would
+ jansteen 3d*: play r13 now, then white would choose the q6
+ jansteen 3d*: joseki instead of the one starting with q7.
+]
+;B[qf]C[
+ madmax 6k*: whenever I do this as white, b always q6.
+ jansteen 3d*: q6 would be an option, white would play r14 and
+ jansteen 3d*: take the initiative. By the way, don't fear q6 madmax,
+ jansteen 3d*: it is not as big as it seems.
+ mas 18k*: because b corner is already live?
+ jansteen 3d*: Well, yes mas, that's also part of the reason.
+]
+;W[pm]
+;B[nq]
+;W[qi]
+;B[kc]C[
+ jansteen 3d*: Black l17 puts white under attack
+ jansteen 3d*: What are white's options now?
+ madmax 6k*: w can q17.
+ jansteen 3d*: Right, madmax, q17 is normal. What's the other normal move?
+ madmax 6k*: could r17
+ jansteen 3d*: r17 is less attractive because l17 would become well placed
+ madmax 6k*: q18 a option?
+ jansteen 3d*: No, q18 would spoil r17
+ jansteen 3d*: All these moves just defend, try to think positive :-)
+ madmax 6k*: j17.
+ jansteen 3d*: Right, madmax! But now reconsider the shape in upper left
+ nbk 5k*: H17
+ jansteen 3d*: Close, nbk
+]
+;W[gc]C[
+ jansteen 3d*: This is the multi-purpose move: encloses the
+ jansteen 3d*: corner and attacks l17. By attacking l17, o17
+ jansteen 3d*: gains strength indirectly The fight is fair now,
+ jansteen 3d*: because both sides have a weak group.
+ mas 18k*: but g17 in fact does nothing to secure the corner.
+ jansteen 3d*: Yes, it does mas, one more move (c16) and the corner is territory.
+ jansteen 3d*: Next move p17, ironant?
+ ironant 1d*: yes!
+ jansteen 3d*: Other ideas here?
+ nbk 5k*: p18.
+ jansteen 3d*: p18 would allow o18 in sente, weakening the l17 stone.
+ tromp 3k*:  q18
+ jansteen 3d*: q18 is worth considering although unusual.
+ ironant 1d*: p17
+ jansteen 3d*: p17 is hard to play because after o16 the corner is still not 100% "clean"
+ iowano9 5k*: q17
+ nbk 5k*: q17
+ jansteen 3d*: right, nbk and iowano9, you got it.
+]
+;B[pc]
+;W[me]C[
+ jansteen 3d*: jumping away lightly looks good.
+ jansteen 3d*: Black now to move l17 stone, any ideas?
+ ironant 1d*: l15 without hesitation
+ jansteen 3d*: Right ironant, l15 pretty normal here.
+ jansteen 3d*: But black decided to play leaning attack technique here
+ nbk 5k*: j16.
+]
+;B[hd]C[
+ nbk 5k*: I was close.
+ jansteen 3d*: Right nbk, but h16 is better than j16 because white (almost) has to answer, j16 in comparison is soft.
+ nbk 5k*: What would happen if w didn't answer?
+ jansteen 3d*: Then black would establish a base with h17, nbk
+]
+;W[hc]
+;B[id]
+;W[ic]
+;B[ke]
+;W[jc]C[
+ ironant 1d*: h16 seems loses territory?
+ jansteen 3d*: Black is looking at c17, ironant.
+]
+;B[jd]
+;W[kb]
+;B[lc]
+;W[lb]
+;B[mc]
+;W[mb]
+;B[nd]C[
+ jansteen 3d*: Black thick now,
+ jansteen 3d*: so the weakness at r8 is shining brightly here.
+ weida NR : w p11
+ jansteen 3d*: p11 next seems very natural.
+ jansteen 3d*: White goes for territory instead with the next move.
+]
+;W[eq]
+;B[fq]
+;W[dq]
+;B[fp]
+;W[do]
+;B[jp]
+;W[op]
+;B[oq]C[
+ jansteen 3d*: next move we predicted :-)
+ jansteen 3d*: Next move?
+ zhangui NR : n5
+ jansteen 3d*: n5 is interesting, flattening black while protecting n8.
+ tigerman 1k*:  p11 possible?
+ jansteen 3d*: p11 is great move as well, agree.
+ jansteen 3d*: The other move which is huge is c15 in my opinion
+]
+;W[oi]
+;B[nb]C[
+ bongo 4d : p11 is not fast, w must be satisfied with his game.
+ ironant 1d*: I think is such kind of move one plays when he leads. Does W lead now?
+ jansteen 3d*: Hmm, ironant, p11 has to :-)
+ jansteen 3d*: Why o18, anyone has opinion on this move?
+ brokko 1k*: looks slow
+ jansteen 3d*: right, looks slow
+ bongo 4d : ic, after p11, p18 threatening n16 aji would be big.
+ jansteen 3d*: right bongo! p18 in sente would be painful.
+ jansteen 3d*: next move?
+ madmax 6k*: c15
+]
+;W[ce]C[
+ jansteen 3d*: right madmax
+ jansteen 3d*: Preventing c17 makes opening very acceptable for white in my opinion.
+ jansteen 3d*: Maybe black h16 didn't bring what black expected: white took both c15 and p11
+ GeGe NR : is c10 a must now?
+ jansteen 3d*: right GeGe, but why c10?
+ GeGe NR : prevent w d10? :)
+ jansteen 3d*: Sure! But I mean why exactly that point?
+ madmax 6k*: c10 because makes c13 and c7 miai.
+ jansteen 3d*: right madmax
+ tigerman 1k*:  c15 is better than c15, my sensei told me.
+ jansteen 3d*: Right, tigerman, when c10 instead of c15, black would immediately invade c17
+]
+;B[cj]
+;W[cl]
+;B[cg]C[
+ jansteen 3d*: Now bongo's idea, where? :-)
+ kyyi 2k*:  e8
+ jansteen 3d*: e8 is too small.
+ bongo 4d : Seems w doesn't need to try hard, n5
+ jansteen 3d*: n5 is right direction, white played different shape though.
+]
+;W[lo]C[
+ jansteen 3d*: if black answers with m3, what then?
+ jansteen 3d*: (white's right side moyo is getting big)
+]
+;B[nl]C[
+ tigerman 1k*:  o8 looks good
+ bongo 4d : aha,
+ jansteen 3d*: The idea of o8 is that when white answers with q9, black gained here
+ mas 18k*: not too deep?
+ jansteen 3d*: no mas, black can escape either by o10 or m8 (two-way exit)
+]
+;W[np]
+;B[ql]
+;W[rm]C[
+ jansteen 3d*: s7 prevents s6
+]
+;B[pj]C[
+ bongo 4d : seems w made life harder with m5, he should have n5 :)
+ jansteen 3d*: yes, maybe bongo :-)
+]
+;W[qj]
+;B[pl]
+;W[rl]
+;B[pi]
+;W[ph]
+;B[qh]
+;W[qg]
+;B[rh]
+;W[rg]
+;B[pg]
+;W[oh]
+;B[rf]
+;W[ok]
+;B[pk]
+;W[ol]
+;B[rk]
+;W[oj]
+;B[rj]
+;W[og]
+;B[pf]C[
+ jansteen 3d*: a big exchange is the result.
+ tigerman 1k*:  I think b is cool :)
+ mas 18k*: gee. <faint>
+ tigerman 1k*:  who gained in this exchange, jan?
+ tigerman 1k*:  I think b did, but I'm not sure.
+ jansteen 3d*: This exchange is even, tigerman.
+ jansteen 3d*: Partly, because white has sente.
+ jansteen 3d*: So, where does white play next?
+ dawn 1k : k5?
+]
+;W[jo]C[
+ jansteen 3d*: good, dawn!
+]
+;B[io]
+;W[jn]
+;B[kq]
+;W[mq]
+;B[mr]
+;W[lq]
+;B[lr]C[
+ jansteen 3d*: next move? (center oriented)
+ dawn 1k : d11?
+ bj1 1k*:  e10?
+ cracker 3k*: d11
+ bongo 4d : d12 around
+ bj1 1k*:  e10
+ mas 18k*: d12?
+ jansteen 3d*: All suggestions to play like e10 or d11 are welcomed by black.
+ jansteen 3d*: He would be happy to have a reason to strengthen this group.
+ bj1 1k*:  then l13?
+ malf 4k : l13
+ kyyi 2k*:  L13
+ garm 15k : k10
+ tigerman 1k*:  k12 :)
+ jansteen 3d*: k12 is closest :-)
+]
+;W[ji]C[
+ jansteen 3d*: But anyway k11 or k12, or ... will always be 50% feeling as well.
+]
+;B[in]
+;W[jl]
+;B[cc]C[
+ jansteen 3d*: c17 is a clever move.
+ jansteen 3d*: When white answers c16, then black has lots of aji in the corner.
+ jansteen 3d*: When white answers d17, black has b15 aji
+ NUTS NR : b want to make c10 group safer.
+ jansteen 3d*: Right NUTS, the c10 group is involved as well.
+]
+;W[dc]
+;B[im]C[
+ jansteen 3d*: Black is planning b15 next, so he plays here first (slightly strengthening c10 in sente).
+]
+;W[jm]
+;B[be]C[
+ NUTS NR : b may try c6 as well?
+ jansteen 3d*: c6 is very brave :-)
+ bj1 1k*:  now w leads?
+ jansteen 3d*: no bj1, it's a completely open game so far.
+ ironant 1d*: B has about 10 pts ahaed on board, but also one weak group. anyone else has a idea who leads?
+ tigerman 1k*:  b has caught up some in territory, right jan?
+ jansteen 3d*: The territory is fairly even as well I think.
+ NUTS NR : if w b16, b sente
+ NUTS NR : but not sure b14 can kill b
+ jansteen 3d*: right NUTS
+]
+;W[bf]
+;B[bd]
+;W[cf]
+;B[db]
+;W[eb]
+;B[cb]C[
+ jansteen 3d*: Ok, now white to play:
+ jansteen 3d*: From which side to attack the two stones?
+ tigerman 1k*:  from upper
+ jansteen 3d*: right, tigerman
+ ironant 1d*: d13
+]
+;W[dg]
+;B[ej]
+;W[el]
+;B[eh]
+;W[ro]
+;B[fr]
+;W[er]
+;B[dp]
+;W[cq]
+;B[kh]C[
+ tigerman 1k*:  s5 seems slow
+ jansteen 3d*: follow-up is s3 (very big)
+]
+;W[ki]
+;B[lh]
+;W[jh]
+;B[li]
+;W[lj]
+;B[mj]
+;W[mi]
+;B[mh]
+;W[ni]
+;B[hj]C[
+ tigerman 1k*:  interesting shape there
+ jansteen 3d*: This move is aiming at l10 cut
+ bj1 1k*:  w plays slow? jan
+ jansteen 3d*: Hmm, hard to say bj1
+]
+;W[jg];B[lf];W[ik];B[rp];W[sp];B[sq];W[so];B[rq];W[ri];B[sg]
+;W[fn];B[bl];W[bk];B[ck];W[bm];B[dl];W[cm];B[bj];W[al];B[ch]
+;W[eg];B[fh];W[go];B[gp];W[qm];B[qk];W[gf];B[ma]C[
+ cpr 6k*: is b alive in the middle?
+ tigerman 1k*:  not yet, but it seems hard to kill it
+ jansteen 3d*: right, hard to kill
+]
+;W[dk];B[ij];W[jj];B[ek];W[fl];B[hk];W[il];B[bg];W[ae];B[ad]
+;W[af];B[ab];W[sk];B[si];W[hp];B[hq];W[hh];B[gh];W[hi];B[gi]
+;W[fk];B[ff];W[fg];B[fj];W[fs];B[gs];W[es];B[gr];W[nf];B[dj]
+;W[dh];B[hl];W[hm];B[ip];W[gm];B[ag];W[di];B[ei];W[fe];B[ea]
+;W[fb];B[ko];W[kn];B[kp];W[dm];B[gd];W[fd];B[lp];W[mp];B[ne]
+;W[mf];B[of];W[on];B[jb];W[ib];B[jf];W[if];B[kg];W[mg];B[ie]
+;W[hg];B[le]C[
+ jansteen 3d*: game is very close for our standards.
+ ironant 1d*: Seems B wins by a little more. 2.5 pts maybe
+ Anderman 26k*:  Why doesn't B11 kill?
+ jansteen 3d*: b11 is alive Anderman, read it :-)
+]
+;W[ci];B[bi];W[fa];B[da];W[ho];B[eo];W[en];B[ii];W[ih];B[aj]
+;W[md];B[ld];W[ak];B[la];W[ja];B[hn];W[ka];B[na];W[ng];B[lg]
+;W[dk];B[gg];W[cd];B[dl];W[bc];B[ac];W[dk];B[sl];W[sm];B[dl]
+;W[ah];B[bh];W[dk];B[dn];W[cn];B[dl];W[ba];B[bb];W[dk];B[co]
+;W[bo];B[dl];W[iq];B[ir];W[dk];B[sj];W[sl];B[dl];W[ge];B[he]
+;W[hf];B[dk]C[
+ jansteen 3d*: That's it, how's score?
+ dawn 1k : g6 g8 one pt?
+ jansteen 3d*: when g6, white will g8.
+ jansteen 3d*: Score? :-)
+ cg NR : b 82, w 80.5?
+ ironant 1d*: b wins by 1.5 pts
+ jansteen 3d*: ironant and cg are right: B+1.5
+ jansteen 3d*: Anyone any idea where white lost the game?
+ tigerman 1k*:  s5 caused it?
+ jansteen 3d*: tigerman, you are right!
+ tigerman 1k*:  I was! today must be my day :&)
+ jansteen 3d*: Instead of s5 white should have played e2
+ jansteen 3d*: White e2, black blocks, white hane and connection, and then s5
+ jansteen 3d*: The difference is that when black plays d4, white can answer c6
+ jansteen 3d*: At that stage white was slightly (one micron) ahead.
+]
+)

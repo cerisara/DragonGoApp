@@ -34,12 +34,18 @@ public class Game {
 	public CharSequence getMessage() {return msg;}
 	public void setMessage(CharSequence m) {msg=m;}
 	
-	static void createDebugGame() {
+	public static Game createDebugGame() {
 		Game g = new Game(null, 1);
 		games2play.add(g);
 		gameShown = g;
+		return g;
 	}
 
+	public void addSgfData(String sgfdata) {
+		if (sgf==null) sgf = new ArrayList<String>();
+		sgf.add(sgfdata);
+	}
+	
 	public static void loadStatusGames(final ServerConnection server) {
 		games2play.clear();
 		final EventManager em = EventManager.getEventManager();
@@ -89,6 +95,7 @@ public class Game {
 
 	public String getGameStatus() {
 		try {
+			if (gameinfo==null||gameinfo.length()<5) return "";
             return gameinfo.getString(4);
         } catch (JSONException e) {
             e.printStackTrace();
