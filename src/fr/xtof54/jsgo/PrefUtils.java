@@ -22,6 +22,12 @@ public class PrefUtils {
 		editor.putString(key,value);
 		editor.commit();
 	}
+	public static void saveToPrefs(Context context, String key, int value) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		final SharedPreferences.Editor editor = prefs.edit();
+		editor.putInt(key,value);
+		editor.commit();
+	}
 
 	/**
 	 * Called to retrieve required value from shared preferences, identified by given key.

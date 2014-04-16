@@ -95,6 +95,8 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	private guistate lastGameState;
 	void changeState(guistate newstate) {
+		if (curstate==guistate.review && newstate!=guistate.review)
+			GoJsActivity.main.wv.loadUrl("javascript:eidogo.autoPlayers[0].detMoveNumber()");
 		if (curstate==guistate.markDeadStones && newstate!=guistate.markDeadStones)
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkp()");
 		System.out.println("inchangestate "+curstate+" .. "+newstate);
@@ -125,7 +127,7 @@ public class GoJsActivity extends FragmentActivity {
 			lastGameState=curstate;
 			setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
 		case review:
-			setButtons("ReprintMsg","Zoom+","Zoom-","ListG"); break;
+			setButtons("ReprintMsg","Zoom+","Zoom-","ListG");break;
 		default:
 		}
 		curstate=newstate;
@@ -282,9 +284,16 @@ public class GoJsActivity extends FragmentActivity {
 			int i=url.indexOf("androidcall01");
 			if (i>=0) {
 				if (url.substring(i).startsWith("androidcall01|C|")) {
-					if (curstate!=guistate.review) return true;
-					Reviews.comment = URLDecoder.decode(url.substring(i+16)).replace("<br>", "\n");
+					if (!Reviews.showCommentsInBig) return true;
+					Reviews.setComment(url.substring(i+16));
 					longToast(Reviews.comment, 5);
+					return true;
+				}
+				if (url.substring(i).startsWith("androidcall01|M|")) {
+					// this is triggered when the player gets out of review mode
+					Integer mn = Integer.parseInt(url.substring(i+16));
+					Reviews.curmove=mn;
+					Reviews.saveCurReview();
 					return true;
 				}
 				int j=url.lastIndexOf('|')+1;
@@ -629,6 +638,9 @@ public class GoJsActivity extends FragmentActivity {
 						break;
 					case message: // go back to last game mode
 						changeState(lastGameState);
+						break;
+					case review:
+						Reviews.showList();
 						break;
 					}
 				}

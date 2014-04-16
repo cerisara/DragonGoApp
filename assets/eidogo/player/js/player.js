@@ -2091,6 +2091,14 @@ eidogo.Player.prototype = {
 	window.location="androidcall01|C|"+this.dom.comments.innerHTML;
     },
 
+    detComments: function() {
+	window.location="androidcall01|C|"+this.dom.comments.innerHTML;
+    },
+
+    detMoveNumber: function() {
+	window.location="androidcall01|M|"+this.moveNumber;
+    },
+
     /**
      * For special notices
     **/
