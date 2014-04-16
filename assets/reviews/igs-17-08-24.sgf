@@ -1,0 +1,207 @@
+(
+;
+FF[4]
+EV[45th NHK title]
+RO[2nd round, 16th game]
+PB[Sakata Eio]
+BR[9 dan]
+PW[Komatsu Hideki]
+WR[9 dan]
+KM[5.5]
+DT[1997]
+PC[Japan]
+RE[W+5.5]
+
+;B[pd];W[dp];B[pp];W[dd];B[pj];W[nc];B[lc];W[qc];B[qd];W[pc]
+;B[od];W[rc]C[
+ jansteen 3d*:  Guo Juan doesn't like s17 particularly since black can \
+take sente now];B[me];W[rd];B[qf]C[
+ jansteen 3d*:  However black decides to play solidly (n15)
+ jansteen 3d*:  Black could take sente playing n15 at o16, white o18]
+;W[nq];B[lq]C[
+ jansteen 3d*:  Next move?
+ imp NR : o5?
+ jansteen 3d*:  Yes, o5 most normal in such positions];W[qq]
+C[
+ jansteen 3d*:  Entering san-san is very brave];B[qp];W[pq]
+;B[op];W[nr];B[mo]C[
+ jansteen 3d*:  Next move?
+ imp NR : that's deep!
+ jansteen 3d*:  o10 invades too deep, black will attack perfectly with \
+m10
+ imp NR : d10 possible here?
+ jansteen 3d*:  Yes, d10 possible
+ jansteen 3d*:  When thinking of correct move to reduce you do the\
+following...
+ jansteen 3d*:  You think about the black move which would turn the moy\
+o into territory
+ jansteen 3d*:  This often is your reducing move
+ imp NR : around m8?
+ jansteen 3d*:  So in this case probably l10
+ imp NR : well, w wants to aim at cut at n4 also...];W[fc]C[
+ jansteen 3d*:  This white move aims at the cut at n16
+ imp NR : maybe that invites b to cover weak point, too easy?
+ imp NR : (money)
+ jansteen 3d*:  imp, usually black will not fight after n4 but give in \
+with m5
+ jansteen 3d*:  imp says that k4 asks black to play l5, covering weakne\
+ss
+ imp NR : but w k4/ b l5 seems to aid black, no?
+ jansteen 3d*:  And then k4 is too close to black's stones
+ jansteen 3d*:  Yes, k4/l5, black gains];B[cj];W[cl];B[cg]C[
+ imp NR : jansteen: why n16-cut more interesting than n4-cut (so no f3,\
+ but f17)];W[ce]C[
+ jansteen 3d*:  I don't think there is much difference imp
+ imp NR : my idea was that it is the opposite:)
+ imp NR : o3/o4 more solid than o17?
+ jansteen 3d*:  Next move starts a fight
+ imp NR : c6:)
+ jansteen 3d*:  I'm slightly suprised by black's next move
+ jansteen 3d*:  Yes, c6 :)];B[cn]C[
+ imp NR : sakata is no moyo-builder
+ jansteen 3d*:  If now white d6 black will play d5 since the ladder is \
+good
+ jansteen 3d*:  (why san-ren-sei then imp? :)
+ jansteen 3d*:  What should white's strategy be in this fight?
+ imp NR : to take territory, and fight at the same time:)
+ jansteen 3d*:  You're too greedy imp :)
+ imp NR : i'd say to attacsplitt and attack two groups?
+ imp NR : no, not me, sakata is:)
+ jansteen 3d*:  Right, if white can engage black in a running fight it \
+would be perfect
+ jansteen 3d*:  While running white can enter black's moyo in a natural\
+ way
+ jansteen 3d*:  So, next move?
+ imp NR : so simply e8 or d9 not severe enough?
+ jansteen 3d*:  e8 would leave black a nice move at b8, so d9 is indeed\
+ most severe];W[dk]C[
+ jansteen 3d*:  replaying a game Basan];B[dj];W[fk]C[
+ imp NR : ok, so b c3 now
+ jansteen 3d*:  This movement is perfect for white (towards the black m\
+oyo)
+ jansteen 3d*:  No time for c3, e10 is too perfect];B[ej];W[dn]
+C[
+ jansteen 3d*:  And now>
+ jansteen 3d*:  ?];B[cq];W[co];B[eq]C[
+ jansteen 3d*:  Ok, local fight finished
+ jansteen 3d*:  White to reduce black's moyo now
+ imp NR : e3?
+ imp NR : is that normal?
+ imp NR : leaves very bad aji
+ jansteen 3d*:  e3 leaves cut, agree
+ imp NR : ai, what is enough now:)
+ imp NR : n8 ok?
+ jansteen 3d*:  White f9 helps white reducing
+ jansteen 3d*:  Very good imp :)];W[mk]C[
+ imp NR : so difficult this, my waekest point, such positions:(
+ jansteen 3d*:  n9 better shape since white can later sabaki with p9 et\
+ cetera...];B[ek];W[fm];B[cm];W[dm];B[bl];W[dq];B[dr];W[cr]
+;B[er];W[bq];B[fo]C[
+ jansteen 3d*:  f5 seems typical for Sakata's style];W[hp];B[gn]
+;W[gq];B[fq];W[ko]C[
+ jansteen 3d*:  Now both players have a weak group];B[ho];W[ip]
+;B[gr];W[hr];B[gp]C[
+ jansteen 3d*:  Black sabaki's his group (creates living shape)
+ jansteen 3d*:  What will white do?
+ imp NR : w not 100% alive in corner i think?
+ jansteen 3d*:  Lower-left corner imp?
+ imp NR : yes
+ jansteen 3d*:  Seems alive since b5 and a5 are sente
+ imp NR : o, nonsens:(
+ imp NR : my idea i mean:)];W[mp]C[
+ jansteen 3d*:  As usual, pro's always have fair trades, black made liv\
+ing shape, white cuts
+ jansteen 3d*:  45th NHK: Sakata Eio (9p,B) vs Komatsu Hideki (9p,W)]
+;B[lo];W[lp];B[kn];W[kp];B[no]C[
+ jansteen 3d*:  Ok, white to play, where and what?
+ jansteen 3d*:  Maybe first answer where?
+ imp NR : help the lone w stone in some way;
+ jansteen 3d*:  correct imp
+ imp NR : l9?
+ jansteen 3d*:  Correct again :)
+ jansteen 3d*:  l9 is nice move since white can k6 next
+ imp NR : p9 o verplay?];W[ok];B[pk]C[
+ jansteen 3d*:  No, p9 is white's privilege (kikashi)];W[kk]
+;B[jn];W[oj];B[ol];W[nh];B[oi];W[ni];B[oh]C[
+ imp NR : well, i was afraid to say p9, because of b l9 answer:)]
+;W[kh]C[
+ jansteen 3d*:  Then white q9 and the group will be very hard to kill
+ jansteen 3d*:  Shall we count? both players played same amount of move\
+s now
+ imp NR : yes, probably:)
+ jansteen 3d*:  White 49 + 5.5 + center group
+ jansteen 3d*:  Black 48
+ jansteen 3d*:  Both scores +- 3 points I guess :)
+ imp NR : i would give about 5 more points to w; how do you count that?\
+
+ jansteen 3d*:  So white indeed ahead
+ jansteen 3d*:  You want a break down of the score imp?
+ imp NR : if possible:)
+ jansteen 3d*:  ok :)
+ jansteen 3d*:  Lower right white s3 is white's privilege
+ jansteen 3d*:  So endgame will be: s3 s4 t4 t5 t3 s5
+ jansteen 3d*:  h3 endgame will be h3 j2
+ jansteen 3d*:  So white 23 points in LR
+ imp NR : I get: UR +- 10, LR +- 10; L-side +- 15, UL +- 15, LL +- 8
+ jansteen 3d*:  I counted upper-left as 12 points since black c13 very \
+thick
+ jansteen 3d*:  ll endgame: black b5 white c4 black connect white c1
+ jansteen 3d*:  So LL is 9 points
+ jansteen 3d*:  UR = 12
+ jansteen 3d*:  So how much in total?
+ jansteen 3d*:  9 + 12 + 12 + 23 = 54
+ jansteen 3d*:  I guess I forgot ll in previous count :)
+ imp NR : + komi + middle
+ jansteen 3d*:  middle is zero points imp, it's a weak group
+ jansteen 3d*:  black left side: 14
+ jansteen 3d*:  black bottom: 5
+ imp NR : + 2 at least, otherwise b wins easily:)
+ jansteen 3d*:  black right side: 35
+ jansteen 3d*:  You cannot count like that imp :) It's more a handicap \
+that group
+ jansteen 3d*:  so black has 14 + 5 + 35 = 54
+ imp NR : ok ok, jst kidding:)
+ jansteen 3d*:  So white ahead by the komi anyway :)];B[bo]
+;W[bp];B[bn];W[cs];B[cc];W[dc];B[be];W[bd]C[
+ imp NR : well, both my feeling and these counts say: w a bit ahead:)]
+;B[bf];W[bc]C[
+ jansteen 3d*:  If black is behind why not black try something in this \
+corner?];B[re]C[
+ jansteen 3d*:  s15 *very* big];W[mc];B[ld];W[rq];B[rp];W[sp]
+;B[so];W[sq];B[rn]C[
+ jansteen 3d*:  Next largest endgame move?
+ imp NR : h17
+ jansteen 3d*:  Good imp];W[ic]C[
+ jansteen 3d*:  j17 or h17 choice: hard to say :)
+ imp NR : better, untime:)
+ jansteen 3d*:  White already thick in UL so h17 probably ok]
+;B[ng];W[mg];B[mf];W[lg];B[ji];W[ig];B[lj];W[li];B[kj];W[mj]
+;B[jk];W[nl];B[om];W[dg];B[gg];W[ch];B[bh]C[
+ imp NR : this is going too easy for w];W[cf];B[bg];W[hq];B[hs]
+;W[is];B[gs];W[jr];B[gd];W[he];B[ge];W[hb]C[
+ imp NR : you are not showuing us a game tha sakata lost, i hope:)]
+;B[el];W[fn]C[
+ jansteen 3d*:  Well, he's very old so he may loose occasionally :)]
+;B[dl];W[hh];B[eg]C[
+ imp NR : now w needs a good move];W[dh];B[eh];W[kl];B[eo];W[do]
+;B[jl];W[gm];B[hm];W[hl];B[il];W[ij];B[ii];W[hk];B[hj];W[lb]
+;B[kb];W[mb];B[je];W[nf];B[og];W[im];B[hn];W[jb];B[gj];W[gk]
+;B[id];W[km];B[jm];W[ik];B[fl];W[gl];B[jj];W[kf];B[kc];W[ka]
+;B[gc];W[gb];B[ee];W[df];B[if];W[hg];B[hf];W[gh];B[fh];W[ef]
+;B[jg];W[jh];B[ih];W[jf];B[ff];W[bi];B[ci];W[ae];B[af];W[ad]
+;B[bj];W[ed];B[lm];W[ml];B[ds];W[cp];B[mm];W[nm];B[nn];W[ke]
+;B[jc];W[hc];B[hd];W[io];B[in];W[ep];B[fp];W[kd];B[jd];W[nd]
+;B[ne];W[oc];B[oq];W[or];B[jo];W[jp];B[sd];W[sc];B[se];W[ao]
+;B[an];W[ap];B[fj];W[di];B[gi];W[kg];B[ei];W[de];B[fe];W[ki]
+C[
+ jansteen 3d*:  That's it, counted?
+ jansteen 3d*:  Nothing much happened since last count actually
+ jansteen 3d*:  White more at the top, black's right side, center and l\
+eft larger than expected
+ imp NR : so should be w by _+ 5
+ jansteen 3d*:  Any guesses? :)
+ Io 20k*: white wins by 6.5?
+ jansteen 3d*:  right, white +5.5
+ jansteen 3d*:  Pity, Sakata out of the NHK cup
+ jansteen 3d*:  ok, thanks for watching :)]
+)

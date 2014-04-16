@@ -1,0 +1,224 @@
+(
+;
+EV[1p-9p encounters]
+PW[Ishida Yoshio]
+WR[9 dan]
+PB[Kin Koshoku]
+BR[1 dan]
+PC[Japan]
+DT[1995]
+RE[W+R]
+KM[0.5]
+HA[2]
+AB[pd][dp]
+US[Jan.van.der.Steen@cwi.nl]
+
+C[
+ jansteen 3d*: This game is played in the 1p-9p series
+]
+;W[de]C[
+ jansteen 3d*: Ishida Yoshio is maybe the toughest professional on earth to beat in handicap Go
+ jansteen 3d*: His reading is awesome and when he's 1 point ahead he will wrap up the game
+ jansteen 3d*: Ishida is 46 years of age now
+ jansteen 3d*: Black is Jin Guang Zhi
+ jansteen 3d*: Black is a 15 years old boy from Korea
+]
+;B[qp]
+;W[op]
+;B[lp]
+;W[om]
+;B[qm]
+;W[ip]C[
+ jansteen 3d*: next move? (two options I think)
+ cracker 3k*: m6 or g3
+ jansteen 3d*: Right cracker
+]
+;B[gq]C[
+ nomad 5d*: g3 only
+ jansteen 3d*: Why g3 only nomad?
+ nomad 5d*: dunno, just feeling :-)
+ jansteen 3d*: I see :-)
+]
+;W[ln]
+;B[jo]
+;W[io]C[
+ jansteen 3d*: next move?
+ nomad 5d*: l6
+ cracker 3k*: l6
+ jansteen 3d*: right, l6 is tesuji shape here
+ jansteen 3d*: however...
+]
+;B[jp]
+;W[jn]
+;B[iq]
+;W[hn]
+;B[im]
+;W[in]
+;B[hp]C[
+ jansteen 3d*: According to Ishida: In handicap game acceptable for black, but in even game it's not
+ jansteen 3d*: next move?
+ jansteen 3d*: (just big opening move next)
+ nomad 5d*: d7 "only" :-)
+ jansteen 3d*: Don't trust nomad's "only" (!) :-)
+]
+;W[nc]
+;B[ic]
+;W[qf]C[
+ jansteen 3d*: Which side to attach now?
+ cracker 3k*: q14
+ emach 1d*: q14
+]
+;B[pf]
+;W[pg]C[
+ jansteen 3d*: reason probably is: black lower right quite solid so black doesn't mind white gets stronger along the right side as well
+ jansteen 3d*: Another reason, black doesn't want to weaken his own stone at j17 by attaching at o16
+ nomad 5d*: "lean on strong side of opponent"
+ jansteen 3d*: right, nomad
+]
+;B[of]
+;W[qe]
+;B[qd]C[
+ jansteen 3d*: Of course white doesn't follow orders here, where is next?
+]
+;W[kc]C[
+ jansteen 3d*: White makes miai of attacking the j17 stone and stil can slide to q18 later on
+ jansteen 3d*: Next black move: strengthen j17 or upper right corner?
+ nomad 5d*: p17 only :-)
+ jansteen 3d*: right nomad :-)
+ jansteen 3d*: Keeping white weak here is *essential*
+ jansteen 3d*: However...
+]
+;B[fc]C[
+ jansteen 3d*: Black f17 is too soft, kind of: "not to the point"
+]
+;W[pb]C[
+ jansteen 3d*: Now suddenly the balance of power has shifted here in white's favor
+]
+;B[ld]
+;W[lc]
+;B[oc]
+;W[ob]
+;B[nd]
+;W[md]
+;B[me]
+;W[mc]C[
+ jansteen 3d*: ok, black strengthened his group at the cost of making white definitely alive
+ jansteen 3d*: Where is next for black?
+]
+;B[pi]
+;W[og]
+;B[nf]
+;W[oi]
+;B[oj]
+;W[ni]
+;B[ng]
+;W[ph]
+;B[pj]C[
+ jansteen 3d*: next move? (just big)
+]
+;W[dc]C[
+ jansteen 3d*: Next black move is very good, shows pro strength
+ jansteen 3d*: It stresses white's thinness in the lower right part of the board
+ jansteen 3d*: please consider for a moment
+ jansteen 3d*: It's not direct, just troublesome for white (feeling, vital point, ...)
+ jansteen 3d*: n8 is the right idea, but shape is different
+ jansteen 3d*: n7 is sometimes vital point as well
+]
+;B[ll]C[
+ jansteen 3d*: Black can attack upper right starting with s12 for example
+ jansteen 3d*: But also lower side looks very thin suddenly
+ jansteen 3d*: Ishida was very impressed by this move, it showed pro skill
+]
+;W[nj]
+;B[mn]C[
+ jansteen 3d*: n6 was follow-up of m8
+]
+;W[mm]
+;B[lm]
+;W[ko]C[
+ jansteen 3d*: next move?
+ jansteen 3d*: let me give a choice: l4 or o7?
+]
+;B[kp]
+;W[ml]
+;B[mo]
+;W[il]
+;B[kk]
+;W[lj]
+;B[kj]
+;W[ki]
+;B[ij]C[
+ jansteen 3d*: The way things happened the brilliant move at m8 became a burden to black
+ jansteen 3d*: There is a thin line betweem success and defeat
+]
+;W[gk]
+;B[ji]
+;W[kh]
+;B[gi]C[
+ jansteen 3d*: While black is occupying dame (invaluable) points, white strengthens both his weak groups
+]
+;W[lf]
+;B[le]
+;W[kf]C[
+ jansteen 3d*: These two moves show Ishida's skill, they are very vital indeed
+ pem 25k*: Should b simply have given up m7 stones?
+ jansteen 3d*: Hmm, pem, these are cutting stones, hard to give them away just like that
+]
+;B[je]
+;W[ke]
+;B[kd]
+;W[jd]
+;B[jc]
+;W[id]
+;B[hd]
+;W[ie]
+;B[jf]
+;W[jg]
+;B[if]
+;W[he]
+;B[ge]
+;W[hf]
+;B[ig]
+;W[gf]
+;B[mf]
+;W[rb]
+;B[mh]
+;W[li]C[
+ jansteen 3d*: Black struggling here
+]
+;B[nh]
+;W[oh]
+;B[lg]
+;W[kg]
+;B[lh]C[
+ jansteen 3d*: Real construction work :-)
+ jansteen 3d*: White's next move is "cool"
+]
+;W[ek]
+;B[gd]
+;W[ff]
+;B[db]
+;W[cb]
+;B[ec]
+;W[dd]
+;B[km]
+;W[kn]
+;B[hl]
+;W[hk]
+;B[ik]
+;W[jl]
+;B[jm]
+;W[hm]
+;B[gl]
+;W[fl]
+;B[gm]
+;W[fn]C[
+ jansteen 3d*: This settles the game
+]
+;B[dg]
+;W[ih]C[
+ jansteen 3d*: Black resigned here
+ jansteen 3d*: The center group still has to seek eyes
+ jansteen 3d*: Oh, by the way, this black player is a student (pupil) of Cho Chikun, so I am sure that we will see more games of him in the future
+];
+)

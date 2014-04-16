@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
@@ -17,18 +18,15 @@ import fr.xtof54.jsgo.ServerConnection.DetLogger;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
@@ -60,7 +58,7 @@ public class GoJsActivity extends FragmentActivity {
 	int chosenServer=0, chosenLogin=0;
 
 	//    String server;
-	enum guistate {nogame, play, markDeadStones, checkScore, message};
+	enum guistate {nogame, play, markDeadStones, checkScore, message, review};
 	guistate curstate = guistate.nogame;
 
 	File eidogodir;
@@ -95,7 +93,7 @@ public class GoJsActivity extends FragmentActivity {
 		});
 	}
 	private guistate lastGameState;
-	private void changeState(guistate newstate) {
+	void changeState(guistate newstate) {
 		if (curstate==guistate.markDeadStones && newstate!=guistate.markDeadStones)
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkp()");
 		System.out.println("inchangestate "+curstate+" .. "+newstate);
@@ -125,6 +123,8 @@ public class GoJsActivity extends FragmentActivity {
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detforbidClicking()");
 			lastGameState=curstate;
 			setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
+		case review:
+			setButtons("Frwd","Cmt","PrevG","NextG"); break;
 		default:
 		}
 		curstate=newstate;
@@ -266,7 +266,8 @@ public class GoJsActivity extends FragmentActivity {
 	private class myWebViewClient extends WebViewClient {
 		@Override
 		public void onPageFinished(final WebView view, String url) {
-			view.loadUrl("javascript:eidogo.autoPlayers[0].last()");
+			if (curstate!=guistate.review)
+				view.loadUrl("javascript:eidogo.autoPlayers[0].last()");
 			if (curstate==guistate.markDeadStones)
 				view.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
 			final EventManager em = EventManager.getEventManager();
@@ -277,6 +278,12 @@ public class GoJsActivity extends FragmentActivity {
 			System.out.println("mywebclient detecting command from javascript: "+url);
 			int i=url.indexOf("androidcall01");
 			if (i>=0) {
+				if (url.substring(i).startsWith("androidcall01|C|")) {
+					if (curstate!=guistate.review) return true;
+					Reviews.comment = URLDecoder.decode(url.substring(i+16));
+					showMessage(Reviews.comment);
+					return true;
+				}
 				int j=url.lastIndexOf('|')+1;
 				String lastMove = url.substring(j);
 
@@ -772,44 +779,6 @@ public class GoJsActivity extends FragmentActivity {
 	private void refuseScore() {
 		cleanTerritory();
 		changeState(guistate.markDeadStones);
-	}
-
-	static class PrefUtils {
-		public static final String PREFS_LOGIN_USERNAME_KEY = "__USERNAME__" ;
-		public static final String PREFS_LOGIN_PASSWORD_KEY = "__PASSWORD__" ;
-		public static final String PREFS_LOGIN_USERNAME2_KEY = "__USERNAME2__" ;
-		public static final String PREFS_LOGIN_PASSWORD2_KEY = "__PASSWORD2__" ;
-
-		/**
-		 * Called to save supplied value in shared preferences against given key.
-		 * @param context Context of caller activity
-		 * @param key Key of value to save against
-		 * @param value Value to save
-		 */
-		public static void saveToPrefs(Context context, String key, String value) {
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-			final SharedPreferences.Editor editor = prefs.edit();
-			editor.putString(key,value);
-			editor.commit();
-		}
-
-		/**
-		 * Called to retrieve required value from shared preferences, identified by given key.
-		 * Default value will be returned of no value found or error occurred.
-		 * @param context Context of caller activity
-		 * @param key Key to find value against
-		 * @param defaultValue Value to return if no data found against given key
-		 * @return Return the value found against given key, default if not found or any error occurs
-		 */
-		public static String getFromPrefs(Context context, String key, String defaultValue) {
-			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-			try {
-				return sharedPrefs.getString(key, defaultValue);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return defaultValue;
-			}
-		}
 	}
 
 	/*
@@ -1352,6 +1321,15 @@ public class GoJsActivity extends FragmentActivity {
 					}
 				});
 
+				Button breviews = (Button)v.findViewById(R.id.reviews);
+				breviews.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						System.out.println("game reviews");
+						Reviews.contReviews();
+						dialog.dismiss();
+					}
+				});
 				Button beidogo = (Button)v.findViewById(R.id.copyEidogo);
 				beidogo.setOnClickListener(new View.OnClickListener() {
 					@Override
