@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class EventManager {
 	enum eventType {loginStarted, loginEnd, downloadListStarted, downloadListEnd, downloadListGamesEnd, downloadGameStarted, downloadGameEnd, GameOK, moveSentStart, moveSentEnd, gobanReady,
-		msgSendStart, msgSendEnd, ladderStart, ladderEnd, ladderChallengeStart, ladderChallengeEnd, showMessage};
+		msgSendStart, msgSendEnd, ladderStart, ladderEnd, ladderChallengeStart, ladderChallengeEnd, showMessage, copyEidogoStart, copyEidogoEnd};
 	
 	private static EventManager em = new EventManager();
 	public static EventManager getEventManager() {

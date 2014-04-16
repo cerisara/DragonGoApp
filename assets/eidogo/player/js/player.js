@@ -2088,7 +2088,7 @@ eidogo.Player.prototype = {
     showComments: function(comments, junk, noRender) {
         if (!comments || noRender) return;
         this.dom.comments.innerHTML += comments.replace(/^(\n|\r|\t|\s)+/, "").replace(/\n/g, "<br />");
-	window.location="androidcall01|C|"+comments.replace(/^(\n|\r|\t|\s)+/, ""));
+	window.location="androidcall01|C|"+this.dom.comments.innerHTML;
     },
 
     /**

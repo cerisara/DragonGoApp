@@ -17,6 +17,7 @@ import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.ServerConnection.DetLogger;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -124,7 +125,7 @@ public class GoJsActivity extends FragmentActivity {
 			lastGameState=curstate;
 			setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
 		case review:
-			setButtons("Frwd","Cmt","PrevG","NextG"); break;
+			setButtons("ReprintMsg","Zoom+","Zoom-","ListG"); break;
 		default:
 		}
 		curstate=newstate;
@@ -182,6 +183,7 @@ public class GoJsActivity extends FragmentActivity {
 	}
 
 	void copyEidogo(final String edir, final File odir) {
+	    EventManager.getEventManager().sendEvent(eventType.copyEidogoStart);
 		AssetManager mgr = getResources().getAssets();
 		try {
 			String[] fs = mgr.list(edir);
@@ -210,6 +212,7 @@ public class GoJsActivity extends FragmentActivity {
 			showMessage("DISK ERROR: "+e.toString());
 		}
 		System.out.println("endof copy");
+		EventManager.getEventManager().sendEvent(eventType.copyEidogoEnd);
 	}
 
 	public void writeInLabel(final String s) {
@@ -280,8 +283,8 @@ public class GoJsActivity extends FragmentActivity {
 			if (i>=0) {
 				if (url.substring(i).startsWith("androidcall01|C|")) {
 					if (curstate!=guistate.review) return true;
-					Reviews.comment = URLDecoder.decode(url.substring(i+16));
-					showMessage(Reviews.comment);
+					Reviews.comment = URLDecoder.decode(url.substring(i+16)).replace("<br>", "\n");
+					longToast(Reviews.comment, 5);
 					return true;
 				}
 				int j=url.lastIndexOf('|')+1;
@@ -539,6 +542,9 @@ public class GoJsActivity extends FragmentActivity {
 						if (!initServer()) return;
 						Message.downloadMessages(server,main);
 						break;
+                    case review: // reprint comment
+                        longToast(Reviews.comment, 5);
+                        break;
 					}
 
 					//	              {
@@ -565,7 +571,8 @@ public class GoJsActivity extends FragmentActivity {
 					case nogame:
 					case play:
 					case markDeadStones:
-					case checkScore:
+                    case checkScore:
+                    case review:
 						wv.zoomIn();
 						wv.invalidate();
 						break;
@@ -587,6 +594,7 @@ public class GoJsActivity extends FragmentActivity {
 					case nogame:
 					case play:
 					case markDeadStones:
+                    case review:
 					case checkScore:
 						wv.zoomOut();
 						wv.invalidate();
@@ -697,6 +705,7 @@ public class GoJsActivity extends FragmentActivity {
 		em.registerListener(eventType.moveSentStart, waitDialogShower);
         em.registerListener(eventType.ladderStart, waitDialogShower);
         em.registerListener(eventType.ladderChallengeStart, waitDialogShower);
+        em.registerListener(eventType.copyEidogoStart, waitDialogShower);
 
 		EventManager.EventListener waitDialogHider = new EventManager.EventListener() {
 			@Override
@@ -724,6 +733,7 @@ public class GoJsActivity extends FragmentActivity {
 		em.registerListener(eventType.moveSentEnd, waitDialogHider);
 		em.registerListener(eventType.ladderEnd, waitDialogHider);
         em.registerListener(eventType.ladderChallengeEnd, waitDialogHider);
+        em.registerListener(eventType.copyEidogoEnd, waitDialogHider);
 
         // to show message
         em.registerListener(eventType.showMessage, new EventManager.EventListener() {
@@ -1372,4 +1382,15 @@ public class GoJsActivity extends FragmentActivity {
 		MoreButtonsDialogFragment dialog = new MoreButtonsDialogFragment();
 		dialog.show(getSupportFragmentManager(),"more actions");
 	}
+
+    public void longToast(String msg, int secs) {
+        final Toast tag = Toast.makeText(getBaseContext(), msg,Toast.LENGTH_SHORT);
+        tag.show();
+        new CountDownTimer(1000*secs, 1000)
+        {
+
+            public void onTick(long millisUntilFinished) {tag.show();}
+            public void onFinish() {tag.show();}
+        }.start();
+    }
 }
