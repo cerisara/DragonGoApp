@@ -266,18 +266,23 @@ public class GoJsActivity extends FragmentActivity {
 			}
 		}
 	}
-
-
+	
 	private class myWebViewClient extends WebViewClient {
 		@Override
 		public void onPageFinished(final WebView view, String url) {
+		    System.out.println("page finished loading");
 			if (curstate!=guistate.review)
 				view.loadUrl("javascript:eidogo.autoPlayers[0].last()");
 			if (curstate==guistate.markDeadStones)
 				view.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
 			final EventManager em = EventManager.getEventManager();
 			em.sendEvent(eventType.gobanReady);
+			
+			// ask for comments to display them in big
+			System.out.println("page finished call detComments");
+			view.loadUrl("javascript:eidogo.autoPlayers[0].detComments()");
 		}
+		
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			System.out.println("mywebclient detecting command from javascript: "+url);
@@ -286,7 +291,7 @@ public class GoJsActivity extends FragmentActivity {
 				if (url.substring(i).startsWith("androidcall01|C|")) {
 					if (!Reviews.showCommentsInBig) return true;
 					Reviews.setComment(url.substring(i+16));
-					longToast(Reviews.comment, 5);
+					if (Reviews.comment.length()>0) longToast(Reviews.comment, 5);
 					return true;
 				}
 				if (url.substring(i).startsWith("androidcall01|M|")) {
@@ -383,6 +388,7 @@ public class GoJsActivity extends FragmentActivity {
 
 	void showGame(final Game g) {
 		if (g.getGameStatus().startsWith("SCORE")) {
+		    System.out.println("scoring phase detected in showgame");
 			// TODO: I tried, but it's really difficult to handle correctly the scoring phase;
 			// so for now, I just call the browser to resolve this stage !
 			//            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(server.getUrl()+"game.php?gid="+g.getGameID()));
@@ -471,6 +477,7 @@ public class GoJsActivity extends FragmentActivity {
 		// show the board game
 		String f=eidogodir+"/example.html";
 		System.out.println("debugloadurl file://"+f);
+		System.out.println("just before loading the URL: ");
 		wv.loadUrl("file://"+f);
 	}
 
@@ -1366,6 +1373,7 @@ public class GoJsActivity extends FragmentActivity {
 					@Override
 					public void onClick(View vv) {
 						changeState(guistate.nogame);
+                        dialog.dismiss();
 					}
 				});
 				Button bskip = (Button)v.findViewById(R.id.skipGame);

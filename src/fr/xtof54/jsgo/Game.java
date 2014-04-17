@@ -106,6 +106,7 @@ public class Game {
 	public int getGameID() {return gid;}
 
 	public void showGame() {
+	    System.out.println("writing game sgf to example.html");
 		if (sgf==null) {
 			System.out.println("ERROR impossible to show game "+gid);
 			return;
@@ -120,6 +121,7 @@ public class Game {
 			e.printStackTrace();
 		}
 		gameShown=this;
+		System.out.println("example.html up to date");
 	}
 	/**
 	 * Warning: once a first player has marked stone and send his agreement to the server, the dead stones are stored in the server

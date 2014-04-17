@@ -44,7 +44,7 @@ public abstract class Reviews {
 		System.out.println("debug comment "+html);
 		String s=URLDecoder.decode(html).replace("<br>", "\n").replace("<br />", "\n");
 		s=s.replaceAll("</[^>]*>", "\n");
-		comment=s.replaceAll("<[^>]*>", " ");
+		comment=s.replaceAll("<[^>]*>", " ").trim();
 	}
 	
 	public static void showList() {
@@ -127,6 +127,7 @@ public abstract class Reviews {
 				g.addSgfData(s);
 			}
 			f.close();
+            GoJsActivity.main.showGame(g);
 
 			// TODO: pb of synchronisation here: all these commands are run before javascript is ready
 			// so nothing happens...
@@ -137,7 +138,6 @@ public abstract class Reviews {
 				GoJsActivity.main.wv.loadUrl("javascript:eidogo.autoPlayers[0].forward()");
 			showCommentsInBig=true;
 
-			GoJsActivity.main.showGame(g);
 			GoJsActivity.main.wv.loadUrl("javascript:eidogo.autoPlayers[0].detComments()");
 		} catch (IOException e) {
 			e.printStackTrace();
