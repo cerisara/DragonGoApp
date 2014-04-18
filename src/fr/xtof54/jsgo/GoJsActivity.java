@@ -273,6 +273,9 @@ public class GoJsActivity extends FragmentActivity {
 		    System.out.println("page finished loading");
 			if (curstate!=guistate.review)
 				view.loadUrl("javascript:eidogo.autoPlayers[0].last()");
+			else if (!Reviews.isNotReviewStage) {
+			    Reviews.advance();
+			}
 			if (curstate==guistate.markDeadStones)
 				view.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
 			final EventManager em = EventManager.getEventManager();
@@ -289,7 +292,8 @@ public class GoJsActivity extends FragmentActivity {
 			int i=url.indexOf("androidcall01");
 			if (i>=0) {
 				if (url.substring(i).startsWith("androidcall01|C|")) {
-					if (!Reviews.showCommentsInBig) return true;
+				    System.out.println("comment command initreview "+Reviews.isNotReviewStage);
+					if (!Reviews.isNotReviewStage) return true;
 					Reviews.setComment(url.substring(i+16));
 					if (Reviews.comment.length()>0) longToast(Reviews.comment, 5);
 					return true;

@@ -36,7 +36,7 @@ public abstract class Reviews {
 	private static String[] sgfs = null;
 	static int cursgf=-1, curmove=-1;
 	static String comment="";
-	public static boolean showCommentsInBig = true;
+	public static boolean isNotReviewStage = true;
 
 	private static int tmpchosen = -1;
 
@@ -127,21 +127,18 @@ public abstract class Reviews {
 				g.addSgfData(s);
 			}
 			f.close();
-            GoJsActivity.main.showGame(g);
-
-			// TODO: pb of synchronisation here: all these commands are run before javascript is ready
-			// so nothing happens...
-			// sometimes; detComments is even sent *before* the goban appears, which creates an HTML error ?
 			
-			showCommentsInBig=false;
-			for (int j=0;j<curmove;j++)
-				GoJsActivity.main.wv.loadUrl("javascript:eidogo.autoPlayers[0].forward()");
-			showCommentsInBig=true;
-
-			GoJsActivity.main.wv.loadUrl("javascript:eidogo.autoPlayers[0].detComments()");
+            isNotReviewStage=false;
+            GoJsActivity.main.showGame(g);
 		} catch (IOException e) {
 			e.printStackTrace();
 			EventManager.getEventManager().sendEvent(eventType.showMessage, "Error loading review games");
 		}	
+	}
+	
+	public static void advance() {
+        isNotReviewStage=true;
+        for (int j=0;j<curmove;j++)
+            GoJsActivity.main.wv.loadUrl("javascript:eidogo.autoPlayers[0].forward()");
 	}
 }
