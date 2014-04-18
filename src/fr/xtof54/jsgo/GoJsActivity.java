@@ -1403,14 +1403,29 @@ public class GoJsActivity extends FragmentActivity {
 		dialog.show(getSupportFragmentManager(),"more actions");
 	}
 
-    public void longToast(String msg, int secs) {
-        final Toast tag = Toast.makeText(getBaseContext(), msg,Toast.LENGTH_SHORT);
-        tag.show();
-        new CountDownTimer(1000*secs, 1000)
-        {
-
-            public void onTick(long millisUntilFinished) {tag.show();}
-            public void onFinish() {tag.show();}
-        }.start();
-    }
+	int toastline = 0;
+	public void longToast(String msg, int secs) {
+	    final String[] ss = msg.split("\n");
+	    if (ss.length>4) {
+	        int ntics = ss.length/4;
+	        if (ntics*4<ss.length) ++ntics;
+	        toastline=0;
+	        String s = ss[toastline];
+	        for (int i=toastline+1;i<toastline+4&&i<ss.length;i++)
+	            s+="\n"+ss[i];
+	        Toast.makeText(getBaseContext(), s, Toast.LENGTH_LONG).show();
+	        new CountDownTimer(1000*ntics, 1000) {
+	            public void onTick(long millisUntilFinished) {
+	                toastline+=4;
+	                String s = ss[toastline];
+	                for (int i=toastline+1;i<toastline+4&&i<ss.length;i++)
+	                    s+="\n"+ss[i];
+	                Toast.makeText(getBaseContext(), s, Toast.LENGTH_LONG).show();
+	            }
+	            public void onFinish() {}
+	        }.start();
+	    } else {
+	        Toast.makeText(getBaseContext(), msg, Toast.LENGTH_LONG).show();
+	    }
+	}
 }
