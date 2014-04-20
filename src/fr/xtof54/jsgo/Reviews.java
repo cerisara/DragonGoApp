@@ -42,7 +42,12 @@ public abstract class Reviews {
 
 	public static void setComment(String html) {
 		System.out.println("debug comment "+html);
-		String s=URLDecoder.decode(html).replace("<br>", "\n").replace("<br />", "\n");
+		String s;
+		try {
+			s=URLDecoder.decode(html).replace("<br>", "\n").replace("<br />", "\n");
+		} catch (Exception e) {
+			s=html.replace("<br>", "\n").replace("<br />", "\n");
+		}
 		s=s.replaceAll("</[^>]*>", "\n");
 		comment=s.replaceAll("<[^>]*>", " ").trim();
 	}
