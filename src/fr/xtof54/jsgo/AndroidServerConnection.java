@@ -3,9 +3,11 @@ package fr.xtof54.jsgo;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -93,7 +95,7 @@ public class AndroidServerConnection {
 				entity = new UrlEncodedFormEntity(formparams, "UTF-8");
 				HttpPost httppost = new HttpPost(getUrl()+"login.php");
 				httppost.setEntity(entity);
-				directConnectExecute(httppost);
+				directConnectExecute(httppost,null);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -162,7 +164,15 @@ public class AndroidServerConnection {
 	Ladder ladd = new Ladder();
 	String res;
 	
-	private String directConnectExecute(HttpUriRequest req) {
+	/**
+	 * In the case of long strings, StringBuilder can crash because of OutOfMemory.
+	 * So the caller must saveInFile, and then get the string back from this file.
+	 * 
+	 * @param req
+	 * @param saveInFile
+	 * @return
+	 */
+	private String directConnectExecute(HttpUriRequest req, final String saveInFile) {
 		res=null;
 		try {
 			// is it synchronous or not ?? Yes, it seems that it is synchronous
@@ -181,15 +191,27 @@ public class AndroidServerConnection {
 					}
 					InputStream instream = entity.getContent();
 					BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("ISO-8859-1")));
-					StringBuilder sb = new StringBuilder();
-					for (;;) {
-						String s = fin.readLine();
-						if (s==null) break;
-//						System.out.println("request answer "+s);
-						sb.append(s);
+					if (saveInFile==null) {
+						StringBuilder sb = new StringBuilder();
+						for (;;) {
+							String s = fin.readLine();
+							if (s==null) break;
+							//						System.out.println("request answer "+s);
+							sb.append(s);
+						}
+						res = sb.toString();
+					} else {
+						System.out.println("saving res in file "+saveInFile);
+						PrintWriter fout = new PrintWriter(new FileWriter(saveInFile));
+						for (;;) {
+							String s = fin.readLine();
+							if (s==null) break;
+							fout.print(s);
+						}
+						fout.close();
+						res=null;
 					}
 					fin.close();
-					res = sb.toString();
 					return res;
 				}
 			},httpctxt);
@@ -209,7 +231,7 @@ public class AndroidServerConnection {
                 System.out.println("challengeladder - getlogin passed");
                 
                 HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tid=3&rid="+rid);
-                String res = directConnectExecute(get);
+                String res = directConnectExecute(get,null);
                 System.out.println("challengeladder - got server answer");
                 
                 // check if challenge possible
@@ -228,7 +250,7 @@ public class AndroidServerConnection {
                 // challenge is possible.
                 {
                     HttpGet cget = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tl_challenge=Confirm+Challenge&tid=3&rid="+rid+"&confirm=1");
-                    String cres = directConnectExecute(cget);
+                    String cres = directConnectExecute(cget,null);
                     System.out.println("challengeladder - got server answer to challenge confirm");
                     System.out.println(cres);
                     EventManager.getEventManager().sendEvent(eventType.showMessage,"Challenge "+ladd.userList[pos]+" ok");
@@ -245,7 +267,7 @@ public class AndroidServerConnection {
 	/**
 	 * @return the players that you can challenge in the ladder, and only them !
 	 */
-	public void startLadderView() {
+	public void startLadderView(final File dir) {
 		EventManager.getEventManager().sendEvent(eventType.ladderStart);
 		if (ladd.isLadderCached()) {
 			EventManager.getEventManager().sendEvent(eventType.ladderEnd);
@@ -258,8 +280,9 @@ public class AndroidServerConnection {
 				System.out.println("getladder - getlogin passed");
 				
 				HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/view.php?tid=3");
-				String res = directConnectExecute(get);
-				ladd.setHTML(res);
+				final String cacheFile = "ladderHtmlString";
+				directConnectExecute(get, dir.getAbsolutePath()+"/"+cacheFile);
+				ladd.loadHTML(dir.getAbsolutePath()+"/"+cacheFile);
 				System.out.println("getladder - got server answer");
 				EventManager.getEventManager().sendEvent(eventType.ladderEnd);
 			}
