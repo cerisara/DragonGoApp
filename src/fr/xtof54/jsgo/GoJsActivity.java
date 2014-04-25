@@ -1235,7 +1235,7 @@ public class GoJsActivity extends FragmentActivity {
 		                .setNeutralButton("Reload", new DialogInterface.OnClickListener() {
 		                    public void onClick(DialogInterface dialog, int id) {
 		                    	androidServer.ladd.resetCache();
-		                    	androidServer.startLadderView();
+		                    	androidServer.startLadderView(eidogodir);
 		                    	DetListDialogFragment.this.getDialog().dismiss();
 		                    }
 		                })
@@ -1254,7 +1254,7 @@ public class GoJsActivity extends FragmentActivity {
 			public String getName() {return "ladder";}
 		});
         androidServer.ladd.checkCache(eidogodir);
-        androidServer.startLadderView();
+        androidServer.startLadderView(eidogodir);
 	}
 	
 	private void ladderChallenge(int pos) {
