@@ -121,9 +121,12 @@ public class Ladder {
 			reslist.toArray(userList);
             ridList  = new String[reslist.size()];
             rids.toArray(ridList);
-			System.out.println("end ladder to array: "+ridList.length+" "+userList.length);
-			for (int a=0;a<15;a++)
-				System.out.println("\t"+a+"\t"+userList[a]);
+            System.out.println("end ladder to array: "+ridList.length+" "+userList.length);
+            if (userList.length==0) {
+                EventManager.getEventManager().sendEvent(eventType.showMessage, "you cannot challenge anymore in this ladder");
+            } else
+                for (int a=0;a<15;a++)
+                    System.out.println("\t"+a+"\t"+userList[a]);
 		}
 		// get user rank
 		int i=html.indexOf("TourneyUser");
