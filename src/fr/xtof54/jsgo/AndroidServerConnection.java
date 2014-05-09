@@ -230,7 +230,7 @@ public class AndroidServerConnection {
                 initHttp();
                 System.out.println("challengeladder - getlogin passed");
                 
-                HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tid=3&rid="+rid);
+                HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tid="+ladd.ladnum+"&rid="+rid);
                 String res = directConnectExecute(get,null);
                 System.out.println("challengeladder - got server answer");
                 
@@ -249,7 +249,7 @@ public class AndroidServerConnection {
                 }
                 // challenge is possible.
                 {
-                    HttpGet cget = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tl_challenge=Confirm+Challenge&tid=3&rid="+rid+"&confirm=1");
+                    HttpGet cget = new HttpGet(getUrl()+"tournaments/ladder/challenge.php?tl_challenge=Confirm+Challenge&tid="+ladd.ladnum+"&rid="+rid+"&confirm=1");
                     String cres = directConnectExecute(cget,null);
                     System.out.println("challengeladder - got server answer to challenge confirm");
                     System.out.println(cres);
