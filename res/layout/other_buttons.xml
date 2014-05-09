@@ -29,12 +29,19 @@
             android:text="Add a game message" />
 
         <Button
-            android:id="@+id/ladder"
+            android:id="@+id/ladder19"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="View 19x19 ladder" />
-
+        
+        <Button
+            android:id="@+id/ladder9"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View 9x9 ladder" />
+        
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

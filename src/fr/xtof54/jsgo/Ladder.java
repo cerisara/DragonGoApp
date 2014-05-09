@@ -15,20 +15,27 @@ import java.util.Calendar;
 import fr.xtof54.jsgo.EventManager.eventType;
 
 public class Ladder {
-	String html;
+	public static final int LADDER19x19 = 3;
+	public static final int LADDER9x9 = 1;
+	
 	String[] userList=null, ridList;
 	File cacheFile=null;
 	String userRank = "unk";
 	int lastClicked = -1;
     // year, month, day, hour, minutes
 	int[] cacheTime = {0,0,0,0,0};
+	int ladnum;
 
+	public Ladder(int ladderid) {
+		ladnum=ladderid;
+	}
+	
 	public CharSequence getCacheTime(){
 	    return cacheTime[0]+"-"+cacheTime[1]+"-"+cacheTime[2]+"."+cacheTime[3]+":"+cacheTime[4];
 	}
 	
 	public void checkCache(File dir) {
-		File f = new File(dir+"/ladder.txt");
+		File f = new File(dir+"/ladder"+ladnum+".txt");
 		cacheFile=f;
 		if (!f.exists()) return;
 		// read ladder from cache
@@ -72,74 +79,6 @@ public class Ladder {
 		userList=null;
 	}
 	
-	@Deprecated
-	private void processHTML() {
-		if (html!=null) {
-			ArrayList<String> reslist = new ArrayList<String>();
-			ArrayList<String> rids = new ArrayList<String>();
-			int i=html.indexOf("Challenge this user");
-			while (i>=0) {
-			    String rid = null;
-			    int j=html.lastIndexOf("rid=", i);
-			    if (j>=0) {
-			        j+=4;
-			        int z=html.indexOf('"',j);
-			        if (z-j>0) rid = html.substring(j, z);
-			    }
-				StringBuilder userline = new StringBuilder();
-				int debline = html.lastIndexOf("<tr ", i);
-				int endline = html.indexOf("</tr", i);
-				if (debline>=0&&endline>=0) {
-					int z=html.indexOf("name=\"rank",debline);
-					if (z>=0) {
-						int z1=html.indexOf('>',z)+1;
-						int z2=html.indexOf('<',z1);
-						userline.append(decode(html.substring(z1,z2)));
-						userline.append(' ');
-					}
-					z=html.indexOf("\" class=\"User",debline);
-					if (z>=0) {
-						int z1=html.indexOf('>',z)+1;
-						int z2=html.indexOf('<',z1);
-						userline.append(decode(html.substring(z1,z2)));
-						userline.append(' ');
-					}
-					z=html.indexOf("\" class=\"Rating",debline);
-					if (z>=0) {
-						int z1=html.indexOf('>',z)+1;
-						int z2=html.indexOf('<',z1);
-						userline.append(decode(html.substring(z1,z2)));
-						userline.append(' ');
-					}
-					reslist.add(userline.toString().trim());
-					rids.add(rid);
-				}
-				j=html.indexOf("Challenge this user",endline);
-				i=j;
-			}
-			userList = new String[reslist.size()];
-			reslist.toArray(userList);
-            ridList  = new String[reslist.size()];
-            rids.toArray(ridList);
-            System.out.println("end ladder to array: "+ridList.length+" "+userList.length);
-            if (userList.length==0) {
-                EventManager.getEventManager().sendEvent(eventType.showMessage, "you cannot challenge anymore in this ladder");
-            } else
-                for (int a=0;a<15;a++)
-                    System.out.println("\t"+a+"\t"+userList[a]);
-		}
-		// get user rank
-		int i=html.indexOf("TourneyUser");
-		if (i>=0) {
-		    int z=html.indexOf("name=\"rank",i);
-            if (z>=0) {
-                int z1=html.indexOf('>',z)+1;
-                int z2=html.indexOf('<',z1);
-                userRank=html.substring(z1, z2);
-            }
-		}
-	}
-
 	ArrayList<String> reslist = new ArrayList<String>();
 	ArrayList<String> rids = new ArrayList<String>();
 	private void treatLine(String s) {
@@ -248,6 +187,7 @@ public class Ladder {
 		reslist.toArray(userList);
         ridList  = new String[reslist.size()];
         rids.toArray(ridList);
+        saveList();
 		System.out.println("end ladder to array: "+ridList.length+" "+userList.length);
 		if (userList.length==0) {
 			EventManager.getEventManager().sendEvent(eventType.showMessage, "you cannot challenge anymore in this ladder");
@@ -290,11 +230,5 @@ public class Ladder {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	// this method should not be used any more because it consumes too much memory
-	public void setHTML(String s) {
-		html=""+s;
-		processHTML();
-		saveList();
 	}
 }

@@ -161,7 +161,7 @@ public class AndroidServerConnection {
 	 * you'll find below direct connection to the DGS server, without using the quicksuite !
 	 */
 
-	Ladder ladd = new Ladder();
+	Ladder ladd = null;
 	String res;
 	
 	/**
@@ -279,7 +279,8 @@ public class AndroidServerConnection {
 				initHttp();
 				System.out.println("getladder - getlogin passed");
 				
-				HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/view.php?tid=3");
+				HttpGet get = new HttpGet(getUrl()+"tournaments/ladder/view.php?tid="+ladd.ladnum);
+				// this file is erased next time we load one of the ladder - it's useless to keep both ladders in such files: it could even be removed afterwards...
 				final String cacheFile = "ladderHtmlString";
 				directConnectExecute(get, dir.getAbsolutePath()+"/"+cacheFile);
 				ladd.loadHTML(dir.getAbsolutePath()+"/"+cacheFile);

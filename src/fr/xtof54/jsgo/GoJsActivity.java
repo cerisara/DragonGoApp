@@ -1187,8 +1187,9 @@ public class GoJsActivity extends FragmentActivity {
 		gameMsgDialog.show(getSupportFragmentManager(),"game messages");
 	}
 
-	private void viewLadder() {
+	private void viewLadder(final int ladid) {
         if (!initAndroidServer()) return;
+        androidServer.ladd=new Ladder(ladid);
         EventManager.getEventManager().registerListener(eventType.ladderEnd, new EventManager.EventListener() {
 			@Override
 			public void reactToEvent() {
@@ -1302,11 +1303,20 @@ public class GoJsActivity extends FragmentActivity {
                     }
                 });
 
-                Button bladder = (Button)v.findViewById(R.id.ladder);
-                bladder.setOnClickListener(new View.OnClickListener() {
+                Button bladder19 = (Button)v.findViewById(R.id.ladder19);
+                bladder19.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View vv) {
-                        viewLadder();
+                        viewLadder(Ladder.LADDER19x19);
+                        dialog.dismiss();
+                    }
+                });
+
+                Button bladder9 = (Button)v.findViewById(R.id.ladder9);
+                bladder9.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        viewLadder(Ladder.LADDER9x9);
                         dialog.dismiss();
                     }
                 });
