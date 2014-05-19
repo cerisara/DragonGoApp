@@ -11,7 +11,7 @@ This is a new experimental android app to use for DGS, with the following featur
 * Full-featured SGF editor/player based on the open-source eidogo code. Also shows game information and game comments.
 * Support dual servers/credentials (DGS and develDGS)
 * Playing moves (obviously !), pass, resign, send/receive messages, attach a comment to a move
-* invite/accept/refuse challenges, challenge in 19x19 ladder
+* invite/accept/refuse challenges, challenge in 19x19 and 9x9 ladders
 * Follow reviews of professional games from gobase, which are included in the app
 
 Limitations:
