@@ -120,6 +120,14 @@ public class ServerConnection {
                 HttpConnectionParams.setSoTimeout(httpparms, 6000);
                 httpclient = new DefaultHttpClient(httpparms);
                 try {
+                	try {
+                		// for now, just an anonymous ping for usage stats
+                		// TODO: use it to check for updates + if enough stats, direct connection with the opponent app for live game
+                        String cmd = "http://talc1.loria.fr/users/cerisara/DGSping.php";
+                        HttpGet httpget = new HttpGet(cmd);
+                        httpclient.execute(httpget);
+                	} catch (Exception e) {}
+                	// login
                     String cmd = server+"login.php?quick_mode=1&userid="+u+"&passwd="+p;
                     System.out.println("debug login cmd "+cmd);
                     HttpGet httpget = new HttpGet(cmd);

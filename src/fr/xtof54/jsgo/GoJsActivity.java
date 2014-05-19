@@ -53,6 +53,8 @@ import android.support.v4.app.FragmentActivity;
  *
  */
 public class GoJsActivity extends FragmentActivity {
+	public static final String version = "1.3";
+	
 	ServerConnection server=null;
 	AndroidServerConnection androidServer = null;
 	int chosenServer=0, chosenLogin=0;
@@ -1195,7 +1197,7 @@ public class GoJsActivity extends FragmentActivity {
 			public void reactToEvent() {
 				EventManager.getEventManager().unregisterListener(eventType.ladderEnd,this);
 				if (androidServer.ladd==null||androidServer.ladd.getCachedLadder()==null||androidServer.ladd.getCachedLadder().length==0) {
-					showMessage("Probleme: are your registered in the ladder ? can you still challenge ?");
+					showMessage("Problem: are your registered in the ladder ? can you still challenge ?");
 			        return;
 				}
 		        class DetListDialogFragment extends DialogFragment {
