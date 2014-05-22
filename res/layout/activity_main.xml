@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView1"
         android:clickable="false"
-        android:text="get Games"
+        android:text="Games"
         />
 
     <Button
@@ -32,7 +32,7 @@
         android:layout_alignTop="@+id/but1"
         android:layout_toRightOf="@+id/but1"
         android:clickable="false"
-        android:text="Zoom+"
+        android:text="Z+"
         />
 
     <Button
@@ -43,7 +43,7 @@
         android:layout_alignTop="@+id/but1"
         android:layout_toRightOf="@+id/but2"
         android:clickable="false"
-        android:text="Zoom-"
+        android:text="Z-"
         />
 
     <Button
@@ -55,6 +55,17 @@
         android:layout_toRightOf="@+id/but3"
         android:clickable="false"
         android:text="pass"
+        />
+
+    <Button
+        android:id="@+id/but5"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/but1"
+        android:layout_toRightOf="@+id/but4"
+        android:clickable="true"
+        android:text="Fwd"
         />
     
     <WebView

@@ -106,11 +106,11 @@ public class GoJsActivity extends FragmentActivity {
 			// we allow clicking just in case the user wants to play locally, disconnected
 			writeInLabel("Getgame: download game from DGS");
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
-			setButtons("Getgame","Zoom+","Zoom-","Msg"); break;
+			setButtons("Games","Z+","Z-","Msg"); break;
 		case play:
 			writeInLabel("click on the board to play");
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
-			setButtons("Send","Zoom+","Zoom-","Reset"); break;
+			setButtons("Send","Z+","Z-","Reset"); break;
 		case markDeadStones:
 			writeInLabel("click on the board to mark dead stones");
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
@@ -119,16 +119,16 @@ public class GoJsActivity extends FragmentActivity {
 			// normally, detmarkx() is called right after the board is displayed,
 			// but here, the board is displayed long ago, so we have to call it manually
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
-			setButtons("Score","Zoom+","Zoom-","Play"); break;
+			setButtons("Score","Z+","Z-","Play"); break;
 		case checkScore: 
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detforbidClicking()");
-			setButtons("Accept","Zoom+","Zoom-","Refuse"); break;
+			setButtons("Accept","Z+","Z-","Refuse"); break;
 		case message:
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detforbidClicking()");
 			lastGameState=curstate;
 			setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
 		case review:
-			setButtons("ReprintMsg","Zoom+","Zoom-","ListG");break;
+			setButtons("ReprintMsg","Z+","Z-","ListG");break;
 		default:
 		}
 		curstate=newstate;
@@ -631,34 +631,44 @@ public class GoJsActivity extends FragmentActivity {
 				}
 			});
 		}
-		{
-			final Button button = (Button)findViewById(R.id.but4);
-			button.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					System.out.println("press button4 on state "+curstate);
-					switch(curstate) {
-					case nogame: // send message (TODO)
-						changeState(guistate.message); break;
-					case play: // reset to the original download SGF
-						showGame(Game.gameShown);
-						break;
-					case markDeadStones: // cancels marking stones and comes back to playing
-						changeState(guistate.play);
-						break;
-					case checkScore: // refuse score and continues to mark stones
-						refuseScore();
-						break;
-					case message: // go back to last game mode
-						changeState(lastGameState);
-						break;
-					case review:
-						Reviews.showList();
-						break;
-					}
-				}
-			});
-		}
+        {
+            final Button button = (Button)findViewById(R.id.but4);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    System.out.println("press button4 on state "+curstate);
+                    switch(curstate) {
+                    case nogame: // send message
+                        changeState(guistate.message); break;
+                    case play: // reset to the original download SGF
+                        showGame(Game.gameShown);
+                        break;
+                    case markDeadStones: // cancels marking stones and comes back to playing
+                        changeState(guistate.play);
+                        break;
+                    case checkScore: // refuse score and continues to mark stones
+                        refuseScore();
+                        break;
+                    case message: // go back to last game mode
+                        changeState(lastGameState);
+                        break;
+                    case review:
+                        Reviews.showList();
+                        break;
+                    }
+                }
+            });
+        }
+        {
+            final Button button = (Button)findViewById(R.id.but5);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    System.out.println("press button5 on state "+curstate);
+                    wv.loadUrl("javascript:eidogo.autoPlayers[0].fwd()");
+                }
+            });
+        }
 
 		// ====================================
 		// copy the eidogo dir into the external sdcard
