@@ -24,6 +24,8 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import fr.xtof54.jsgo.EventManager.eventType;
 
 /**
@@ -123,7 +125,8 @@ public class ServerConnection {
                 	try {
                 		// for now, just an anonymous ping for usage stats
                 		// TODO: use it to check for updates + if enough stats, direct connection with the opponent app for live game
-                        String cmd = "http://talc1.loria.fr/users/cerisara/DGSping.php";
+                        String cmd = "http://talc1.loria.fr/users/cerisara/DGSping.php?v="+GoJsActivity.dgappversion;
+                        Log.i("login", cmd);
                         HttpGet httpget = new HttpGet(cmd);
                         httpclient.execute(httpget);
                 	} catch (Exception e) {}

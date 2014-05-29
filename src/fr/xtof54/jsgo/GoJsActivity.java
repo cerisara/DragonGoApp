@@ -53,7 +53,7 @@ import android.support.v4.app.FragmentActivity;
  *
  */
 public class GoJsActivity extends FragmentActivity {
-	public static final String version = "1.3";
+	public static final String dgappversion = "1.3";
 	
 	ServerConnection server=null;
 	AndroidServerConnection androidServer = null;
