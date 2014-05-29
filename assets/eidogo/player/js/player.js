@@ -1059,6 +1059,13 @@ eidogo.Player.prototype = {
         this.resetCursor(false, true);
     },
 
+    fwd: function() {
+        if (!this.cursor.hasNext()) return;
+        this.variation(null, true);
+        this.refresh();
+	window.location="androidcall01|C|"+this.dom.comments.innerHTML;
+    },
+
     last: function() {
         if (!this.cursor.hasNext()) return;
         while (this.variation(null, true)) {}
