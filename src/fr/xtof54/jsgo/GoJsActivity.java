@@ -23,6 +23,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -79,6 +80,16 @@ public class GoJsActivity extends FragmentActivity {
 	//		}
 	//	}
 
+	private void setButtons(final String b1, final String b2, final String b3, final String b4, final String b5) {
+		setButtons(b1, b2, b3, b4);
+		this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Button but5 = (Button)findViewById(R.id.but5);
+				but5.setText(b5);
+			}
+		});
+	}
 	private void setButtons(final String b1, final String b2, final String b3, final String b4) {
 		this.runOnUiThread(new Runnable() {
 			@Override
@@ -106,11 +117,11 @@ public class GoJsActivity extends FragmentActivity {
 			// we allow clicking just in case the user wants to play locally, disconnected
 			writeInLabel("Getgame: download game from DGS");
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
-			setButtons("Games","Z+","Z-","Msg"); break;
+			setButtons("Games","Zm+","Zm-","Msg"); break;
 		case play:
 			writeInLabel("click on the board to play");
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
-			setButtons("Send","Z+","Z-","Reset"); break;
+			setButtons("Send","Zm+","Zm-","Reset","Bck"); break;
 		case markDeadStones:
 			writeInLabel("click on the board to mark dead stones");
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
@@ -119,16 +130,16 @@ public class GoJsActivity extends FragmentActivity {
 			// normally, detmarkx() is called right after the board is displayed,
 			// but here, the board is displayed long ago, so we have to call it manually
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detmarkx()");
-			setButtons("Score","Z+","Z-","Play"); break;
+			setButtons("Score","Zm+","Zm-","Play"); break;
 		case checkScore: 
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detforbidClicking()");
-			setButtons("Accept","Z+","Z-","Refuse"); break;
+			setButtons("Accept","Zm+","Zm-","Refuse"); break;
 		case message:
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detforbidClicking()");
 			lastGameState=curstate;
 			setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
 		case review:
-			setButtons("ReprintMsg","Z+","Z-","ListG");break;
+			setButtons("LastCmt","Zm+","Zm-","ListG","Fwd");break;
 		default:
 		}
 		curstate=newstate;
@@ -665,7 +676,12 @@ public class GoJsActivity extends FragmentActivity {
                 @Override
                 public void onClick(View v) {
                     System.out.println("press button5 on state "+curstate);
-                    wv.loadUrl("javascript:eidogo.autoPlayers[0].fwd()");
+                    CharSequence t = button.getText();
+                    if (t.equals("Fwd"))
+                    	wv.loadUrl("javascript:eidogo.autoPlayers[0].fwd()");
+                    else if (t.equals("Bck"))
+                    	wv.loadUrl("javascript:eidogo.autoPlayers[0].backward()");
+                    else Log.w("button5", "unknow text "+t);
                 }
             });
         }
