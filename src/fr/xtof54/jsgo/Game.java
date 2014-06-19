@@ -1,5 +1,8 @@
 package fr.xtof54.jsgo;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -46,6 +49,7 @@ public class Game {
 		sgf.add(sgfdata);
 	}
 	
+	// TODO: use raw table format instead of JSON to reduce bandwidth
 	public static void loadStatusGames(final ServerConnection server) {
 		games2play.clear();
 		final EventManager em = EventManager.getEventManager();
@@ -58,19 +62,23 @@ public class Game {
 					int ngames = o.getInt("list_size");
 					if (ngames>0) {
 						JSONArray headers = o.getJSONArray("list_header");
-						int gid_jsonidx = -1;
+						int gid_jsonidx=-1, lastmove_jsonidx=-1, nextmovecolor_jsonidx=-1;
 						for (int i=0;i<headers.length();i++) {
 							String h = headers.getString(i);
 							System.out.println("jsonheader "+i+" "+h);
-							if (h.equals("id")) gid_jsonidx=i;
+                            if (h.equals("id")) gid_jsonidx=i;
+                            if (h.equals("move_last")) lastmove_jsonidx=i;
+                            if (h.equals("move_color")) nextmovecolor_jsonidx=i;
 						}
 						JSONArray jsongames = o.getJSONArray("list_result");
 						for (int i=0;i<jsongames.length();i++) {
 							JSONArray jsongame = jsongames.getJSONArray(i);
 							int gameid = jsongame.getInt(gid_jsonidx);
-							Game g = new Game(jsongame, gameid);
+							Game g = new Game(jsongame, gameid, lastmove_jsonidx, nextmovecolor_jsonidx);
 							games2play.add(g);
 						}
+						float r=getPropOfLocalGames()*100f;
+						GoJsActivity.main.showMessage("% of local games: "+r+"%");
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -88,10 +96,31 @@ public class Game {
 
 	public static List<Game> getGames() {return games2play;}
 
-	Game(JSONArray gameObject, int gameid) {
-		gid=gameid;
-		gameinfo = gameObject;
-	}
+    Game(JSONArray gameObject, int gameid) {
+        gid=gameid;
+        gameinfo = gameObject;
+        tryAndLoadGame();
+    }
+    Game(JSONArray gameObject, int gameid, int jsonlastmove, int jsonnextmovecolor) {
+        gid=gameid;
+        gameinfo = gameObject;
+        if (tryAndLoadGame()) {
+            try {
+                String nextColor = gameObject.getString(jsonnextmovecolor);
+                // TODO: verifier si le SGF local contient deja le "lastmove" (arrive si le user n'a pas joue apres)
+                // ceci doit etre fait en comptant le nombre de coups !!
+                char opponentColor = 'W';
+                if (nextColor.charAt(0)=='W') opponentColor='B';
+                String opponentMove = gameObject.getString(jsonlastmove);
+                String lastInSgf = sgf.remove(sgf.size()-1).trim();
+                assert lastInSgf.charAt(lastInSgf.length()-1)==')';
+                String nlastInSgf=lastInSgf.substring(0, lastInSgf.length()-1)+";"+opponentColor+"["+opponentMove+"])";
+                sgf.add(nlastInSgf);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 	public String getGameStatus() {
 		try {
@@ -210,37 +239,44 @@ public class Game {
 
 	// est-ce qu'il faut garder le meme httpclient qu'avant pour pouvoir beneficier du proxy ? ==> OUI
 	public void downloadGame(final ServerConnection server) {
-		final EventManager em = EventManager.getEventManager();
-		EventManager.EventListener f = new EventManager.EventListener() {
-			@Override
-			public synchronized void reactToEvent() {
-				em.unregisterListener(eventType.downloadGameEnd, this);
-				sgf = new ArrayList<String>();
-				for (String s : server.sgf) sgf.add(""+s);
-				// look for move_id and size
-				for (String s: sgf) {
-					int i=s.indexOf("XM[");
-					if (i>=0) {
-						int j=s.indexOf(']',i+3);
-						moveid = Integer.parseInt(s.substring(i+3, j));
-					}
-					i=s.indexOf("SZ[");
-					if (i>=0) {
-						int j=s.indexOf(']',i+3);
-						boardsize = Integer.parseInt(s.substring(i+3, j));
-					}
-				}
-				checkIfDeadStonesMarked();
-				System.out.println("sgf: "+sgf);
-				System.out.println("moveid "+moveid);
-				System.out.println("deadstones in SGF: "+deadstInSgf);
-				em.sendEvent(eventType.GameOK);
-			}
-			@Override
-			public String getName() {return "downloadGame";}
-		};
-		em.registerListener(eventType.downloadGameEnd, f);
-		server.downloadSgf(gid, true);
+        // TODO: also provide an option to list/reload/del local files
+        final EventManager em = EventManager.getEventManager();
+	    if (sgf==null) {
+	        // download the SGF iff it's not already loaded from local file !
+	        EventManager.EventListener f = new EventManager.EventListener() {
+	            @Override
+	            public synchronized void reactToEvent() {
+	                em.unregisterListener(eventType.downloadGameEnd, this);
+	                sgf = new ArrayList<String>();
+	                for (String s : server.sgf) sgf.add(""+s);
+	                // look for move_id and size
+	                for (String s: sgf) {
+	                    int i=s.indexOf("XM[");
+	                    if (i>=0) {
+	                        int j=s.indexOf(']',i+3);
+	                        moveid = Integer.parseInt(s.substring(i+3, j));
+	                    }
+	                    i=s.indexOf("SZ[");
+	                    if (i>=0) {
+	                        int j=s.indexOf(']',i+3);
+	                        boardsize = Integer.parseInt(s.substring(i+3, j));
+	                    }
+	                }
+	                checkIfDeadStonesMarked();
+	                System.out.println("sgf: "+sgf);
+	                System.out.println("moveid "+moveid);
+	                System.out.println("deadstones in SGF: "+deadstInSgf);
+	                saveGame();
+	                em.sendEvent(eventType.GameOK);
+	            }
+	            @Override
+	            public String getName() {return "downloadGame";}
+	        };
+	        em.registerListener(eventType.downloadGameEnd, f);
+	        server.downloadSgf(gid, true);
+	    } else {
+            em.sendEvent(eventType.GameOK);
+	    }
 	}
 
 	public int getBoardSize() {return boardsize;}
@@ -410,5 +446,45 @@ public class Game {
 		if (msg!=null)
 		    cmd+="&msg="+URLEncoder.encode(msg.toString());
 		server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
+	}
+	
+	public void saveGame() {
+        try {
+            PrintWriter fout = new PrintWriter(new FileWriter(GoJsActivity.main.eidogodir+"/game"+gid+".sgf"));
+            for (int i=0;i<sgf.size();i++) fout.println(sgf.get(i));
+            fout.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+	private boolean tryAndLoadGame() {
+        sgf=null;
+	    File f = new File(GoJsActivity.main.eidogodir+"/game"+gid+".sgf");
+	    if (!f.exists()) return false;
+        try {
+            BufferedReader fin = new BufferedReader(new FileReader(f));
+            sgf = new ArrayList<String>();
+            for (;;) {
+                String s = fin.readLine();
+                if (s==null) break;
+                sgf.add(s);
+            }
+            fin.close();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            sgf=null;
+            return false;
+        }
+	}
+	public static float getPropOfLocalGames() {
+	    int ntot=0, nok=0;
+	    for (Game g : games2play) {
+	        ntot++;
+	        if (g.sgf!=null) nok++;
+	    }
+	    float r=1;
+	    if (ntot>0) r = (float)nok/(float)ntot;
+	    return r;
 	}
 }
