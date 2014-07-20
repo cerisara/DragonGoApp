@@ -11,7 +11,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+
+import fr.xtof54.dragonGoApp.R;
 import fr.xtof54.jsgo.EventManager.eventType;
+import fr.xtof54.jsgo.GoJsActivity.ErrDialogFragment;
+import fr.xtof54.jsgo.GoJsActivity.guistate;
 
 public class Game {
 	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
@@ -401,14 +413,62 @@ public class Game {
 	}
 
 	public void sendMove2server(String move, final ServerConnection server) {
+		if (move.toLowerCase().startsWith("tt")) move="pass";
 		System.out.println("move "+move);
-		String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move="+move;
-		if (move.toLowerCase().startsWith("tt")) {
-			// pass move
-			cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move=pass";
+		final String finmove = move;
+		
+		// ask for confirmation before sending
+		class ConfirmDialogFragment extends DialogFragment {
+			String cmdSentBeforeNetErr;
+			eventType eventTobesent;
+			GoJsActivity main;
+			public void setArguments(String s, eventType e, GoJsActivity m) {
+				cmdSentBeforeNetErr = s;
+				eventTobesent = e;
+				main=m;
+			}
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because its going in the dialog layout
+				View v = inflater.inflate(R.layout.error, null);
+				// Add action buttons
+				builder.setView(v).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						ConfirmDialogFragment.this.getDialog().cancel();
+					}
+				})
+				.setPositiveButton("OK, send !", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move="+finmove;
+						if (msg!=null)
+						    cmd+="&msg="+URLEncoder.encode(msg.toString());
+						server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
+						ConfirmDialogFragment.this.getDialog().cancel();
+					}
+				});
+				builder.setTitle("Confirmation");
+				TextView tv = (TextView)v.findViewById(R.id.errormsg);
+				// transform internal move rep to user-type moves:
+				String usermove = finmove;
+				if (finmove.length()==2) {
+					char col=Character.toUpperCase(finmove.charAt(0));
+					if (Character.toLowerCase(finmove.charAt(0))>='i') {
+						col=(char)((int)col+1);
+					}
+					int row = boardsize-((int)Character.toUpperCase(finmove.charAt(1))-(int)'A');
+					usermove=""+col;
+					usermove+=row;
+				}
+				tv.setText("Confirm move "+usermove+" ?");
+				return builder.create();
+			}
 		}
-		if (msg!=null)
-		    cmd+="&msg="+URLEncoder.encode(msg.toString());
-		server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
+		ConfirmDialogFragment confirmDialog = new ConfirmDialogFragment();
+		confirmDialog.show(GoJsActivity.main.getSupportFragmentManager(),"confirmBeforeSend");
 	}
 }
