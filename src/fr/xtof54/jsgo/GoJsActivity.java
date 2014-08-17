@@ -54,7 +54,7 @@ import android.support.v4.app.FragmentActivity;
  *
  */
 public class GoJsActivity extends FragmentActivity {
-	public static final String dgappversion = "1.3";
+	public static final String dgappversion = "1.6";
 	
 	ServerConnection server=null;
 	AndroidServerConnection androidServer = null;
@@ -1433,6 +1433,15 @@ public class GoJsActivity extends FragmentActivity {
 					public void onClick(View vv) {
 						System.out.println("resign game");
 						resignGame();
+						dialog.dismiss();
+					}
+				});
+				Button bforums= (Button)v.findViewById(R.id.forums);
+				bforums.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						System.out.println("Forums");
+						(new Forums()).show();
 						dialog.dismiss();
 					}
 				});

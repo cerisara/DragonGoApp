@@ -16,5 +16,7 @@ package fr.xtof54.jsgo;
  *
  */
 public class Forums {
-
+	public void show() {
+		GUI.getGUI().showForums();
+	}
 }

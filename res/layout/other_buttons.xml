@@ -41,6 +41,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="View 9x9 ladder" />
+
+        <Button
+            android:id="@+id/forums"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View Forums" />
         
         <RelativeLayout
             android:layout_width="match_parent"
