@@ -80,7 +80,7 @@ public class AndroidServerConnection {
 			"http://dragongoserver.sourceforge.net/"
 	};
 
-	private void initHttp() {
+	void initHttp() {
 		if (httpclientdirect==null) {
 			httpclientdirect = AndroidHttpClient.newInstance(null);
 			httpctxt = new BasicHttpContext();
@@ -172,7 +172,7 @@ public class AndroidServerConnection {
 	 * @param saveInFile
 	 * @return
 	 */
-	private String directConnectExecute(HttpUriRequest req, final String saveInFile) {
+	public String directConnectExecute(HttpUriRequest req, final String saveInFile) {
 		res=null;
 		try {
 			// is it synchronous or not ?? Yes, it seems that it is synchronous
@@ -192,11 +192,12 @@ public class AndroidServerConnection {
 					InputStream instream = entity.getContent();
 					BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("ISO-8859-1")));
 					if (saveInFile==null) {
+						System.out.println("building String with answer to request");
 						StringBuilder sb = new StringBuilder();
 						for (;;) {
 							String s = fin.readLine();
 							if (s==null) break;
-							//						System.out.println("request answer "+s);
+							System.out.println("request answer "+s);
 							sb.append(s);
 						}
 						res = sb.toString();

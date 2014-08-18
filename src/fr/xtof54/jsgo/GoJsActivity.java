@@ -61,7 +61,7 @@ public class GoJsActivity extends FragmentActivity {
 	int chosenServer=0, chosenLogin=0;
 
 	//    String server;
-	enum guistate {nogame, play, markDeadStones, checkScore, message, review};
+	enum guistate {nogame, play, markDeadStones, checkScore, message, review, forums};
 	guistate curstate = guistate.nogame;
 
 	File eidogodir;
@@ -524,10 +524,24 @@ public class GoJsActivity extends FragmentActivity {
 		});
 	}
 
+	// warning; this requires API 5 (> v2.0)
+	@Override
+	public void onBackPressed() {
+		System.out.println("back pressed");
+		if (curstate==guistate.nogame) {
+			super.onBackPressed();
+		} else if (curstate==guistate.forums) {
+			if (Forums.back()) GUI.getGUI().showHome();
+		} else
+			GUI.getGUI().showHome();
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		initGUI();
+	}
+	void initGUI() {
 		// ====================================
 		setContentView(R.layout.activity_main);
 
@@ -954,7 +968,7 @@ public class GoJsActivity extends FragmentActivity {
 		}
 		return true;
 	}
-	private boolean initAndroidServer() {
+	boolean initAndroidServer() {
 		if (androidServer!=null) return true;
 		String loginkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
 		String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
@@ -1441,7 +1455,7 @@ public class GoJsActivity extends FragmentActivity {
 					@Override
 					public void onClick(View vv) {
 						System.out.println("Forums");
-						(new Forums()).show();
+						Forums.show();
 						dialog.dismiss();
 					}
 				});

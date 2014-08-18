@@ -9,7 +9,7 @@
     tools:context=".GoJsActivity" >
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/forumtext"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
