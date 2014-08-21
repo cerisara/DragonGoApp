@@ -60,6 +60,10 @@ public class Forums {
 			inList=0;
 			showForums(toshow);
 			return false;
+		} else if (inList==2) {
+			inList--;
+			showForums(toshow2);
+			return false;
 		} else return true;
 	}
 	
@@ -158,7 +162,7 @@ public class Forums {
 	}
 	static void catChosen2(int pos) {
 		System.out.println("chosen cat2 "+pos);
-		String cmd = GoJsActivity.main.androidServer.getUrl()+"forum/"+hrefs.get(pos);
+		String cmd = GoJsActivity.main.androidServer.getUrl()+"forum/"+hrefs2.get(pos);
 		System.out.println("direct connect cmd "+cmd);
 		HttpGet get = new HttpGet(cmd);
 		final String cacheFile = GoJsActivity.main.eidogodir+"/forumsHtmlCats";
@@ -214,17 +218,18 @@ public class Forums {
 			e.printStackTrace();
 		}
 		
-		// remove HTML tags
-		txt = txt.replace("<BR>", "\n");
-		txt = txt.replaceAll("<.*>", "");
-		
+//		txt = txt.replace("<BR>", "\n");
+//		txt = txt.replaceAll("<.*>", "");
+		inList++;
+
 		// display
 		GoJsActivity.main.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				GoJsActivity.main.setContentView(R.layout.forums);
 				final EditText v = (EditText)GoJsActivity.main.findViewById(R.id.forumtext);
-				v.setText(txt);
+				v.setKeyListener(null);
+				v.setText(android.text.Html.fromHtml(txt));
 			}
 		});
 	}
@@ -233,13 +238,13 @@ public class Forums {
 		if (i>=0) {
 			int j=s.indexOf("</a>",i);
 			int k=s.lastIndexOf('>', j)+1;
-			txt+="("+s.substring(j, k)+", ";
+			txt+="("+s.substring(k, j)+", ";
 		}
 		i=s.indexOf("PostHeadNormal Author");
 		if (i>=0) {
 			int j=s.indexOf("</A>",i);
 			int k=s.lastIndexOf('>', j)+1;
-			txt+=s.substring(j, k)+") ";
+			txt+=s.substring(k, j)+") ";
 		}
 		i=s.indexOf("PostBody");
 		if (i>=0) {
@@ -254,10 +259,12 @@ public class Forums {
     	int hrefdeb = s.lastIndexOf("href", j);
     	j=s.indexOf('"',hrefdeb)+1;
     	int k=s.indexOf('"',j);
-    	hrefs2.add(s.substring(j,k));
-    	j=s.lastIndexOf("\">",j)+2;
+    	hrefs2.add(s.substring(j,k).replace("&amp;", "&"));
+    	System.out.println("put in hrefs2 "+s.substring(j,k));
+    	j=s.indexOf('>',k)+1;
     	k=s.indexOf('<',j);
     	toshow2.add(s.substring(j, k));
+    	System.out.println("put in toshow2 "+s.substring(j, k));
 	}
 	
 	static private void treatLine(String s) {
