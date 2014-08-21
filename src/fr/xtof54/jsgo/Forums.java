@@ -71,6 +71,10 @@ public class Forums {
 		GoJsActivity.main.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
+			    if (cats.size()==0) {
+			        GoJsActivity.main.showMessage("No new forums");
+			        return;
+			    }
 				System.out.println("set Forum view");
 				GoJsActivity.main.setContentView(R.layout.forumcats);
 				String[] c = new String[cats.size()];
