@@ -38,6 +38,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONObject;
 
+import android.net.NetworkInfo;
 import android.net.http.AndroidHttpClient;
 
 import fr.xtof54.jsgo.EventManager.eventType;
@@ -178,7 +179,19 @@ public class AndroidServerConnection {
 			// is it synchronous or not ?? Yes, it seems that it is synchronous
 			httpclientdirect.execute(req,new ResponseHandler<String>() {
 				@Override
-				public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
+				public String handleResponse(HttpResponse response0) throws ClientProtocolException, IOException {
+					Header[] httpHeader = response0.getHeaders("Location");
+				    while (httpHeader.length > 0) {
+				        httpclientdirect.close();
+				        httpclientdirect = AndroidHttpClient.newInstance(null);
+				        String url = httpHeader[0].getValue();
+				        System.out.println("redirect "+url);
+				        HttpGet httpGet = new HttpGet(url);
+				        response0 = httpclientdirect.execute(httpGet);
+				        httpHeader = response0.getHeaders("Location");
+				    }
+				    final HttpResponse response = response0;
+				    
 					StatusLine status = response.getStatusLine();
 					System.out.println("httpclient execute status "+status.toString());
 					HttpEntity entity = response.getEntity();
