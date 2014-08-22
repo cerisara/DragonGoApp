@@ -60,10 +60,13 @@ public class Forums {
 	// the back button has been pressed
 	public static boolean back() {
 		if (inList==1) {
-			inList=0;
+		    // go back to the list of topics
+		    toshow2.clear(); hrefs2.clear();
+			inList--;
 			showForums(toshow);
 			return false;
 		} else if (inList==2) {
+		    // go back to the list of threads for the current topic
 			inList--;
 			showForums(toshow2);
 			return false;
@@ -110,6 +113,7 @@ public class Forums {
 			catChosen2(pos);
 			return;
 		}
+		GUI.showWaitingWin();
 		System.out.println("chosen cat "+pos);
 		String cmd = GoJsActivity.main.androidServer.getUrl()+"forum/"+hrefs.get(pos);
 		System.out.println("direct connect cmd "+cmd);
@@ -166,9 +170,11 @@ public class Forums {
 			e.printStackTrace();
 		}
 		inList++;
+        GUI.hideWaitingWin();
 		showForums(toshow2);
 	}
 	static void catChosen2(int pos) {
+	    GUI.showWaitingWin();
 		System.out.println("chosen cat2 "+pos);
 		String cmd = GoJsActivity.main.androidServer.getUrl()+"forum/"+hrefs2.get(pos);
 		System.out.println("direct connect cmd "+cmd);
@@ -225,6 +231,7 @@ public class Forums {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		GUI.hideWaitingWin();
 		
 //		txt = txt.replace("<BR>", "\n");
 //		txt = txt.replaceAll("<.*>", "");
@@ -302,6 +309,7 @@ public class Forums {
 	}
 	
 	static void getLastForums() {
+	    GUI.showWaitingWin();
 		GoJsActivity.main.androidServer.initHttp();
 		String cmd = GoJsActivity.main.androidServer.getUrl()+"forum/index.php";
 		System.out.println("direct connect cmd "+cmd);
@@ -360,6 +368,8 @@ public class Forums {
 			f.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+		    GUI.hideWaitingWin();
 		}
 	}
 }

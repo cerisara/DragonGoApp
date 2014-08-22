@@ -71,6 +71,7 @@ public class GoJsActivity extends FragmentActivity {
 	int curgidx2play=0,moveid=0;
 	final String netErrMsg = "Connection errors or timeout, you may retry";
 	static GoJsActivity main;
+    private int numEventsReceived = 0;
 
 	//	private static void copyFile(InputStream in, OutputStream out) throws IOException {
 	//		byte[] buffer = new byte[1024];
@@ -751,15 +752,7 @@ public class GoJsActivity extends FragmentActivity {
 			public String getName() {return "onStartShowWaitDialog";}
 			@Override
 			public synchronized void reactToEvent() {
-				try {
-					if (!isWaitingDialogShown) {
-						waitdialog = new WaitDialogFragment();
-						waitdialog.show(getSupportFragmentManager(),"waiting");
-						isWaitingDialogShown=true;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			    GUI.showWaitingWin();
 				numEventsReceived++;
 			}
 		};
@@ -784,8 +777,7 @@ public class GoJsActivity extends FragmentActivity {
 						return;
 					}
 					if (numEventsReceived==0) {
-						waitdialog.dismiss();
-						isWaitingDialogShown=false;
+					    GUI.hideWaitingWin();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -855,37 +847,6 @@ public class GoJsActivity extends FragmentActivity {
 		cleanTerritory();
 		changeState(guistate.markDeadStones);
 	}
-
-	/*
-	 * This method must not be blocking, otherwise the waiting dialog window is never displayed.
-	 */
-	public Thread runInWaitingThread(final Runnable method) {
-		final Thread computingThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				// this is blocking
-				method.run();
-				try {
-					// just in case, wait for the waiting dialog to be visible
-					for (;;) {
-						if (waitdialog!=null && waitdialog.getDialog()!=null) break;
-						Thread.sleep(500);
-					}
-					// then dismisses it
-					waitdialog.getDialog().cancel();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				// I notify potential threads that wait for computing to be finished
-				synchronized (waiterComputingFinished) {
-					waiterComputingFinished.notifyAll();
-				}
-			}
-		});
-		computingThread.start();
-		return computingThread;
-	}
-	private Boolean waiterComputingFinished=true;
 
 	public static class ErrDialogFragment extends DialogFragment {
 		String cmdSentBeforeNetErr;
@@ -1025,31 +986,6 @@ public class GoJsActivity extends FragmentActivity {
 			initFinished();
 		}
 	}
-
-	public static class WaitDialogFragment extends DialogFragment {
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			// Get the layout inflater
-			LayoutInflater inflater = getActivity().getLayoutInflater();
-
-			// Inflate and set the layout for the dialog
-			// Pass null as the parent view because its going in the dialog layout
-			builder.setView(inflater.inflate(R.layout.waiting, null))
-			// Add action buttons
-			.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					WaitDialogFragment.this.getDialog().cancel();
-					// TODO stop thread
-				}
-			});
-			return builder.create();
-		}
-	}
-
-	private WaitDialogFragment waitdialog;
-	private int numEventsReceived = 0;
-	boolean isWaitingDialogShown = false;
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
