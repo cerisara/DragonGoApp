@@ -1062,7 +1062,10 @@ public class GoJsActivity extends FragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_settings:
-			ask4credentials();
+		    if (curstate==guistate.forums && Forums.inList>0) {
+		        Forums.switchShowNew();
+		    } else
+		        ask4credentials();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

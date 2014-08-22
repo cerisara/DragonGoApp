@@ -40,6 +40,9 @@ public class Forums {
 	static ArrayList<String> hrefs2 = new ArrayList<String>();
 	static String txt;
 	static int inList=0;
+	private static boolean showAll=false;
+    private static String class2find = "class=\"NewFlag\"";
+    private static String class2find2 = "class=\"NewFlag\"";
 	
 	public static void show() {
         if (!GoJsActivity.main.initAndroidServer()) return;
@@ -72,7 +75,8 @@ public class Forums {
 			@Override
 			public void run() {
 			    if (cats.size()==0) {
-			        GoJsActivity.main.showMessage("No new forums");
+			        GoJsActivity.main.showMessage("No new forums; repress to see all forums");
+			        if (!showAll) switchShowNew();
 			        return;
 			    }
 				System.out.println("set Forum view");
@@ -237,28 +241,42 @@ public class Forums {
 			}
 		});
 	}
+	public static void switchShowNew() {
+	    showAll=!showAll;
+	    if (showAll) {
+	        GoJsActivity.main.showMessage("showing old msgs");
+            class2find="class=ThreadCnt";
+            class2find2="class=Name><";
+	    } else {
+            class2find="class=\"NewFlag\"";
+            class2find2="class=\"NewFlag\"";
+	        GoJsActivity.main.showMessage("showing new msgs only");
+	    }
+	}
+	
 	private static void treatLine3(String s) {
-		int i=s.indexOf("PostHeadNormal Subject");
-		if (i>=0) {
-			int j=s.indexOf("</a>",i);
-			int k=s.lastIndexOf('>', j)+1;
-			txt+="("+s.substring(k, j)+", ";
-		}
-		i=s.indexOf("PostHeadNormal Author");
+	    // no need to reprint the subject here, it was already shown in the list on the previous screen
+//		int i=s.indexOf("PostHeadNormal Subject");
+//		if (i>=0) {
+//			int j=s.indexOf("</a>",i);
+//			int k=s.lastIndexOf('>', j)+1;
+//			txt+="("+s.substring(k, j)+", ";
+//		}
+		int i=s.indexOf("PostHeadNormal Author");
 		if (i>=0) {
 			int j=s.indexOf("</A>",i);
 			int k=s.lastIndexOf('>', j)+1;
-			txt+=s.substring(k, j)+") ";
+			txt+="<b>"+s.substring(k, j)+"</b><BR> ";
 		}
 		i=s.indexOf("PostBody");
 		if (i>=0) {
 			i+=23;
 			int j=s.indexOf("</td>",i);
-			txt+=s.substring(i, j)+"\n";
+			txt+=s.substring(i, j)+"<BR>";
 		}
 	}
 	private static void treatLine2(String s) {
-    	int j=s.indexOf("class=\"NewFlag\"");
+    	int j=s.indexOf(class2find2);
     	if (j<0) return;
     	int hrefdeb = s.lastIndexOf("href", j);
     	j=s.indexOf('"',hrefdeb)+1;
@@ -272,7 +290,7 @@ public class Forums {
 	}
 	
 	static private void treatLine(String s) {
-    	int j=s.indexOf("class=\"NewFlag\"");
+    	int j=s.indexOf(class2find);
     	if (j<0) return;
     	int hrefdeb = s.lastIndexOf("href", j);
     	j=s.indexOf('"',hrefdeb)+1;
