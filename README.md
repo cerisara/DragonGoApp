@@ -15,6 +15,8 @@ This is a new experimental android app to use for DGS, with the following featur
 * Follow reviews of professional games from gobase, which are included in the app
 * Read the DGS Forums: by default, only the new/unread messages will be shown, but you can switch to read all messages by pressing menu-settings while in the forums view.
 
+You can install the latest release from [F-droid](https://f-droid.org/repository/browse/?fdfilter=dragongoapp&fdid=fr.xtof54.dragonGoApp)
+
 Limitations:
 
 * Ending game (territory agreement, scoring) is supported by displaying the DGS website, for now.
