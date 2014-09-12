@@ -97,8 +97,10 @@ public class AndroidServerConnection {
 				HttpPost httppost = new HttpPost(getUrl()+"login.php");
 				httppost.setEntity(entity);
 				directConnectExecute(httppost,null);
+	            GoJsActivity.main.updateTraffic();
 			} catch (Exception e) {
 				e.printStackTrace();
+	            GoJsActivity.main.updateTraffic();
 			}
 		}
 	}
@@ -226,12 +228,14 @@ public class AndroidServerConnection {
 						res=null;
 					}
 					fin.close();
+		            GoJsActivity.main.updateTraffic();
 					return res;
 				}
 			},httpctxt);
 			System.out.println("just after execute...");
 		} catch (Exception e) {
 			e.printStackTrace();
+            GoJsActivity.main.updateTraffic();
 		}
 		return res;
 	}
@@ -253,12 +257,14 @@ public class AndroidServerConnection {
                 if (i>=0) {
                     EventManager.getEventManager().sendEvent(eventType.ladderChallengeEnd);
                     EventManager.getEventManager().sendEvent(eventType.showMessage,"Defender is not any more challengeable");
+                    GoJsActivity.main.updateTraffic();
                     return;
                 }
                 i=res.indexOf("Please confirm if you want to challenge this user");
                 if (i<0) {
                     EventManager.getEventManager().sendEvent(eventType.ladderChallengeEnd);
                     EventManager.getEventManager().sendEvent(eventType.showMessage,"Error when trying to challenge user");
+                    GoJsActivity.main.updateTraffic();
                     return;
                 }
                 // challenge is possible.
@@ -273,6 +279,7 @@ public class AndroidServerConnection {
                 // warning: displaying this String may not be done completely, why ?
 //                System.out.println(res);
                 EventManager.getEventManager().sendEvent(eventType.ladderChallengeEnd);
+                GoJsActivity.main.updateTraffic();
             }
         });
         t.start();
@@ -285,6 +292,7 @@ public class AndroidServerConnection {
 		EventManager.getEventManager().sendEvent(eventType.ladderStart);
 		if (ladd.isLadderCached()) {
 			EventManager.getEventManager().sendEvent(eventType.ladderEnd);
+            GoJsActivity.main.updateTraffic();
 			return;
 		}
 		Thread t = new Thread(new Runnable() {
@@ -299,6 +307,7 @@ public class AndroidServerConnection {
 				directConnectExecute(get, dir.getAbsolutePath()+"/"+cacheFile);
 				ladd.loadHTML(dir.getAbsolutePath()+"/"+cacheFile);
 				System.out.println("getladder - got server answer");
+	            GoJsActivity.main.updateTraffic();
 				EventManager.getEventManager().sendEvent(eventType.ladderEnd);
 			}
 		});

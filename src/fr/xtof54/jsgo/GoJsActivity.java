@@ -14,10 +14,14 @@ import org.json.JSONObject;
 import fr.xtof54.dragonGoApp.R;
 import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.ServerConnection.DetLogger;
+import android.net.TrafficStats;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Process;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -54,8 +58,18 @@ import android.support.v4.app.FragmentActivity;
  *
  */
 public class GoJsActivity extends FragmentActivity {
-	public static final String dgappversion = "1.6";
+	public static final String dgappversion = "1.8";
 	
+	private long rx=0, tx=0, rx0=-7, tx0=-7;
+	private int uid=-1;
+	private Handler mHandler = new Handler();
+	private final Runnable mRunnable = new Runnable() {
+		public void run() {
+			updateTraffic();
+			mHandler.postDelayed(mRunnable, 3000);
+		}
+	};
+
 	ServerConnection server=null;
 	AndroidServerConnection androidServer = null;
 	int chosenServer=0, chosenLogin=0;
@@ -230,6 +244,32 @@ public class GoJsActivity extends FragmentActivity {
 		EventManager.getEventManager().sendEvent(eventType.copyEidogoEnd);
 	}
 
+	public void updateTraffic() {
+		long newrx = TrafficStats.getTotalRxBytes();
+		long newtx = TrafficStats.getTotalTxBytes();
+		if (rx!=newrx||tx!=newtx) {
+			rx=newrx; tx=newtx;
+			writeTraffix(rx+tx);
+		}
+	}
+	
+	private void writeTraffix(final long nbytes) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				final TextView label = (TextView)findViewById(R.id.textView1);
+				String s = label.getText().toString();
+				if (s.endsWith("kB")) {
+					int i=s.lastIndexOf(' ');
+					s=s.substring(0, i);
+				}
+				int kb = (int)((nbytes - rx0 - tx0) / (long)1024);
+				label.setText(s+" "+kb+"kB");
+				label.invalidate();
+			}
+		});
+	}
+	
 	public void writeInLabel(final String s) {
 		runOnUiThread(new Runnable() {
 			@Override
@@ -804,6 +844,25 @@ public class GoJsActivity extends FragmentActivity {
         
 		// initialize guistate
 		changeState(guistate.nogame);
+		
+		// initialize traffic stats
+		ActivityManager mgr = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
+		// strange: the initial bandwidth of this uid is not 0 ?!
+		uid = Process.myUid();
+		rx=TrafficStats.getTotalRxBytes();
+		tx=TrafficStats.getTotalTxBytes();
+		if (rx0==-7) {
+			rx0=rx; tx0=tx;
+		}
+		if (rx == TrafficStats.UNSUPPORTED || tx == TrafficStats.UNSUPPORTED) {
+			AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			alert.setTitle("Uh Oh!");
+			alert.setMessage("Your device does not support traffic stat monitoring.");
+			alert.show();
+		} else {
+			mHandler.postDelayed(mRunnable, 3000);
+		}
+		writeTraffix(rx+tx);
 	}
 
 	private void acceptScore() {

@@ -160,6 +160,7 @@ public class ServerConnection {
                 }
                 System.out.println("end login run");
                 em.sendEvent(eventType.loginEnd);
+                GoJsActivity.main.updateTraffic();
             }
         };
         MyRunnable r = new MyRunnable();
@@ -238,6 +239,7 @@ public class ServerConnection {
                     handleNetError(e.toString(),cmd,endEvent);
                 }
                 System.out.println("server runnable terminated");
+                GoJsActivity.main.updateTraffic();
                 if (!hasError&&endEvent!=null) em.sendEvent(endEvent);
             }
         };
@@ -317,6 +319,7 @@ public class ServerConnection {
                     e.printStackTrace();
                     logger.showMsg(netErrMsg);
                 }
+                GoJsActivity.main.updateTraffic();
                 em.sendEvent(eventType.downloadGameEnd);
             }
         };
@@ -385,6 +388,7 @@ public class ServerConnection {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        GoJsActivity.main.updateTraffic();
         return res;
     }
 
@@ -402,9 +406,11 @@ public class ServerConnection {
             System.out.println("direct login anws: "+answ);
             // TODO: check if login succeeded
             isAlreadyDirectLogged=true;
+            GoJsActivity.main.updateTraffic();
             return answ;
         } catch (Exception e) {
             e.printStackTrace();
+            GoJsActivity.main.updateTraffic();
         }
         return "";
     }
@@ -458,10 +464,12 @@ public class ServerConnection {
             HttpPost httppost = new HttpPost(getUrl()+"message.php");
             httppost.setEntity(entity);
             String answ = directConnectExecute(httppost, null);
+            GoJsActivity.main.updateTraffic();
             // TODO: check if success
             return answ;
         } catch (Exception e) {
             e.printStackTrace();
+            GoJsActivity.main.updateTraffic();
         }
         return "";
     }
