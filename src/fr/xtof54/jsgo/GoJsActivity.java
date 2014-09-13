@@ -63,10 +63,11 @@ public class GoJsActivity extends FragmentActivity {
 	private long rx=0, tx=0, rx0=-7, tx0=-7;
 	private int uid=-1;
 	private Handler mHandler = new Handler();
+	private boolean quitall = false;
 	private final Runnable mRunnable = new Runnable() {
 		public void run() {
 			updateTraffic();
-			mHandler.postDelayed(mRunnable, 3000);
+			if (!quitall) mHandler.postDelayed(mRunnable, 3000);
 		}
 	};
 
@@ -243,7 +244,29 @@ public class GoJsActivity extends FragmentActivity {
 		System.out.println("endof copy");
 		EventManager.getEventManager().sendEvent(eventType.copyEidogoEnd);
 	}
-
+	
+	/*
+	 * lifecycle:
+	 * onCreate() ... onDestroy()
+	 * visible:
+	 * onStart() ... onStop() : can be called multiple times
+	 * in front of all others:
+	 * onResume() ... onPause() : interacting with user; called frequently
+	 */
+	
+	@Override
+	public void onDestroy() {
+		quitall=true;
+		if (server!=null) server.closeConnection();
+		if (androidServer!=null) androidServer.closeConnection();
+	}
+	
+	@Override
+	public void onRestart() {
+		super.onRestart();
+		loadSgf();
+	}
+	
 	public void updateTraffic() {
 		long newrx = TrafficStats.getTotalRxBytes();
 		long newtx = TrafficStats.getTotalTxBytes();
