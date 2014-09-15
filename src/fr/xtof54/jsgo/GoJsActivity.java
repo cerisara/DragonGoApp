@@ -256,6 +256,7 @@ public class GoJsActivity extends FragmentActivity {
 	
 	@Override
 	public void onDestroy() {
+		super.onDestroy();
 		quitall=true;
 		if (server!=null) server.closeConnection();
 		if (androidServer!=null) androidServer.closeConnection();
@@ -281,14 +282,18 @@ public class GoJsActivity extends FragmentActivity {
 			@Override
 			public void run() {
 				final TextView label = (TextView)findViewById(R.id.textView1);
-				String s = label.getText().toString();
-				if (s.endsWith("kB")) {
-					int i=s.lastIndexOf(' ');
-					s=s.substring(0, i);
+				if (label!=null) {
+					CharSequence a = label.getText();
+					if (a==null) a="";
+					String s = a.toString();
+					if (s.endsWith("kB")) {
+						int i=s.lastIndexOf(' ');
+						s=s.substring(0, i);
+					}
+					int kb = (int)((nbytes - rx0 - tx0) / (long)1024);
+					label.setText(s+" "+kb+"kB");
+					label.invalidate();
 				}
-				int kb = (int)((nbytes - rx0 - tx0) / (long)1024);
-				label.setText(s+" "+kb+"kB");
-				label.invalidate();
 			}
 		});
 	}
