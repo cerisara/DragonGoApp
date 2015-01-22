@@ -311,13 +311,38 @@ public class Game {
 		// TODO
 	}
 	
+	void prepareGame() {
+		// look for move_id and size
+		for (String s: sgf) {
+			int i=s.indexOf("XM[");
+			if (i>=0) {
+				int j=s.indexOf(']',i+3);
+				moveid = Integer.parseInt(s.substring(i+3, j));
+			}
+			i=s.indexOf("SZ[");
+			if (i>=0) {
+				int j=s.indexOf(']',i+3);
+				boardsize = Integer.parseInt(s.substring(i+3, j));
+			}
+		}
+		checkIfDeadStonesMarked();
+		System.out.println("sgf: "+sgf);
+		System.out.println("moveid "+moveid);
+		System.out.println("deadstones in SGF: "+deadstInSgf);
+		final EventManager em = EventManager.getEventManager();
+		em.sendEvent(eventType.GameOK);
+	}
+	
 	// est-ce qu'il faut garder le meme httpclient qu'avant pour pouvoir beneficier du proxy ? ==> OUI
 	public void downloadGame(final ServerConnection server) {
+		final EventManager em = EventManager.getEventManager();
 		if (loadSGFLocally()) {
+			em.sendEvent(eventType.downloadGameStarted);
+			em.sendEvent(eventType.downloadGameEnd);
+			prepareGame();
 			GoJsActivity.main.showMessage("game loaded locally");
 			return;
 		}
-		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
 			@Override
 			public synchronized void reactToEvent() {
@@ -325,24 +350,7 @@ public class Game {
 				sgf = new ArrayList<String>();
 				for (String s : server.sgf) sgf.add(""+s);
 				saveSGFLocally();
-				// look for move_id and size
-				for (String s: sgf) {
-					int i=s.indexOf("XM[");
-					if (i>=0) {
-						int j=s.indexOf(']',i+3);
-						moveid = Integer.parseInt(s.substring(i+3, j));
-					}
-					i=s.indexOf("SZ[");
-					if (i>=0) {
-						int j=s.indexOf(']',i+3);
-						boardsize = Integer.parseInt(s.substring(i+3, j));
-					}
-				}
-				checkIfDeadStonesMarked();
-				System.out.println("sgf: "+sgf);
-				System.out.println("moveid "+moveid);
-				System.out.println("deadstones in SGF: "+deadstInSgf);
-				em.sendEvent(eventType.GameOK);
+				prepareGame();
 			}
 			@Override
 			public String getName() {return "downloadGame";}
