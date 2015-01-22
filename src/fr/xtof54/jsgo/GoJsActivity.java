@@ -392,6 +392,7 @@ public class GoJsActivity extends FragmentActivity {
 				// this is trigerred when the user clicks the SEND button or by the sgf downloader when detecting a SCORE2 phase
 				final Game g = Game.gameShown;
 				if (curstate==guistate.markDeadStones) {
+					// TODO: update the local SGF
 					String sgfdata = url.substring(i+14, j);
 					String deadstones=getMarkedStones(sgfdata);
 					final EventManager em = EventManager.getEventManager();
@@ -1160,9 +1161,12 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	// TODO: move this method into Game !
 	private void resignGame() {
+		Game.gameShown.addResignToSGF();
 		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+Game.gameShown.moveid;
-		if (Game.gameShown.getMessage()!=null)
+		if (Game.gameShown.getMessage()!=null) {
 		    cmd+="&msg="+URLEncoder.encode(Game.gameShown.getMessage().toString());
+		    Game.gameShown.addMessageToSGF(Game.gameShown.getMessage().toString());
+		}
 		EventManager.getEventManager().registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
 			@Override
 			public void reactToEvent() {

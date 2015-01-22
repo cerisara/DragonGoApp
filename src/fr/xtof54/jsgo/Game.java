@@ -1,5 +1,8 @@
 package fr.xtof54.jsgo;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -22,8 +25,6 @@ import android.widget.TextView;
 
 import fr.xtof54.dragonGoApp.R;
 import fr.xtof54.jsgo.EventManager.eventType;
-import fr.xtof54.jsgo.GoJsActivity.ErrDialogFragment;
-import fr.xtof54.jsgo.GoJsActivity.guistate;
 
 public class Game {
 	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
@@ -219,9 +220,52 @@ public class Game {
 		} else return false;
 	}
 
-
+	private void saveSGFLocally() {
+		try {
+			PrintWriter fout = new PrintWriter(new FileWriter(GoJsActivity.main.eidogodir+"/mygame"+gid+".sgf"));
+			for (int i=0;i<sgf.size();i++) fout.println(sgf.get(i));
+			fout.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	private boolean loadSGFLocally() {
+		final String fname = GoJsActivity.main.eidogodir+"/mygame"+gid+".sgf";
+		File f0 = new File(fname);
+		if (!f0.exists()) return false;
+		try {
+			BufferedReader f = new BufferedReader(new FileReader(f0));
+			sgf = new ArrayList<String>();
+			for (;;) {
+				String s=f.readLine();
+				if (s==null) break;
+				sgf.add(s);
+			}
+			f.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	void addResignToSGF() {
+		// TODO
+	}
+	// it is always called just after addmove or addresign
+	void addMessageToSGF(String msg) {
+		// TODO
+	}
+	void addMoveToSGF(String move) {
+		System.out.println("DEJJJJJJJJJJJ "+move);
+		// TODO
+	}
+	
 	// est-ce qu'il faut garder le meme httpclient qu'avant pour pouvoir beneficier du proxy ? ==> OUI
 	public void downloadGame(final ServerConnection server) {
+		if (loadSGFLocally()) {
+			GoJsActivity.main.showMessage("game loaded locally");
+			return;
+		}
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
 			@Override
@@ -229,6 +273,7 @@ public class Game {
 				em.unregisterListener(eventType.downloadGameEnd, this);
 				sgf = new ArrayList<String>();
 				for (String s : server.sgf) sgf.add(""+s);
+				saveSGFLocally();
 				// look for move_id and size
 				for (String s: sgf) {
 					int i=s.indexOf("XM[");
@@ -444,9 +489,12 @@ public class Game {
 				})
 				.setPositiveButton("OK, send !", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
+						addMoveToSGF(finmove);
 						String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move="+finmove;
-						if (msg!=null)
+						if (msg!=null) {
+							addMessageToSGF(msg.toString());
 						    cmd+="&msg="+URLEncoder.encode(msg.toString());
+						}
 						server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
 						ConfirmDialogFragment.this.getDialog().cancel();
 					}
