@@ -1489,6 +1489,15 @@ public class GoJsActivity extends FragmentActivity {
 						dialog.dismiss();
 					}
 				});
+				Button bsaved= (Button)v.findViewById(R.id.savedGames);
+				bsaved.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						System.out.println("List saved games");
+						Game.showListSaved();
+						dialog.dismiss();
+					}
+				});
 
 				builder.setView(v);
 				return builder.create();

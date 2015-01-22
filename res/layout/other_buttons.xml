@@ -49,6 +49,13 @@
             android:layout_height="wrap_content"
             android:text="View Forums" />
         
+        <Button
+            android:id="@+id/savedGames"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="List saved games" />
+        
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

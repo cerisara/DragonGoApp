@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
@@ -21,10 +22,15 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
 import fr.xtof54.dragonGoApp.R;
 import fr.xtof54.jsgo.EventManager.eventType;
+import fr.xtof54.jsgo.GoJsActivity.guistate;
 
 public class Game {
 	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
@@ -54,6 +60,51 @@ public class Game {
 		return g;
 	}
 
+	static void savedGameChosen(File sgffile, int gid) {
+		// TODO
+	}
+	
+	public static void showListSaved() {
+		final File d = GoJsActivity.main.eidogodir;//+"/mygame"+gid+".sgf";
+		final File[] savedGames = d.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File arg0, String arg1) {
+				return arg1.startsWith("mygame") && arg1.endsWith(".sgf");
+			}
+		});
+		if (savedGames==null||savedGames.length==0) {
+			GoJsActivity.main.showMessage("no game saved");
+			return;
+		}
+		GoJsActivity.main.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				GoJsActivity.main.setContentView(R.layout.forumcats);
+				final String[] c = new String[savedGames.length];
+				for (int i=0;i<c.length;i++) {
+					String s=savedGames[i].getName().substring(6).replace(".sgf", "");
+					c[i]=s;
+				}
+		        ArrayAdapter<String> adapter = new ArrayAdapter<String>(GoJsActivity.main, R.layout.detlistitem, c);
+				final ListView listFrameview = (ListView)GoJsActivity.main.findViewById(R.id.forumCatsList);
+				listFrameview.setAdapter(adapter);
+				listFrameview.setOnItemClickListener(new OnItemClickListener() {
+		            @Override
+		            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
+		            	final int n=position;
+		            	Thread gameselthread = new Thread(new Runnable() {
+							@Override
+							public void run() {
+				            	Game.savedGameChosen(savedGames[n],Integer.parseInt(c[n]));
+							}
+						});
+		            	gameselthread.start();
+		            }
+		        });
+			}
+		});
+	}
+	
 	public void addSgfData(String sgfdata) {
 		if (sgf==null) sgf = new ArrayList<String>();
 		sgf.add(sgfdata);
