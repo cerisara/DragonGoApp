@@ -581,7 +581,6 @@ public class GoJsActivity extends FragmentActivity {
 		System.out.println("showing game "+curgidx2play);
 
 		final Game g = Game.getGames().get(curgidx2play);
-		g.downloadGame(server);
 		final EventManager em = EventManager.getEventManager();
 		em.registerListener(eventType.GameOK, new EventManager.EventListener() {
 			@Override
@@ -592,6 +591,7 @@ public class GoJsActivity extends FragmentActivity {
 				showGame(g);
 			}
 		});
+		g.downloadGame(server);
 	}
 
 	// warning; this requires API 5 (> v2.0)
@@ -978,7 +978,7 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	private ErrDialogFragment errdialog = null;
 
-	private boolean initServer() {
+	boolean initServer() {
 		System.out.println("call initserver "+server);
 		if (server!=null) return true;
 		String loginkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;

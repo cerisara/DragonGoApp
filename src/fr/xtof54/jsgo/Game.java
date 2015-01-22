@@ -60,11 +60,62 @@ public class Game {
 		return g;
 	}
 
-	static void savedGameChosen(File sgffile, int gid) {
-		// TODO
+	static void savedGameChosen(final File sgffile, final int gid) {
+		System.out.println("chosen "+gid);
+		class ConfirmDialogFragment extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because its going in the dialog layout
+				View v = inflater.inflate(R.layout.error, null);
+				// Add action buttons
+				builder.setView(v).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						ConfirmDialogFragment.this.getDialog().cancel();
+					}
+				})
+				.setPositiveButton("Show", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Game g = new Game(null, gid	);
+						g.loadSGFLocally();
+						g.prepareGame();
+						ConfirmDialogFragment.this.getDialog().cancel();
+						GUI.getGUI().showHome();
+						GoJsActivity.main.showGame(g);
+						GoJsActivity.main.changeState(guistate.play);
+					}
+				})
+				.setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						sgffile.delete();
+						ConfirmDialogFragment.this.getDialog().cancel();
+						GUI.getGUI().showHome();
+					}
+				});
+				builder.setTitle("Choice");
+				TextView tv = (TextView)v.findViewById(R.id.errormsg);
+				tv.setText("What do you want to do ?");
+				return builder.create();
+			}
+		}
+		ConfirmDialogFragment confirmDialog = new ConfirmDialogFragment();
+		confirmDialog.show(GoJsActivity.main.getSupportFragmentManager(),"SavedGameChoice");
 	}
 	
 	public static void showListSaved() {
+		Thread forumthread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				showListSaved2();
+			}
+		});
+        forumthread.start();
+	}
+	private static void showListSaved2() {
 		final File d = GoJsActivity.main.eidogodir;//+"/mygame"+gid+".sgf";
 		final File[] savedGames = d.listFiles(new FilenameFilter() {
 			@Override
@@ -80,6 +131,7 @@ public class Game {
 			@Override
 			public void run() {
 				GoJsActivity.main.setContentView(R.layout.forumcats);
+				GoJsActivity.main.curstate=guistate.forums;
 				final String[] c = new String[savedGames.length];
 				for (int i=0;i<c.length;i++) {
 					String s=savedGames[i].getName().substring(6).replace(".sgf", "");
@@ -122,17 +174,20 @@ public class Game {
 					int ngames = o.getInt("list_size");
 					if (ngames>0) {
 						JSONArray headers = o.getJSONArray("list_header");
-						int gid_jsonidx = -1;
+						int gid_jsonidx=-1, movejsoni=-1, moveidjson=-1;
 						for (int i=0;i<headers.length();i++) {
 							String h = headers.getString(i);
 							System.out.println("jsonheader "+i+" "+h);
 							if (h.equals("id")) gid_jsonidx=i;
+							else if (h.equals("move_last")) movejsoni=i;
+							else if (h.equals("move_id")) moveidjson=i;
 						}
 						JSONArray jsongames = o.getJSONArray("list_result");
 						for (int i=0;i<jsongames.length();i++) {
 							JSONArray jsongame = jsongames.getJSONArray(i);
 							int gameid = jsongame.getInt(gid_jsonidx);
 							Game g = new Game(jsongame, gameid);
+							if (movejsoni>=0&&moveidjson>=0) g.setOppMove(jsongame.getString(movejsoni),jsongame.getInt(moveidjson));
 							games2play.add(g);
 						}
 					}
@@ -304,11 +359,19 @@ public class Game {
 	}
 	// it is always called just after addmove or addresign
 	void addMessageToSGF(String msg) {
-		// TODO
+		sgf.add(sgf.size()-1, "C["+msg.trim()+"]");
+		saveSGFLocally();
 	}
 	void addMoveToSGF(String move) {
-		System.out.println("DEJJJJJJJJJJJ "+move);
-		// TODO
+		char oppColor = sgf.get(sgf.size()-2).charAt(1);
+		char myColor = oppColor=='W'?'B':'W';
+		sgf.add(sgf.size()-1, ";"+myColor+"["+move+"]");
+		saveSGFLocally();
+	}
+	private String oppMove = null;
+	private int newMoveId=0;
+	void setOppMove(String move, int mid) {
+		oppMove=move; newMoveId=mid;
 	}
 	
 	void prepareGame() {
@@ -338,6 +401,14 @@ public class Game {
 		final EventManager em = EventManager.getEventManager();
 		if (loadSGFLocally()) {
 			em.sendEvent(eventType.downloadGameStarted);
+			if (oppMove!=null) {
+				addMoveToSGF(oppMove);
+				for (int i=0;i<sgf.size();i++) {
+					if (sgf.get(i).startsWith("XM[")) sgf.set(i,"XM["+newMoveId+"]");
+					saveSGFLocally();
+					break;
+				}
+			}
 			em.sendEvent(eventType.downloadGameEnd);
 			prepareGame();
 			GoJsActivity.main.showMessage("game loaded locally");
@@ -517,6 +588,11 @@ public class Game {
 	}
 
 	public void sendMove2server(String move, final ServerConnection server) {
+		if (server==null) {
+			if (!GoJsActivity.main.initServer()) return;
+			sendMove2server(move, GoJsActivity.main.server);
+			return;
+		}
 		if (move.toLowerCase().startsWith("tt")) move="pass";
 		System.out.println("move "+move);
 		final String finmove = move;
@@ -554,6 +630,7 @@ public class Game {
 							addMessageToSGF(msg.toString());
 						    cmd+="&msg="+URLEncoder.encode(msg.toString());
 						}
+						// TODO: check that server exists
 						server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
 						ConfirmDialogFragment.this.getDialog().cancel();
 					}
