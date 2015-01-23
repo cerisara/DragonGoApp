@@ -61,7 +61,6 @@ public class Game {
 	}
 
 	static void savedGameChosen(final File sgffile, final int gid) {
-		System.out.println("chosen "+gid);
 		class ConfirmDialogFragment extends DialogFragment {
 			@Override
 			public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -132,10 +131,11 @@ public class Game {
 			public void run() {
 				GoJsActivity.main.setContentView(R.layout.forumcats);
 				GoJsActivity.main.curstate=guistate.forums;
-				final String[] c = new String[savedGames.length];
-				for (int i=0;i<c.length;i++) {
+				final String[] c = new String[savedGames.length+1];
+				c[0]="remove all";
+				for (int i=0;i<c.length-1;i++) {
 					String s=savedGames[i].getName().substring(6).replace(".sgf", "");
-					c[i]=s;
+					c[i+1]=s;
 				}
 		        ArrayAdapter<String> adapter = new ArrayAdapter<String>(GoJsActivity.main, R.layout.detlistitem, c);
 				final ListView listFrameview = (ListView)GoJsActivity.main.findViewById(R.id.forumCatsList);
@@ -143,11 +143,17 @@ public class Game {
 				listFrameview.setOnItemClickListener(new OnItemClickListener() {
 		            @Override
 		            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
-		            	final int n=position;
+		            	if (position==0) {
+		            		for (File f: savedGames) f.delete();
+		            		System.out.println("all files deleted");
+							GUI.getGUI().showHome();
+		            		return;
+		            	}
+		            	final int n=position-1;
 		            	Thread gameselthread = new Thread(new Runnable() {
 							@Override
 							public void run() {
-				            	Game.savedGameChosen(savedGames[n],Integer.parseInt(c[n]));
+				            	Game.savedGameChosen(savedGames[n],Integer.parseInt(c[n+1]));
 							}
 						});
 		            	gameselthread.start();
@@ -402,11 +408,20 @@ public class Game {
 		if (loadSGFLocally()) {
 			em.sendEvent(eventType.downloadGameStarted);
 			if (oppMove!=null) {
-				addMoveToSGF(oppMove);
+				int nmoves=0;
 				for (int i=0;i<sgf.size();i++) {
-					if (sgf.get(i).startsWith("XM[")) sgf.set(i,"XM["+newMoveId+"]");
-					saveSGFLocally();
-					break;
+					if (sgf.get(i).startsWith("XM[")) {
+						String xx =sgf.get(i).substring(3).replace(']', ' ').trim();
+						nmoves = Integer.parseInt(xx);
+						sgf.set(i,"XM["+newMoveId+"]");
+						break;
+					}
+				}
+				if (nmoves==newMoveId) { // games already download and updated, but not played; just keep it like that
+				} else if (newMoveId==nmoves+2) {
+					addMoveToSGF(oppMove); // and save
+				} else {
+					System.out.println("ERROR: nmoves newMoveId "+nmoves+" "+newMoveId+" "+sgf.size());
 				}
 			}
 			em.sendEvent(eventType.downloadGameEnd);
