@@ -79,13 +79,13 @@ public class GoJsActivity extends FragmentActivity {
 	enum guistate {nogame, play, markDeadStones, checkScore, message, review, forums};
 	guistate curstate = guistate.nogame;
 
-	File eidogodir;
+	public File eidogodir;
 	final boolean forcecopy=false;
 	WebView wv;
 	ArrayList<Game> games2play = new ArrayList<Game>();
 	int curgidx2play=0,moveid=0;
 	final String netErrMsg = "Connection errors or timeout, you may retry";
-	static GoJsActivity main;
+	public static GoJsActivity main;
     private int numEventsReceived = 0;
 
 	//	private static void copyFile(InputStream in, OutputStream out) throws IOException {

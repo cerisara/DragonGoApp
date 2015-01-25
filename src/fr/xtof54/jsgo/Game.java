@@ -35,13 +35,15 @@ import fr.xtof54.jsgo.GoJsActivity.guistate;
 public class Game {
 	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
 
-	private static ArrayList<Game> games2play = new ArrayList<Game>();
+	public static ArrayList<Game> games2play = new ArrayList<Game>();
 	public static Game gameShown = null;
 
 	private int gid;
 	private JSONArray gameinfo;
 	List<String> sgf = null;
-	int moveid, boardsize;
+	int moveid, boardsize; // moveid comes from the sgf file
+	public String oppMove = null;
+	public int newMoveId=0; // newMoveId comes from the Status games sent by the server: TODO: this should be the only one !
 	// contains the last dead stones used to compute the score
 	// if the player accepts this score, then these same dead stones are sent again with command AGREE
 	String deadstInSgf=null;
@@ -168,38 +170,42 @@ public class Game {
 		sgf.add(sgfdata);
 	}
 	
+	public static void parseJSONStatusGames(JSONObject o) {
+		if (o==null) return;
+		try {
+			games2play.clear();
+			int ngames = o.getInt("list_size");
+			if (ngames>0) {
+				JSONArray headers = o.getJSONArray("list_header");
+				int gid_jsonidx=-1, movejsoni=-1, moveidjson=-1;
+				for (int i=0;i<headers.length();i++) {
+					String h = headers.getString(i);
+					System.out.println("jsonheader "+i+" "+h);
+					if (h.equals("id")) gid_jsonidx=i;
+					else if (h.equals("move_last")) movejsoni=i;
+					else if (h.equals("move_id")) moveidjson=i;
+				}
+				JSONArray jsongames = o.getJSONArray("list_result");
+				for (int i=0;i<jsongames.length();i++) {
+					JSONArray jsongame = jsongames.getJSONArray(i);
+					int gameid = jsongame.getInt(gid_jsonidx);
+					Game g = new Game(jsongame, gameid);
+					if (movejsoni>=0&&moveidjson>=0) g.setOppMove(jsongame.getString(movejsoni),jsongame.getInt(moveidjson));
+					games2play.add(g);
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void loadStatusGames(final ServerConnection server) {
-		games2play.clear();
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
 			@Override
 			public synchronized void reactToEvent() {
 				JSONObject o = server.o;
-				if (o==null) return;
-				try {
-					int ngames = o.getInt("list_size");
-					if (ngames>0) {
-						JSONArray headers = o.getJSONArray("list_header");
-						int gid_jsonidx=-1, movejsoni=-1, moveidjson=-1;
-						for (int i=0;i<headers.length();i++) {
-							String h = headers.getString(i);
-							System.out.println("jsonheader "+i+" "+h);
-							if (h.equals("id")) gid_jsonidx=i;
-							else if (h.equals("move_last")) movejsoni=i;
-							else if (h.equals("move_id")) moveidjson=i;
-						}
-						JSONArray jsongames = o.getJSONArray("list_result");
-						for (int i=0;i<jsongames.length();i++) {
-							JSONArray jsongame = jsongames.getJSONArray(i);
-							int gameid = jsongame.getInt(gid_jsonidx);
-							Game g = new Game(jsongame, gameid);
-							if (movejsoni>=0&&moveidjson>=0) g.setOppMove(jsongame.getString(movejsoni),jsongame.getInt(moveidjson));
-							games2play.add(g);
-						}
-					}
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
+				parseJSONStatusGames(o);
 				System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
 				em.unregisterListener(eventType.downloadListEnd, this);
 				em.sendEvent(eventType.downloadListGamesEnd);
@@ -341,8 +347,14 @@ public class Game {
 			e.printStackTrace();
 		}
 	}
-	private boolean loadSGFLocally() {
-		final String fname = GoJsActivity.main.eidogodir+"/mygame"+gid+".sgf";
+	public int countMovesInSgf() {
+		int n=0;
+		for (int i=0;i<sgf.size();i++) {
+			if (sgf.get(i).length()>0&&sgf.get(i).charAt(0)==';') n++;
+		}
+		return n;
+	}
+	public boolean loadSGFLocally(String fname) {
 		File f0 = new File(fname);
 		if (!f0.exists()) return false;
 		try {
@@ -360,6 +372,10 @@ public class Game {
 		}
 		return true;
 	}
+	private boolean loadSGFLocally() {
+		final String fname = GoJsActivity.main.eidogodir+"/mygame"+gid+".sgf";
+		return loadSGFLocally(fname);
+	}
 	void addResignToSGF() {
 		// TODO
 	}
@@ -374,8 +390,6 @@ public class Game {
 		sgf.add(sgf.size()-1, ";"+myColor+"["+move+"]");
 		saveSGFLocally();
 	}
-	private String oppMove = null;
-	private int newMoveId=0;
 	void setOppMove(String move, int mid) {
 		oppMove=move; newMoveId=mid;
 	}
@@ -408,20 +422,55 @@ public class Game {
 		if (loadSGFLocally()) {
 			em.sendEvent(eventType.downloadGameStarted);
 			if (oppMove!=null) {
-				int nmoves=0;
-				for (int i=0;i<sgf.size();i++) {
-					if (sgf.get(i).startsWith("XM[")) {
-						String xx =sgf.get(i).substring(3).replace(']', ' ').trim();
-						nmoves = Integer.parseInt(xx);
-						sgf.set(i,"XM["+newMoveId+"]");
-						break;
-					}
-				}
-				if (nmoves==newMoveId) { // games already download and updated, but not played; just keep it like that
-				} else if (newMoveId==nmoves+2) {
+				// This game has already been created, for instance by sownloading tatusGame from DGS
+				/*
+				 * It can happen that the user plays a move, so the local sgf is updated (but not the moveid !),
+				 * but the move is not sent correctly to the server. Then, next time status games are downloaded,
+				 * the newMoveId will actually be late by 2 moves, as compared to the *actual* nb of moves in the sgf.
+				 * Then, we must warn the user, and propose him to resend his move or rethink about it.
+				 */
+				int nActualMovesInSgf = countMovesInSgf();
+				if (newMoveId==nActualMovesInSgf-2) {
+					// the user last move has not been received by the DGS server
+					GoJsActivity.main.showMessage("last move not received by server: you may resend it");
+				} else if (newMoveId==nActualMovesInSgf) {
+					// we got a new move from the server
 					addMoveToSGF(oppMove); // and save
+					GoJsActivity.main.showMessage("detected a new move from server");
+				} else if (newMoveId==nActualMovesInSgf-1) {
+					GoJsActivity.main.showMessage("No new move from server");
+					// we didn't got any new move from the server
 				} else {
-					System.out.println("ERROR: nmoves newMoveId "+nmoves+" "+newMoveId+" "+sgf.size());
+					GoJsActivity.main.showMessage("ERROR nmoves");
+					System.out.println("ERROR: strange nmoves "+getGameID()+" "+nActualMovesInSgf+" "+newMoveId);
+					// TODO: reload the sgf from the server
+				}
+				
+				if (false) {
+					// another check
+					int nmoves=0;
+					for (int i=0;i<sgf.size();i++) {
+						if (sgf.get(i).startsWith("XM[")) {
+							String xx =sgf.get(i).substring(3).replace(']', ' ').trim();
+							nmoves = Integer.parseInt(xx);
+							sgf.set(i,"XM["+newMoveId+"]");
+							break;
+						}
+					}
+					/*
+					 * nmoves is the nb of moves indicated in the sgf file:
+					 * when playing a move and sending it, this nb is not updated in the SGF file;
+					 * so the next time status games are downloaded, the newMoveId will be increased by 2 moves compared to this nb in the sgf file.
+					 * If this is so, then we just update the sgf file with the newly downloaded move and newMoveId.
+					 * Hence, if this game is just skipped, next time status games are downloaded, we can detect that the sgf
+					 * file should not be updated because this nb will match the one downloaded.
+					 */
+					if (nmoves==newMoveId) { // games already download and updated, but not played; just keep it like that
+					} else if (newMoveId==nmoves+2) {
+						addMoveToSGF(oppMove); // and save
+					} else {
+						System.out.println("ERROR: nmoves newMoveId "+nmoves+" "+newMoveId+" "+sgf.size());
+					}
 				}
 			}
 			em.sendEvent(eventType.downloadGameEnd);
@@ -640,7 +689,7 @@ public class Game {
 				.setPositiveButton("OK, send !", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						addMoveToSGF(finmove);
-						String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+moveid+"&move="+finmove;
+						String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+newMoveId+"&move="+finmove;
 						if (msg!=null) {
 							addMessageToSGF(msg.toString());
 						    cmd+="&msg="+URLEncoder.encode(msg.toString());
