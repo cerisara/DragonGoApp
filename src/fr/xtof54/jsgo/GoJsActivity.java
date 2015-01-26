@@ -1087,9 +1087,13 @@ public class GoJsActivity extends FragmentActivity {
 		switch (item.getItemId()) {
 		case R.id.action_settings:
 		    if (curstate==guistate.forums && Forums.inList>0) {
+		    	// TODO: this keycode is weird; remove it
 		        Forums.switchShowNew();
 		    } else
 		        ask4credentials();
+			return true;
+		case R.id.bandwidth:
+			ask4bandwidth();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -1105,6 +1109,37 @@ public class GoJsActivity extends FragmentActivity {
 		});
 	}
 
+	private void ask4bandwidth() {
+		class LoginDialogFragment extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+				View v = inflater.inflate(R.layout.error, null);
+				builder.setView(v)
+				.setPositiveButton("Prefer Local SGF", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						Game.bandwidthMode = Game.PREFER_LOCAL_SGF;
+						LoginDialogFragment.this.getDialog().cancel();
+					}
+				})
+				.setNegativeButton("Always download", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Game.bandwidthMode = Game.ALWAYS_DOWNLOAD_SGF;
+						LoginDialogFragment.this.getDialog().cancel();
+					}
+				});
+				builder.setTitle("Bandwidth");
+				TextView tv = (TextView)v.findViewById(R.id.errormsg);
+				tv.setText("Choose bandwidth mode:");
+				return builder.create();
+			}
+		}
+		LoginDialogFragment dialog = new LoginDialogFragment();
+		dialog.show(getSupportFragmentManager(),"bandwidth");
+	}
+	
 	private void ask4credentials() {
 		System.out.println("calling settings");
 		final Context c = this;

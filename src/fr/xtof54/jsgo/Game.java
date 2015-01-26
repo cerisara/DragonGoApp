@@ -33,6 +33,10 @@ import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.GoJsActivity.guistate;
 
 public class Game {
+	public static final int PREFER_LOCAL_SGF=0;
+	public static final int ALWAYS_DOWNLOAD_SGF=1;
+	public static int bandwidthMode = PREFER_LOCAL_SGF;
+	
 	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
 
 	public static ArrayList<Game> games2play = new ArrayList<Game>();
@@ -62,6 +66,12 @@ public class Game {
 		return g;
 	}
 
+	/**
+	 * Called after a local game has been selected in the list of local games
+	 * 
+	 * @param sgffile
+	 * @param gid
+	 */
 	static void savedGameChosen(final File sgffile, final int gid) {
 		class ConfirmDialogFragment extends DialogFragment {
 			@Override
@@ -419,7 +429,7 @@ public class Game {
 	// est-ce qu'il faut garder le meme httpclient qu'avant pour pouvoir beneficier du proxy ? ==> OUI
 	public void downloadGame(final ServerConnection server) {
 		final EventManager em = EventManager.getEventManager();
-		if (loadSGFLocally()) {
+		if (bandwidthMode==PREFER_LOCAL_SGF&&loadSGFLocally()) {
 			em.sendEvent(eventType.downloadGameStarted);
 			if (oppMove!=null) {
 				// This game has already been created, for instance by sownloading tatusGame from DGS
@@ -437,40 +447,11 @@ public class Game {
 					// we got a new move from the server
 					addMoveToSGF(oppMove); // and save
 					GoJsActivity.main.showMessage("detected a new move from server");
-				} else if (newMoveId==nActualMovesInSgf-1) {
-					GoJsActivity.main.showMessage("No new move from server");
-					// we didn't got any new move from the server
 				} else {
 					GoJsActivity.main.showMessage("ERROR nmoves");
-					System.out.println("ERROR: strange nmoves "+getGameID()+" "+nActualMovesInSgf+" "+newMoveId);
-					// TODO: reload the sgf from the server
-				}
-				
-				if (false) {
-					// another check
-					int nmoves=0;
-					for (int i=0;i<sgf.size();i++) {
-						if (sgf.get(i).startsWith("XM[")) {
-							String xx =sgf.get(i).substring(3).replace(']', ' ').trim();
-							nmoves = Integer.parseInt(xx);
-							sgf.set(i,"XM["+newMoveId+"]");
-							break;
-						}
-					}
-					/*
-					 * nmoves is the nb of moves indicated in the sgf file:
-					 * when playing a move and sending it, this nb is not updated in the SGF file;
-					 * so the next time status games are downloaded, the newMoveId will be increased by 2 moves compared to this nb in the sgf file.
-					 * If this is so, then we just update the sgf file with the newly downloaded move and newMoveId.
-					 * Hence, if this game is just skipped, next time status games are downloaded, we can detect that the sgf
-					 * file should not be updated because this nb will match the one downloaded.
-					 */
-					if (nmoves==newMoveId) { // games already download and updated, but not played; just keep it like that
-					} else if (newMoveId==nmoves+2) {
-						addMoveToSGF(oppMove); // and save
-					} else {
-						System.out.println("ERROR: nmoves newMoveId "+nmoves+" "+newMoveId+" "+sgf.size());
-					}
+					System.out.println("ERROR: strange nmoves "+getGameID()+" "+nActualMovesInSgf+" "+newMoveId+
+							" re-downloading...");
+					downloadSGF(server);
 				}
 			}
 			em.sendEvent(eventType.downloadGameEnd);
@@ -478,6 +459,10 @@ public class Game {
 			GoJsActivity.main.showMessage("game loaded locally");
 			return;
 		}
+		downloadSGF(server);
+	}
+	public void downloadSGF(final ServerConnection server) {
+		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
 			@Override
 			public synchronized void reactToEvent() {
