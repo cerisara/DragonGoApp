@@ -430,31 +430,40 @@ public class Game {
 	public void downloadGame(final ServerConnection server) {
 		final EventManager em = EventManager.getEventManager();
 		if (bandwidthMode==PREFER_LOCAL_SGF&&loadSGFLocally()) {
-			em.sendEvent(eventType.downloadGameStarted);
 			if (oppMove!=null) {
-				// This game has already been created, for instance by sownloading tatusGame from DGS
+				// This game has already been created, for instance by downloading statusGame from DGS
 				/*
 				 * It can happen that the user plays a move, so the local sgf is updated (but not the moveid !),
 				 * but the move is not sent correctly to the server. Then, next time status games are downloaded,
 				 * the newMoveId will actually be late by 2 moves, as compared to the *actual* nb of moves in the sgf.
 				 * Then, we must warn the user, and propose him to resend his move or rethink about it.
+				 * 
+				 * Also, the user may play some time on another computer. In all these cases, we have to resync.
 				 */
 				int nActualMovesInSgf = countMovesInSgf();
 				if (newMoveId==nActualMovesInSgf-2) {
+					em.sendEvent(eventType.downloadGameStarted);
 					// the user last move has not been received by the DGS server
 					GoJsActivity.main.showMessage("last move not received by server: you may resend it");
+					em.sendEvent(eventType.downloadGameEnd);
 				} else if (newMoveId==nActualMovesInSgf) {
+					em.sendEvent(eventType.downloadGameStarted);
 					// we got a new move from the server
 					addMoveToSGF(oppMove); // and save
 					GoJsActivity.main.showMessage("detected a new move from server");
+					em.sendEvent(eventType.downloadGameEnd);
 				} else {
-					GoJsActivity.main.showMessage("ERROR nmoves");
+					GoJsActivity.main.showMessage("Server not sync - reloading");
 					System.out.println("ERROR: strange nmoves "+getGameID()+" "+nActualMovesInSgf+" "+newMoveId+
 							" re-downloading...");
 					downloadSGF(server);
+					return;
 				}
+			} else {
+				// the user is just looking at a local game
+				em.sendEvent(eventType.downloadGameStarted);
+				em.sendEvent(eventType.downloadGameEnd);
 			}
-			em.sendEvent(eventType.downloadGameEnd);
 			prepareGame();
 			GoJsActivity.main.showMessage("game loaded locally");
 			return;
