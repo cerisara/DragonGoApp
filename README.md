@@ -54,15 +54,13 @@ There is a top-right button *...* that shows a list of additional functionalitie
 * *reset GUI* : press it to come back to the initial GUI, as if you just had launched the app
 * *Open game reviews* : continues the reading of Pro games reviews
 * *recopy Eidogo* : for debugging only
-* *redraw last goban* : shortcut to quickly view the last goban when offline
+* *redraw last goban* : shortcut to quickly view the last goban
  
 
 Note that although the "look and feel" of DragonGoApp is not very appealing,
 this app actually has all the required functionalities (and even more) to really do its job, I mean, playing Go with DGS !
 It's just that, as a programmer, I hate spending time on designing colourful and nice GUIs. I'm really only interested by the
 core features, sorry about that, but that's just how I am.
-In addition to these 4 main buttons, there's also a fifth rightmost small button at the top, which opens a long list of not-so-often-used
-commands. The third (and last) interation channel is via the standard android menu.
 
 How to start playing
 --------------------
@@ -74,29 +72,31 @@ You can also select here the "devDGS" (development DGS) server, but you shouldn'
 
 * Press *Games* to download the games where it's your turn to play
 * Click on the board where you wanna play
-* Press *Sent* the next game to move will be shown automatically.
+* Press *Sent* . the next game to move will be shown automatically.
 
 Note that the app is pretty good for playing games, but not very good for counting game score (when you arrive at this stage, the app
 just shows the DGS page of the game) or finding an opponent. 
-Although you can challenge opponents from within the app in 19x19 and 9x9 ladders, for anything else (waiting room, other tournaments)
+Although you can challenge opponents from within the app in 19x19 and 9x9 ladders, for other challenges (waiting room, other tournaments)
 I recommend to do it from the web site.
 
 Bandwidth efficiency
 --------------------
 
-Note that only very few buttons actually connects to the Internet, and this one is the first one. In fact, the app is designed to
+Very few buttons actually connects to the Internet: *Games*, *Send*, *View forums* and the first time you press one of the *View ladders* button, or when you later on press *Reload* when viewing a ladder.
+
+In fact, the app is designed to
 only access the Internet when it's really useful, hence minimizing bandwidth and consumption of your data plan. This has always been
 a major design guideline when writing this app, and you can actually always check in real time, on the top-right of the status bar, the
 total amount of internet connection that has been consumed by the app since it's been launched. Typically, you can play one move in 6 or 7 games with less than a few dozens of kbits of bandwidth.
 
-By default, the app does not download the game SGF from the server, but it stores locally (on the SD-card) the sgf, i.e.,
-all the moves that you play and all your opponent moves that are sent by the server when getting the status with the "Games" button.
-When it thus founds a local SGF file for the current game, it shows a 1s-notification "local file found".
+By default, the app caches everything locally (the game SGF, the ladders, *except the forums*).
+When downloading the status games, it also gets the last move of your opponent, which is simply added to the local SGF.
+So, there is no need to download the full SGF at every move.
 This greatly reduces bandwitdh consumption and improves playing speed, BUT this approach has one drawback: you don't see the comments
 sent by your opponent and attached to each move, because the "get status" connection does not return these comments ! 
 If you want to see them, then you should select the "menu/Always download" dialog,
-which always triggers a SGF download for every move of your opponent. Then, you will also always get all comments attached to the moves,
-which comments are both shown for a few seconds on a big dialog just after showing each move, and they are also shown in small font below
-the goban.
+which switches the configuration of the app in either the default "bandwidth-saving" mode, or in the "always download SGF with all comments"
+mode.
+Then, you will also always get all comments attached to every move.
 
 
