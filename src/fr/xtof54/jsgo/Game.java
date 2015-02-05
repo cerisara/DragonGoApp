@@ -35,7 +35,7 @@ import fr.xtof54.jsgo.GoJsActivity.guistate;
 public class Game {
 	public static final int PREFER_LOCAL_SGF=0;
 	public static final int ALWAYS_DOWNLOAD_SGF=1;
-	public static int bandwidthMode = PREFER_LOCAL_SGF;
+	public static int bandwidthMode = ALWAYS_DOWNLOAD_SGF;
 	
 	final static String cmdGetListOfGames = "quick_do.php?obj=game&cmd=list&view=status";
 

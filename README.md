@@ -37,7 +37,7 @@ The 5 top-left buttons always present the most useful function at any time:
 * *Zm+* : Zoom-in the goban
 * *Zm-* : Zoom-out the goban
 * *Msg* : download status messages from DGS server
-* *Fwd* / *Bck* : navigate in the game; these buttons are redundant with the arrows on the goban, and should be removed later on.
+* *Fwd* / *Bck* : navigate in the game; these buttons are redundant with the arrows on the goban.
 * *Reset* : comes back to the original position (as in the server): very useful when exploring lines of play, just before sending the actual next move you wanna play.
 * *Send* : send your last move to DGS. A confirmation dialog is shown.
 
@@ -89,14 +89,14 @@ only access the Internet when it's really useful, hence minimizing bandwidth and
 a major design guideline when writing this app, and you can actually always check in real time, on the top-right of the status bar, the
 total amount of internet connection that has been consumed by the app since it's been launched. Typically, you can play one move in 6 or 7 games with less than a few dozens of kbits of bandwidth.
 
-By default, the app caches everything locally (the game SGF, the ladders, *except the forums*).
-When downloading the status games, it also gets the last move of your opponent, which is simply added to the local SGF.
-So, there is no need to download the full SGF at every move.
-This greatly reduces bandwitdh consumption and improves playing speed, BUT this approach has one drawback: you don't see the comments
+Starting from version 1.8, the app caches locally the game SGF and the ladders (*not the forums*).
+But by default, it'll reload the SGF at every move.
+You can switch to a more bandwidth-saving mode via the menu: "Bandwidth config, prefer local SGF".
+Then, when downloading the status list of games, it also gets the last move of your opponent, which is simply added to the local SGF.
+The SGF will not be downloaded any more.
+This greatly reduces bandwidth consumption and improves playing speed, BUT this approach has one drawback: you don't see the comments
 sent by your opponent and attached to each move, because the "get status" connection does not return these comments ! 
-If you want to see them, then you should select the "menu/Always download" dialog,
-which switches the configuration of the app in either the default "bandwidth-saving" mode, or in the "always download SGF with all comments"
-mode.
+If you want to see them, then you should switch back via the bandwidth menu to the "always download SGF" option.
 Then, you will also always get all comments attached to every move.
 
 
