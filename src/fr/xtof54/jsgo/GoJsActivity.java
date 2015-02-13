@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+//import com.google.android.gms.gcm.GoogleCloudMessaging;
+
 import fr.xtof54.dragonGoApp.R;
 import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.ServerConnection.DetLogger;
@@ -106,6 +108,59 @@ public class GoJsActivity extends FragmentActivity {
 			}
 		});
 	}
+	
+//	GoogleCloudMessaging gcm=null;
+	String regid=null;
+    String PROJECT_NUMBER = "628250164493";
+
+    private void gcmInit() {
+    	System.out.println("call gcm init");
+		if (regid!=null) return;
+		regid = PrefUtils.getFromPrefs(getApplicationContext(), PrefUtils.PREFS_GCM_REG_KEY, null);
+		System.out.println("gcm device key " +regid);
+		if (regid==null) {
+			showMessage("Retrieving cloud access key...");
+			getRegId();
+		}
+    }
+    /**
+     * don't use google cloud messaging, because:
+     * - It depends on Google: the API may change, the devices may exceed limits, the service may get down, the server may get blacklisted...
+     * - It requires to have the Google Play Services and to have them activated... which triggers donwloads from many other services/apps that one may not want to have
+     * - Google play may also use a lot of bandwidth, which is incompatible with the design of my app. 
+     * 
+     * So rather use Web sockets with ping/pong messages to keep them alive in the long term...
+     */
+	private void getRegId(){
+//		new AsyncTask<Void, Void, String>() {
+//			@Override
+//			protected String doInBackground(Void... params) {
+//				String msg = "";
+//				try {
+//					if (gcm == null) {
+//						System.out.println("before gcm call");
+//						gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+//						System.out.println("gcm got "+gcm);
+//					}
+//					if (gcm!=null) {
+//						regid = gcm.register(PROJECT_NUMBER);
+//						PrefUtils.saveToPrefs(getApplicationContext(), PrefUtils.PREFS_GCM_REG_KEY, regid);
+//						msg = "Device registered, registration ID=" + regid;
+//						Log.i("GCM",  msg);
+//					}
+//				} catch (IOException ex) {
+//					msg = "Error :" + ex.getMessage();
+//				}
+//				return msg;
+//			}
+//
+//			@Override
+//			protected void onPostExecute(String msg) {
+//				showMessage("Access Cloud: "+msg.substring(0, 40));
+//			}
+//		}.execute(null, null, null);
+	}
+	
 	private void setButtons(final String b1, final String b2, final String b3, final String b4) {
 		this.runOnUiThread(new Runnable() {
 			@Override
@@ -1015,6 +1070,7 @@ public class GoJsActivity extends FragmentActivity {
 			};
 			server.setLogger(l);
 		}
+		gcmInit();
 		return true;
 	}
 	boolean initAndroidServer() {

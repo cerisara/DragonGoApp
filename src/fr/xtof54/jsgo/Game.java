@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.HashSet;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -180,6 +182,20 @@ public class Game {
 		sgf.add(sgfdata);
 	}
 	
+	public static void gotOpponentMove(int gameid, int moveid, String move) {
+		Game g=null;
+		for (Game gg : games2play) if (gameid==gg.gid) {g=gg; break;}
+		if (g==null) g = new Game(null, gameid);
+		g.loadSGFLocally();
+		g.prepareGame();
+		g.addMoveToSGF(move);
+		g.loadSGFLocally();
+		g.prepareGame();
+		GUI.getGUI().showHome();
+		GoJsActivity.main.showGame(g);
+		GoJsActivity.main.changeState(guistate.play);
+	}
+	
 	public static void parseJSONStatusGames(JSONObject o) {
 		if (o==null) return;
 		try {
@@ -209,7 +225,31 @@ public class Game {
 		}
 	}
 	
+	private static int[] getKnownGames() {
+		HashSet<Integer> games = new HashSet<Integer>();
+		for (Game g : games2play) games.add(g.getGameID());
+		final File d = GoJsActivity.main.eidogodir;//+"/mygame"+gid+".sgf";
+		final File[] savedGames = d.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File arg0, String arg1) {
+				return arg1.startsWith("mygame") && arg1.endsWith(".sgf");
+			}
+		});
+		if (savedGames!=null) {
+			for (File f: savedGames) {
+				int i=Integer.parseInt(f.getName().substring(6, f.getName().length()-4));
+				games.add(i);
+			}
+		}
+		int[] gs = new int[games.size()];
+		int j=0; for (int i:games) gs[j++]=i;
+		return gs;
+	}
+	
 	public static void loadStatusGames(final ServerConnection server) {
+		// also connects now to the client server to give it time to connect correctly
+		WSclient.getWSclient();
+
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
 			@Override
@@ -219,6 +259,10 @@ public class Game {
 				System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
 				em.unregisterListener(eventType.downloadListEnd, this);
 				em.sendEvent(eventType.downloadListGamesEnd);
+				
+				// now that the status games have been downloaded, also sent to the client server the list of games known
+				int[] gamesIDS = getKnownGames();
+				WSclient.getWSclient().sendGameIDs(gamesIDS);
 			}
 			@Override
 			public String getName() {return "loadStatusGame";}
@@ -690,6 +734,7 @@ public class Game {
 						}
 						// TODO: check that server exists
 						server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
+						WSclient.getWSclient().sendMove(getGameID(), newMoveId, finmove);
 						ConfirmDialogFragment.this.getDialog().cancel();
 					}
 				});

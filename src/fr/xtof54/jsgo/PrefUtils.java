@@ -9,6 +9,7 @@ public class PrefUtils {
 	public static final String PREFS_LOGIN_PASSWORD_KEY = "__PASSWORD__" ;
 	public static final String PREFS_LOGIN_USERNAME2_KEY = "__USERNAME2__" ;
 	public static final String PREFS_LOGIN_PASSWORD2_KEY = "__PASSWORD2__" ;
+	public static final String PREFS_GCM_REG_KEY = "__GCMREG__" ;
 
 	/**
 	 * Called to save supplied value in shared preferences against given key.
