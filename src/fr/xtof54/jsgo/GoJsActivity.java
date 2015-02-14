@@ -40,6 +40,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -1049,6 +1050,12 @@ public class GoJsActivity extends FragmentActivity {
 			showMessage("Please enter your credentials first via menu Settings");
 			return false;
 		}
+		{
+			int i=PrefUtils.getFromPrefs(getApplicationContext(), PrefUtils.PREFS_BADNWIDTH_MODE, Game.ALWAYS_DOWNLOAD_SGF);
+			Game.bandwidthMode=i;
+			if (i==Game.PREFER_LOCAL_SGF)
+				System.out.println("Set prefer local sgf from saved preferences");
+		}
 
 		final GoJsActivity m = this;
 		System.out.println("credentials passed to server "+u+" "+p);
@@ -1070,7 +1077,7 @@ public class GoJsActivity extends FragmentActivity {
 			};
 			server.setLogger(l);
 		}
-		gcmInit();
+		// gcmInit();
 		return true;
 	}
 	boolean initAndroidServer() {
@@ -1177,12 +1184,14 @@ public class GoJsActivity extends FragmentActivity {
 					@Override
 					public void onClick(DialogInterface dialog, int id) {
 						Game.bandwidthMode = Game.PREFER_LOCAL_SGF;
+						PrefUtils.saveToPrefs(getApplicationContext(), PrefUtils.PREFS_BADNWIDTH_MODE, Game.PREFER_LOCAL_SGF);
 						LoginDialogFragment.this.getDialog().cancel();
 					}
 				})
 				.setNegativeButton("Always download", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						Game.bandwidthMode = Game.ALWAYS_DOWNLOAD_SGF;
+						PrefUtils.saveToPrefs(getApplicationContext(), PrefUtils.PREFS_BADNWIDTH_MODE, Game.ALWAYS_DOWNLOAD_SGF);
 						LoginDialogFragment.this.getDialog().cancel();
 					}
 				});
@@ -1587,6 +1596,14 @@ public class GoJsActivity extends FragmentActivity {
 						System.out.println("List saved games");
 						Game.showListSaved();
 						dialog.dismiss();
+					}
+				});
+				
+				final CheckBox connectClientServer = (CheckBox)v.findViewById(R.id.checkBoxClientServer);
+				connectClientServer.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						WSclient.setConnect(connectClientServer.isChecked());
 					}
 				});
 

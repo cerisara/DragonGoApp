@@ -248,7 +248,7 @@ public class Game {
 	
 	public static void loadStatusGames(final ServerConnection server) {
 		// also connects now to the client server to give it time to connect correctly
-		WSclient.getWSclient();
+		WSclient.init();
 
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
@@ -262,7 +262,7 @@ public class Game {
 				
 				// now that the status games have been downloaded, also sent to the client server the list of games known
 				int[] gamesIDS = getKnownGames();
-				WSclient.getWSclient().sendGameIDs(gamesIDS);
+				WSclient.sendGameIDs(gamesIDS);
 			}
 			@Override
 			public String getName() {return "loadStatusGame";}
@@ -734,7 +734,7 @@ public class Game {
 						}
 						// TODO: check that server exists
 						server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
-						WSclient.getWSclient().sendMove(getGameID(), newMoveId, finmove);
+						WSclient.sendMove(getGameID(), newMoveId, finmove);
 						ConfirmDialogFragment.this.getDialog().cancel();
 					}
 				});
