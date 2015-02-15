@@ -57,6 +57,7 @@ public class Game {
 	String deadstProposal=null;
 
 	private CharSequence msg = null;
+	private int myid=-1, blackid=-1, whiteid=-1;
 
 	public CharSequence getMessage() {return msg;}
 	public void setMessage(CharSequence m) {msg=m;}
@@ -196,6 +197,50 @@ public class Game {
 		GoJsActivity.main.changeState(guistate.play);
 	}
 	
+	/**
+	 * for now:
+I/System.out(11012): jsonheader 0 id
+I/System.out(11012): jsonheader 1 double_id
+I/System.out(11012): jsonheader 2 tournament_id
+I/System.out(11012): jsonheader 3 game_action
+I/System.out(11012): jsonheader 4 status
+I/System.out(11012): jsonheader 5 flags
+I/System.out(11012): jsonheader 6 score
+I/System.out(11012): jsonheader 7 game_type
+I/System.out(11012): jsonheader 8 rated
+I/System.out(11012): jsonheader 9 ruleset
+I/System.out(11012): jsonheader 10 size
+I/System.out(11012): jsonheader 11 komi
+I/System.out(11012): jsonheader 12 jigo_mode
+I/System.out(11012): jsonheader 13 handicap
+I/System.out(11012): jsonheader 14 handicap_mode
+I/System.out(11012): jsonheader 15 shape_id
+I/System.out(11012): jsonheader 16 time_started
+I/System.out(11012): jsonheader 17 time_lastmove
+I/System.out(11012): jsonheader 18 time_weekend_clock
+I/System.out(11012): jsonheader 19 time_mode
+I/System.out(11012): jsonheader 20 time_limit
+I/System.out(11012): jsonheader 21 my_id
+I/System.out(11012): jsonheader 22 move_id
+I/System.out(11012): jsonheader 23 move_count
+I/System.out(11012): jsonheader 24 move_color
+I/System.out(11012): jsonheader 25 move_uid
+I/System.out(11012): jsonheader 26 move_opp
+I/System.out(11012): jsonheader 27 move_last
+I/System.out(11012): jsonheader 28 prio
+I/System.out(11012): jsonheader 29 black_user.id
+I/System.out(11012): jsonheader 30 black_gameinfo.prisoners
+I/System.out(11012): jsonheader 31 black_gameinfo.remtime
+I/System.out(11012): jsonheader 32 black_gameinfo.rating_start
+I/System.out(11012): jsonheader 33 black_gameinfo.rating_start_elo
+I/System.out(11012): jsonheader 34 white_user.id
+I/System.out(11012): jsonheader 35 white_gameinfo.prisoners
+I/System.out(11012): jsonheader 36 white_gameinfo.remtime
+I/System.out(11012): jsonheader 37 white_gameinfo.rating_start
+I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
+
+	 * @param o
+	 */
 	public static void parseJSONStatusGames(JSONObject o) {
 		if (o==null) return;
 		try {
@@ -204,19 +249,28 @@ public class Game {
 			if (ngames>0) {
 				JSONArray headers = o.getJSONArray("list_header");
 				int gid_jsonidx=-1, movejsoni=-1, moveidjson=-1;
+				int myidjson=-1, whiteidjson=-1, blackidjson=-1;
 				for (int i=0;i<headers.length();i++) {
 					String h = headers.getString(i);
 					System.out.println("jsonheader "+i+" "+h);
 					if (h.equals("id")) gid_jsonidx=i;
 					else if (h.equals("move_last")) movejsoni=i;
 					else if (h.equals("move_id")) moveidjson=i;
+					else if (h.equals("my_id")) myidjson=i;
+					else if (h.equals("white_user.id")) whiteidjson=i;
+					else if (h.equals("black_user.id")) blackidjson=i;
 				}
 				JSONArray jsongames = o.getJSONArray("list_result");
+				int[] users = {-1,-1,-1};
 				for (int i=0;i<jsongames.length();i++) {
 					JSONArray jsongame = jsongames.getJSONArray(i);
 					int gameid = jsongame.getInt(gid_jsonidx);
 					Game g = new Game(jsongame, gameid);
 					if (movejsoni>=0&&moveidjson>=0) g.setOppMove(jsongame.getString(movejsoni),jsongame.getInt(moveidjson));
+					if (myidjson>=0) users[0]=jsongame.getInt(myidjson);
+					if (blackidjson>=0) users[1]=jsongame.getInt(blackidjson);
+					if (whiteidjson>=0) users[2]=jsongame.getInt(whiteidjson);
+					g.setUsers(users);
 					games2play.add(g);
 				}
 			}
@@ -247,22 +301,18 @@ public class Game {
 	}
 	
 	public static void loadStatusGames(final ServerConnection server) {
-		// also connects now to the client server to give it time to connect correctly
-		WSclient.init();
-
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener f = new EventManager.EventListener() {
 			@Override
 			public synchronized void reactToEvent() {
 				JSONObject o = server.o;
 				parseJSONStatusGames(o);
+				// also connects now to the client server to give it time to connect correctly
+				if (games2play.size()>0) WSclient.init(games2play.get(0).myid);
+
 				System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
 				em.unregisterListener(eventType.downloadListEnd, this);
 				em.sendEvent(eventType.downloadListGamesEnd);
-				
-				// now that the status games have been downloaded, also sent to the client server the list of games known
-				int[] gamesIDS = getKnownGames();
-				WSclient.sendGameIDs(gamesIDS);
 			}
 			@Override
 			public String getName() {return "loadStatusGame";}
@@ -288,6 +338,12 @@ public class Game {
         }
 	}
 
+	private void setUsers(int[] uids) {
+		myid=uids[0];
+		blackid=uids[1];
+		whiteid=uids[2];
+	}
+	
 	public int getGameID() {return gid;}
 
 	public void showGame() {
@@ -689,6 +745,11 @@ public class Game {
 		server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
 	}
 
+	private int getOppID() {
+		if (myid==whiteid) return blackid;
+		else return whiteid;
+	}
+	
 	public void sendMove2server(String move, final ServerConnection server) {
 		if (server==null) {
 			if (!GoJsActivity.main.initServer()) return;
@@ -734,7 +795,7 @@ public class Game {
 						}
 						// TODO: check that server exists
 						server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
-						WSclient.sendMove(getGameID(), newMoveId, finmove);
+						WSclient.sendMove(getGameID(), newMoveId, finmove, getOppID());
 						ConfirmDialogFragment.this.getDialog().cancel();
 					}
 				});

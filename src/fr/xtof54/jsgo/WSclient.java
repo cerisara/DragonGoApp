@@ -4,7 +4,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
@@ -17,36 +16,29 @@ import android.widget.Toast;
  * used to connect to a WS server that gets informed of moved played by opponents, and immediately
  * warns the appropriate client of the new move.
  * This is realized by establishing a long-term connection with the server and maintaining this connection
- * alive with low-cost ping/pongs
+ * alive with low-cost ping/pongs -TODO
  * 
  * @author xtof
  *
  */
 public class WSclient {
-	final String server = "ws://192.168.30.1:8080";
-	final static byte CMD_GAMEIDS = 0;
+	final String server = "ws://192.168.43.1:8080";
+	final static byte CMD_USERID = 0;
 	final static byte CMD_MOVE = 1;
+	private final static byte WSCLIENT_VERSION = 1; // useful for the server to be back-compatible with multiple old versions
 
 	private static boolean doConnect = true;
 	private WebSocketClient client=null;
 	boolean isConnected = false;
 	private ArrayList<int[]> movesAlreadySent = new ArrayList<int[]>();
-
 	private static WSclient wsclient = null;
-	public static void init() {
+	private static int uid = -1;
+	
+	public static void init(int userid) {
+		uid=userid;
 		if (!checkDoConnect()) return;
 		System.out.println("WSCLIENT "+wsclient);
-		if (wsclient==null) wsclient=new WSclient();
-	}
-	private static boolean checkDoConnect() {
-		if (!doConnect) {
-			if (wsclient!=null) {
-				wsclient.client.close();
-				wsclient=null;
-			}
-			return false;
-		}
-		return true;
+		if (wsclient==null) wsclient=new WSclient(userid);
 	}
 	
 	public static void setConnect(boolean selected) {
@@ -54,62 +46,19 @@ public class WSclient {
 		checkDoConnect();
 	}
 	
-	private static void problemConnect() {
-		Toast.makeText(GoJsActivity.main.getApplicationContext(), "Pb w/ client server. retrying...", Toast.LENGTH_SHORT).show();
-		System.out.println("problem connect to clients server");
-		System.out.println("trying reconnect...");
-		wsclient.client.close();
-		init();
-		try {
-			Thread.sleep(400);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-	}
-	
-	private static void abordConnect() {
-		Toast.makeText(GoJsActivity.main.getApplicationContext(), "Pb w/ client server. aborting...", Toast.LENGTH_SHORT).show();
-		if (wsclient!=null) wsclient.client.close();
-		wsclient=null;
-		doConnect=false;
-	}
-	
 	final static int intsize=4, charsize=2;
-	private static boolean sendGameIDs(int[] gameIDS, boolean retry) {
-		if (!checkDoConnect()) return false;
-		if (wsclient==null) {
-			System.out.println("ERROR WSCLIENT: cannot send game ids");
-			return false;
-		}
-		System.out.println("client sending games ID "+Arrays.toString(gameIDS));
-		ByteBuffer bb = ByteBuffer.allocate(1+gameIDS.length*intsize);
-		bb.put(CMD_GAMEIDS);
-		for (int i=0;i<gameIDS.length;i++) bb.putInt(gameIDS[i]);
-		try {
-			wsclient.client.send(bb.array());
-			return true;
-		} catch (Exception e) {
-			if (retry) {
-				problemConnect();
-				return sendGameIDs(gameIDS,false);
-			} else abordConnect();
-			return false;
-		}
-	}
-	public static boolean sendGameIDs(int[] gameIDS) {
-		return sendGameIDs(gameIDS, true);
-	}
 
-	private static boolean sendMove(int gameid, int moveid, String move, boolean retry) {
+	private static boolean sendMove(int gameid, int moveid, String move, int oppid, boolean retry) {
 		if (!checkDoConnect()) return false;
 		if (wsclient==null) {
 			System.out.println("ERROR WSCLIENT cannot send moves");
 			return false;
 		}
-		ByteBuffer bb = ByteBuffer.allocate(1+2*intsize+move.length()*charsize);
+		ByteBuffer bb = ByteBuffer.allocate(1+3*intsize+move.length()*charsize);
 		bb.put(CMD_MOVE);
 		bb.putInt(gameid);
 		bb.putInt(moveid);
+		bb.putInt(oppid);
 		for (int i=0;i<move.length();i++) bb.putChar(move.charAt(i));
 		try {
 			wsclient.client.send(bb.array());
@@ -125,14 +74,16 @@ public class WSclient {
 		} catch (Exception e) {
 			if (retry) {
 				problemConnect();
-				return sendMove(gameid, moveid, move, false);
-			} else abordConnect();
+				return sendMove(gameid, moveid, move, oppid, false);
+			} else abortConnect();
 			return false;
 		}
 	}
-	public static boolean sendMove(int gameid, int moveid, String move) {
-		return sendMove(gameid, moveid, move, true);
+	public static boolean sendMove(int gameid, int moveid, String move, int oppid) {
+		return sendMove(gameid, moveid, move, oppid, true);
 	}
+	
+	// ===================================================================
 
 	private void gotMove(ByteBuffer bb) {
 		switch (bb.get(0)) {
@@ -153,7 +104,7 @@ public class WSclient {
 		}
 	}
 
-	private WSclient() {
+	private WSclient(int userid) {
 		try {
 			client = new WebSocketClient( new URI(server), new Draft_17()) {
 
@@ -170,6 +121,17 @@ public class WSclient {
 				@Override
 				public void onOpen( ServerHandshake handshake ) {
 					isConnected=true;
+					ByteBuffer bb = ByteBuffer.allocate(2+intsize);
+					bb.put(CMD_USERID);
+					bb.put(WSCLIENT_VERSION);
+					bb.putInt(uid);
+					try {
+						client.send(bb.array());
+					} catch (Exception e) {
+						System.out.println("PROBLEM client server just after open ");
+						e.printStackTrace();
+						abortConnect();
+					}
 				}
 
 				@Override
@@ -179,14 +141,46 @@ public class WSclient {
 
 				@Override
 				public void onError( Exception ex ) {
+					abortConnect();
 					System.out.println("problem connection to client server");
 					ex.printStackTrace();
-					wsclient=null;
 				}
 			};
 			client.connect();
 		} catch ( URISyntaxException ex ) {
 			System.out.println(server+ " is not a valid WebSocket URI\n" );
 		}
+	}
+
+	private static void problemConnect() {
+		Toast.makeText(GoJsActivity.main.getApplicationContext(), "Pb w/ client server. retrying...", Toast.LENGTH_SHORT).show();
+		wsclient.isConnected=false;
+		System.out.println("problem connect to clients server");
+		System.out.println("trying reconnect...");
+		wsclient.client.close();
+		init(uid);
+		try {
+			Thread.sleep(400);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	private static void abortConnect() {
+		Toast.makeText(GoJsActivity.main.getApplicationContext(), "Pb w/ client server. aborting...", Toast.LENGTH_SHORT).show();
+		if (wsclient!=null) wsclient.client.close();
+		wsclient=null;
+		doConnect=false;
+	}
+	
+	private static boolean checkDoConnect() {
+		if (!doConnect) {
+			if (wsclient!=null) {
+				wsclient.client.close();
+				wsclient=null;
+			}
+			return false;
+		}
+		return true;
 	}
 }
