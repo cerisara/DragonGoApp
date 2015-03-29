@@ -944,7 +944,13 @@ public class GoJsActivity extends FragmentActivity {
         
 		// initialize guistate
 		changeState(guistate.nogame);
-		
+
+        {
+            // initialize pushserver
+            int valInConfig = PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,1);
+            WSclient.setConnect(valInConfig==1?true:false);
+        }
+
 		// initialize traffic stats
 		ActivityManager mgr = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
 		// strange: the initial bandwidth of this uid is not 0 ?!
@@ -1615,10 +1621,17 @@ public class GoJsActivity extends FragmentActivity {
 				});
 				
 				final CheckBox connectClientServer = (CheckBox)v.findViewById(R.id.checkBoxClientServer);
+                {
+                    int prefval=PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,1);
+                    connectClientServer.setChecked(prefval==1?true:false);
+                }
 				connectClientServer.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View vv) {
-						WSclient.setConnect(connectClientServer.isChecked());
+                        boolean curval = connectClientServer.isChecked();
+						WSclient.setConnect(curval);
+                        int curvali = curval?1:0;
+                        PrefUtils.saveToPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,curvali);
 					}
 				});
 
