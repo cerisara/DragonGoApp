@@ -428,99 +428,112 @@ public class GoJsActivity extends FragmentActivity {
 			System.out.println("mywebclient detecting command from javascript: "+url);
 			int i=url.indexOf("androidcall01");
 			if (i>=0) {
-				if (url.substring(i).startsWith("androidcall01|C|")) {
+                // received the comment associated with the current move
+				if (url.substring(i).startsWith("androidcall01C")) {
 				    System.out.println("comment command initreview "+Reviews.isNotReviewStage);
 					if (!Reviews.isNotReviewStage) return true;
-					Reviews.setComment(url.substring(i+16));
+					Reviews.setComment(url.substring(i+14));
 					if (Reviews.comment.length()>0) longToast(Reviews.comment, 5);
 					return true;
 				}
-				if (url.substring(i).startsWith("androidcall01|M|")) {
+				if (url.substring(i).startsWith("androidcall01M")) {
 					// this is triggered when the player gets out of review mode
-					Integer mn = Integer.parseInt(url.substring(i+16));
+					Integer mn = Integer.parseInt(url.substring(i+14));
 					Reviews.curmove=mn;
 					Reviews.saveCurReview();
 					return true;
 				}
-				int j=url.lastIndexOf('|')+1;
-				String lastMove = url.substring(j);
+                if (url.substring(i).startsWith("androidcall01S")) {
+                    // this is trigerred when the user clicks the SEND button or by the sgf downloader when detecting a SCORE2 phase
+                    // TODO: check that we can never have a 'Z' in a move definition
+                    int j = url.lastIndexOf('Z') + 1;
+                    String lastMove = url.substring(j);
 
-				// this is trigerred when the user clicks the SEND button or by the sgf downloader when detecting a SCORE2 phase
-				final Game g = Game.gameShown;
-				if (curstate==guistate.markDeadStones) {
-					// TODO: update the local SGF
-					String sgfdata = url.substring(i+14, j);
-					String deadstones=getMarkedStones(sgfdata);
-					final EventManager em = EventManager.getEventManager();
-					EventManager.EventListener f = new EventManager.EventListener() {
-						@Override
-						public String getName() {return "mywebclient";}
-						@Override
-						public synchronized void reactToEvent() {
-							em.unregisterListener(eventType.moveSentEnd, this);
-							JSONObject o = server.o;
-							if (o==null) {
-							    // error: do nothing
-							    return;
-							}
-							String err;
-							try {
-							    err = o.getString("error");
-							    if (err!=null&&err.length()>0) {
-							        // error: do nothing
-							        return;
-							    }
-							} catch (JSONException e) {
-							    // TODO Auto-generated catch block
-							    e.printStackTrace();
-							}
-							// show territories
-							String sc = showCounting(o);
-							showMessage("dead stones sent; score="+sc);
-							writeInLabel("score: "+sc);
-							changeState(guistate.checkScore);
-						}
-					};
-					em.registerListener(eventType.moveSentEnd, f);
-					g.sendDeadstonesToServer(deadstones, server, true);
-				} else {
-					final EventManager em = EventManager.getEventManager();
-					EventManager.EventListener f = new EventManager.EventListener() {
-						@Override
-						public String getName() {return "mywebclient";}
-						@Override
-						public synchronized void reactToEvent() {
-							em.unregisterListener(eventType.moveSentEnd, this);
-							JSONObject o = server.o;
-							if (o==null) {
-							    // error: don't switch game
-							    return;
-							}
-							String err;
-							try {
-							    err = o.getString("error");
-							    if (err!=null&&err.length()>0) {
-							        // error: don't switch game
-							        return;
-							    }
-							} catch (JSONException e) {
-							    // TODO Auto-generated catch block
-							    e.printStackTrace();
-							}
-							// switch to next game
-							g.finishedWithThisGame();
-							if (Game.getGames().size()==0) {
-								showMessage("No more games locally");
-								changeState(guistate.nogame);
-							} else
-								downloadAndShowGame();
-						}
-					};
-					em.registerListener(eventType.moveSentEnd, f);
-					g.sendMove2server(lastMove,server);
-				}
-				return true;
-			} else {
+                    final Game g = Game.gameShown;
+                    if (curstate == guistate.markDeadStones) {
+                        // TODO: update the local SGF
+                        String sgfdata = url.substring(i + 14, j);
+                        String deadstones = getMarkedStones(sgfdata);
+                        final EventManager em = EventManager.getEventManager();
+                        EventManager.EventListener f = new EventManager.EventListener() {
+                            @Override
+                            public String getName() {
+                                return "mywebclient";
+                            }
+
+                            @Override
+                            public synchronized void reactToEvent() {
+                                em.unregisterListener(eventType.moveSentEnd, this);
+                                JSONObject o = server.o;
+                                if (o == null) {
+                                    // error: do nothing
+                                    return;
+                                }
+                                String err;
+                                try {
+                                    err = o.getString("error");
+                                    if (err != null && err.length() > 0) {
+                                        // error: do nothing
+                                        return;
+                                    }
+                                } catch (JSONException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
+                                // show territories
+                                String sc = showCounting(o);
+                                showMessage("dead stones sent; score=" + sc);
+                                writeInLabel("score: " + sc);
+                                changeState(guistate.checkScore);
+                            }
+                        };
+                        em.registerListener(eventType.moveSentEnd, f);
+                        g.sendDeadstonesToServer(deadstones, server, true);
+                    } else {
+                        // we are in a "normal" (not scoring) state
+                        final EventManager em = EventManager.getEventManager();
+                        EventManager.EventListener f = new EventManager.EventListener() {
+                            @Override
+                            public String getName() {
+                                return "mywebclient";
+                            }
+
+                            @Override
+                            public synchronized void reactToEvent() {
+                                em.unregisterListener(eventType.moveSentEnd, this);
+                                JSONObject o = server.o;
+                                if (o == null) {
+                                    // error: don't switch game
+                                    return;
+                                }
+                                String err;
+                                try {
+                                    err = o.getString("error");
+                                    if (err != null && err.length() > 0) {
+                                        // error: don't switch game
+                                        return;
+                                    }
+                                } catch (JSONException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
+                                // switch to next game
+                                g.finishedWithThisGame();
+                                if (Game.getGames().size() == 0) {
+                                    showMessage("No more games locally");
+                                    changeState(guistate.nogame);
+                                } else
+                                    downloadAndShowGame();
+                            }
+                        };
+                        em.registerListener(eventType.moveSentEnd, f);
+                        g.sendMove2server(lastMove, server);
+                    }
+                    return true;
+                }
+                System.out.println("WARNING: unknown androidcall01 from javascript !");
+                return true;
+            } else {
 				// its not an android call back 
 				// let the browser navigate normally
 				return false;
@@ -701,11 +714,13 @@ public class GoJsActivity extends FragmentActivity {
 						break;
 					case play: // send the move
 						// ask eidogo to send last move; it will be captured by the web listener
-						wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
+                        System.out.println("DEBUG SENDING MOVE TO SERVER");
+                        wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
 						break;
 					case markDeadStones: // send a request to the server to compute the score
 						// ask eidogo to give sgf, which shall contain X
-						wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
+                        // for now, I forbid scoring mode from the app
+						// wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
 						break;
 					case checkScore: // accept the current score evaluation
 						acceptScore();

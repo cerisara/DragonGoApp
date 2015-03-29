@@ -1037,21 +1037,26 @@ eidogo.Player.prototype = {
         }
     },
 
+    // detsonSend is never called from JS, it must be called from the Java app
+    // this fct is used to let the Java app know about the last move that is shown on the goban:
+    // this is the move that must be send to the server
     detsonSend: function() {
         var sgf = this.cursor.getGameRoot().toSgf();
         var selectedMove = this.cursor.getLastMove();
-	window.location="androidcall01|"+sgf+"|"+selectedMove;
+	window.location="androidcall01S"+sgf+"Z"+selectedMove;
     },
 
     send: function(e, obj, noRender) {
+/* remove this fct, because it is now forbidden to send move to the server from the JS goban
 	var sgf = this.cursor.getGameRoot().toSgf();
 	var selectedMove = this.cursor.getLastMove();
 	window.location="androidcall01|"+sgf+"|"+selectedMove;
+*/
     },
 
     forward: function(e, obj, noRender) {
         this.variation(null, noRender);
-	window.location="androidcall01|C|"+this.dom.comments.innerHTML;
+	window.location="androidcall01C"+this.dom.comments.innerHTML;
     },
 
     first: function() {
@@ -1064,7 +1069,7 @@ eidogo.Player.prototype = {
             this.board.revert(1);
             this.goingBack = true;
             this.refresh();
-	    window.location="androidcall01|C|"+this.dom.comments.innerHTML;
+	    window.location="androidcall01C"+this.dom.comments.innerHTML;
         }
     },
 
@@ -1072,7 +1077,7 @@ eidogo.Player.prototype = {
         if (!this.cursor.hasNext()) return;
         this.variation(null, true);
         this.refresh();
-	window.location="androidcall01|C|"+this.dom.comments.innerHTML;
+	window.location="androidcall01C"+this.dom.comments.innerHTML;
     },
 
     last: function() {
@@ -2107,12 +2112,14 @@ eidogo.Player.prototype = {
         this.dom.comments.innerHTML += comments.replace(/^(\n|\r|\t|\s)+/, "").replace(/\n/g, "<br />");
     },
 
+    // this fct is used to let the Java app know about the comments for the current move
+    // so that the java app may show them within a Toast
     detComments: function() {
-	window.location="androidcall01|C|"+this.dom.comments.innerHTML;
+	window.location="androidcall01C"+this.dom.comments.innerHTML;
     },
 
     detMoveNumber: function() {
-	window.location="androidcall01|M|"+this.moveNumber;
+	window.location="androidcall01M"+this.moveNumber;
     },
 
     /**
