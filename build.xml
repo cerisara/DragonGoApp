@@ -26,7 +26,7 @@
 
    <property name="ant.project.name" value="DragonGoApp" />
    <property name="project.minSdkVersion" value="8" />
-   <property name="project.target.apilevel" value="8" />
+   <property name="project.target.apilevel" value="9" />
    <property name="project.target.android.jar" value="android.jar" />
             <path id="project.target.class.path">
                <pathelement path="android.jar" />
@@ -86,8 +86,8 @@
 
     <!-- compilation options -->
     <property name="java.encoding" value="UTF-8" />
-    <property name="java.target" value="1.7" />
-    <property name="java.source" value="1.7" />
+    <property name="java.target" value="1.6" />
+    <property name="java.source" value="1.6" />
     <property name="java.compilerargs" value="" />
     <property name="java.compiler.classpath" value="" />
 
