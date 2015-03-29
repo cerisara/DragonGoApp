@@ -794,7 +794,9 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 						    cmd+="&msg="+URLEncoder.encode(msg.toString());
 						}
 						// TODO: check that server exists
+                        // this first command sends the move to the DGS server
 						server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
+                        // this second command sends the move to the push server for real-time playing
 						WSclient.sendMove(getGameID(), newMoveId, finmove, getOppID());
 						ConfirmDialogFragment.this.getDialog().cancel();
 					}

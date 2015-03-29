@@ -5,6 +5,13 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+import android.util.Log;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
@@ -28,7 +35,6 @@ public class WSclient {
 	private final static byte WSCLIENT_VERSION = 1; // useful for the server to be back-compatible with multiple old versions
 
 	private static boolean doConnect = true;
-	private WebSocketClient client=null;
 	boolean isConnected = false;
 	private ArrayList<int[]> movesAlreadySent = new ArrayList<int[]>();
 	private static WSclient wsclient = null;
@@ -36,51 +42,42 @@ public class WSclient {
 	
 	public static void init(int userid) {
 		uid=userid;
-		if (!checkDoConnect()) return;
-		System.out.println("WSCLIENT "+wsclient);
 		if (wsclient==null) wsclient=new WSclient(userid);
 	}
 	
 	public static void setConnect(boolean selected) {
 		doConnect=selected;
-		checkDoConnect();
 	}
 	
 	final static int intsize=4, charsize=2;
 
-	private static boolean sendMove(int gameid, int moveid, String move, int oppid, boolean retry) {
-		if (!checkDoConnect()) return false;
-		if (wsclient==null) {
-			System.out.println("ERROR WSCLIENT cannot send moves");
-			return false;
-		}
-		ByteBuffer bb = ByteBuffer.allocate(1+3*intsize+move.length()*charsize);
-		bb.put(CMD_MOVE);
-		bb.putInt(gameid);
-		bb.putInt(moveid);
-		bb.putInt(oppid);
-		for (int i=0;i<move.length();i++) bb.putChar(move.charAt(i));
-		try {
-			wsclient.client.send(bb.array());
-			int[] s = {gameid,moveid};
-			boolean alreadyin=false;
-			for (int i=0;i<wsclient.movesAlreadySent.size();i++)
-				if (wsclient.movesAlreadySent.get(i)[0]==gameid) {
-					wsclient.movesAlreadySent.set(i, s);
-					alreadyin=true; break;
-				}
-			if (!alreadyin) wsclient.movesAlreadySent.add(s);
-			return true;
-		} catch (Exception e) {
-			if (retry) {
-				problemConnect();
-				return sendMove(gameid, moveid, move, oppid, false);
-			} else abortConnect();
-			return false;
-		}
-	}
-	public static boolean sendMove(int gameid, int moveid, String move, int oppid) {
-		return sendMove(gameid, moveid, move, oppid, true);
+	private static void sendMove(final int gameid, final int moveid, final String move, final int oppid, boolean retry) {
+        if (doConnect) {
+            Thread push = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("Send move to pushserver");
+                    HttpParams httpparms = new BasicHttpParams();
+                    HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
+                    HttpConnectionParams.setSoTimeout(httpparms, 6000);
+                    HttpClient httpclient = new DefaultHttpClient(httpparms);
+                    try {
+                        String cmd = "http://talc1.loria.fr/users/cerisara/DGSmove.php?v=" +
+                                gameid + "Z" + moveid + "Z" + move + "Z" + oppid;
+                        Log.i("login", cmd);
+                        HttpGet httpget = new HttpGet(cmd);
+                        httpclient.execute(httpget);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            push.start();
+        }
+    }
+
+    public static void sendMove(int gameid, int moveid, String move, int oppid) {
+		sendMove(gameid, moveid, move, oppid, true);
 	}
 	
 	// ===================================================================
@@ -105,82 +102,5 @@ public class WSclient {
 	}
 
 	private WSclient(int userid) {
-		try {
-			client = new WebSocketClient( new URI(server), new Draft_17()) {
-
-				@Override
-				public void onMessage( String message ) {
-					System.out.println("received message "+message);
-				}
-
-				@Override
-				public void onMessage( ByteBuffer bytes ) {
-					gotMove(bytes);
-				}
-
-				@Override
-				public void onOpen( ServerHandshake handshake ) {
-					isConnected=true;
-					ByteBuffer bb = ByteBuffer.allocate(2+intsize);
-					bb.put(CMD_USERID);
-					bb.put(WSCLIENT_VERSION);
-					bb.putInt(uid);
-					try {
-						client.send(bb.array());
-					} catch (Exception e) {
-						System.out.println("PROBLEM client server just after open ");
-						e.printStackTrace();
-						abortConnect();
-					}
-				}
-
-				@Override
-				public void onClose( int code, String reason, boolean remote ) {
-					isConnected=false;
-				}
-
-				@Override
-				public void onError( Exception ex ) {
-					abortConnect();
-					System.out.println("problem connection to client server");
-					ex.printStackTrace();
-				}
-			};
-			client.connect();
-		} catch ( URISyntaxException ex ) {
-			System.out.println(server+ " is not a valid WebSocket URI\n" );
-		}
-	}
-
-	private static void problemConnect() {
-		Toast.makeText(GoJsActivity.main.getApplicationContext(), "Pb w/ client server. retrying...", Toast.LENGTH_SHORT).show();
-		wsclient.isConnected=false;
-		System.out.println("problem connect to clients server");
-		System.out.println("trying reconnect...");
-		wsclient.client.close();
-		init(uid);
-		try {
-			Thread.sleep(400);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-	}
-	
-	private static void abortConnect() {
-		Toast.makeText(GoJsActivity.main.getApplicationContext(), "Pb w/ client server. aborting...", Toast.LENGTH_SHORT).show();
-		if (wsclient!=null) wsclient.client.close();
-		wsclient=null;
-		doConnect=false;
-	}
-	
-	private static boolean checkDoConnect() {
-		if (!doConnect) {
-			if (wsclient!=null) {
-				wsclient.client.close();
-				wsclient=null;
-			}
-			return false;
-		}
-		return true;
 	}
 }
