@@ -319,6 +319,10 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 		};
 		em.registerListener(eventType.downloadListEnd, f);
 		server.sendCmdToServer(cmdGetListOfGames,eventType.downloadListStarted,eventType.downloadListEnd);
+
+        // TODO
+        System.out.println("OGS login:");
+        OGSConnection.login();
 	}
 
 	public static List<Game> getGames() {return games2play;}

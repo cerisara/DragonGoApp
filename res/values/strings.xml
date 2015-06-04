@@ -6,7 +6,8 @@
     <string name="hello_world">Please wait, copying eidogo on disk&#8230;</string>
     <string name="username">login</string>
     <string name="password">password</string>
-    <string name="signin">signin</string>
+    <string name="signinDGS">DGS</string>
+    <string name="signinOGS">OGS</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="loading">loading</string>

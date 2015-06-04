@@ -1228,7 +1228,7 @@ public class GoJsActivity extends FragmentActivity {
 	
 	private void ask4credentials() {
 		System.out.println("calling settings");
-		final Context c = this;
+		final Context c = getApplicationContext();
 		class LoginDialogFragment extends DialogFragment {
 			@Override
 			public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -1237,34 +1237,52 @@ public class GoJsActivity extends FragmentActivity {
 				LayoutInflater inflater = getActivity().getLayoutInflater();
 
 				// Inflate and set the layout for the dialog
-				// Pass null as the parent view because its going in the dialog layout
-				builder.setView(inflater.inflate(R.layout.dialog_signin, null))
-				// Add action buttons
-				.setPositiveButton(R.string.signin, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-						// sign in the user ...
-						TextView username = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.username);
-						TextView pwd = (TextView)LoginDialogFragment.this.getDialog().findViewById(R.id.password);
-						String userkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
-						String pwdkey  = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
-						if (chosenLogin==1) {
-							System.out.println("saving creds 1");
-							userkey = PrefUtils.PREFS_LOGIN_USERNAME2_KEY;
-							pwdkey  = PrefUtils.PREFS_LOGIN_PASSWORD2_KEY;
-						} else
-							System.out.println("saving creds 0");
-						PrefUtils.saveToPrefs(c, userkey, username.getText().toString());
-						PrefUtils.saveToPrefs(c, pwdkey, (String)pwd.getText().toString());
-						showMessage("Credentials saved");
-					}
-				})
-				.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						LoginDialogFragment.this.getDialog().cancel();
-					}
-				});
-				return builder.create();
+                // Pass null as the parent view because its going in the dialog layout
+                builder.setView(inflater.inflate(R.layout.dialog_signin, null))
+                        // Add action buttons
+                        .setPositiveButton(R.string.signinDGS, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                // sign in the user ...
+                                TextView username = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.username);
+                                TextView pwd = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.password);
+                                String userkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
+                                String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
+                                if (chosenLogin == 1) {
+                                    System.out.println("saving creds 1");
+                                    userkey = PrefUtils.PREFS_LOGIN_USERNAME2_KEY;
+                                    pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD2_KEY;
+                                } else
+                                    System.out.println("saving creds 0");
+                                PrefUtils.saveToPrefs(c, userkey, username.getText().toString());
+                                PrefUtils.saveToPrefs(c, pwdkey, (String) pwd.getText().toString());
+                                showMessage("DGS Credentials saved");
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                LoginDialogFragment.this.getDialog().cancel();
+                            }
+                        })
+                        .setNeutralButton(R.string.signinOGS, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                TextView username = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.username);
+                                TextView pwd = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.password);
+                                String userkey = PrefUtils.PREFS_LOGIN_OGS_USERNAME;
+                                String pwdkey = PrefUtils.PREFS_LOGIN_OGS_PASSWD;
+                                System.out.println("saving creds OGS");
+                                PrefUtils.saveToPrefs(c, userkey, username.getText().toString());
+                                PrefUtils.saveToPrefs(c, pwdkey, (String) pwd.getText().toString());
+                                System.out.println("OGS creds saved");
+                                showMessage("OGS Credentials saved");
+
+                                // immediately try to login
+                                OGSConnection.login();
+                            }
+                        });
+
+                return builder.create();
 			}
 		}
 		LoginDialogFragment dialog = new LoginDialogFragment();
