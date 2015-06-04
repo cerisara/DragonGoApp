@@ -12,6 +12,8 @@ public class PrefUtils {
 	public static final String PREFS_GCM_REG_KEY = "__GCMREG__" ;
     public static final String PREFS_BADNWIDTH_MODE = "__BANDWIDTH__" ;
     public static final String PREFS_PUSHSERVER = "__PUSHSERVER__" ;
+    public static final String PREFS_LOGIN_OGS_USERNAME = "__OGSUSER__" ;
+    public static final String PREFS_LOGIN_OGS_PASSWD = "__OGSPASWD__" ;
 
 	/**
 	 * Called to save supplied value in shared preferences against given key.
