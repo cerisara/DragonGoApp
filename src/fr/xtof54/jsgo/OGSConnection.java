@@ -43,8 +43,9 @@ public class OGSConnection {
                 if (s == null) break;
                 System.out.println("talc1log " + s);
                 s = s.trim();
-                if (s.length() > 0) {
-                    res=s;
+                int i=s.indexOf("detinfo=");
+                if (i >= 0) {
+                    res=s.substring(i+8);
                     break;
                 }
             }
