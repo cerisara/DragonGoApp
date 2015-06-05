@@ -26,69 +26,107 @@ import java.util.List;
  */
 public class OGSConnection {
 
+    // to be run on a separate thread
+    public static String getWithHttpGet(String cmd) {
+        System.out.println("login to OGS server");
+        HttpParams httpparms = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
+        HttpConnectionParams.setSoTimeout(httpparms, 6000);
+        HttpClient httpclient = new DefaultHttpClient(httpparms);
+        String res=null;
+        try {
+            HttpGet httpget = new HttpGet(cmd);
+            HttpResponse response = httpclient.execute(httpget);
+            BufferedReader fin = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
+            for (; ; ) {
+                String s = fin.readLine();
+                if (s == null) break;
+                System.out.println("talc1log " + s);
+                s = s.trim();
+                if (s.length() > 0) {
+                    res=s;
+                    break;
+                }
+            }
+            fin.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     public static void login() {
-        final String OGSCLIENTID = "todo: how to save it outside git ?";
-        final String OGSCLIENTSECRET = "todo";
+        Thread push = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                login0();
+            }
+        });
+        push.start();
+    }
+    public static void login0() {
+        String OGSCLIENTID = PrefUtils.getFromPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTID, null);
+        if (OGSCLIENTID==null) OGSCLIENTID = getWithHttpGet("http://talc1.loria.fr/users/cerisara/ogsooid.txt");
+        if (OGSCLIENTID==null) {
+            GoJsActivity.main.showMessage("Error connections A1");
+            return;
+        }
+        String OGSCLIENTSECRET = PrefUtils.getFromPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTSECRET, null);
+        if (OGSCLIENTSECRET==null) OGSCLIENTSECRET = getWithHttpGet("http://talc1.loria.fr/users/cerisara/ogsoose.txt");
+        if (OGSCLIENTSECRET==null) {
+            GoJsActivity.main.showMessage("Error connections A2");
+            return;
+        }
 
         final String pwd = PrefUtils.getFromPrefs(GoJsActivity.main.getApplicationContext(),PrefUtils.PREFS_LOGIN_OGS_PASSWD,null);
         if (pwd==null) GoJsActivity.main.showMessage("You must first create an application-specific password on online-go.com," +
                 "and enter this password in this app Settings menu");
         else {
             final String user = PrefUtils.getFromPrefs(GoJsActivity.main.getApplicationContext(),PrefUtils.PREFS_LOGIN_OGS_USERNAME,null);
-            if (user==null) GoJsActivity.main.showMessage("You must first enter your OGS credentials via the Settings menu");
+            if (user == null)
+                GoJsActivity.main.showMessage("You must first enter your OGS credentials via the Settings menu");
             else {
                 System.out.println("all info is here:");
-                System.out.println("OGSuser "+user);
-                System.out.println("OGSpwd "+pwd);
-                Thread push = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        System.out.println("login to OGS server");
-                        HttpParams httpparms = new BasicHttpParams();
-                        HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
-                        HttpConnectionParams.setSoTimeout(httpparms, 6000);
-                        HttpClient httpclient = new DefaultHttpClient(httpparms);
-                        try {
-                            String cmd = "https://online-go.com/oauth2/access_token";
+                System.out.println("OGSuser " + user);
+                System.out.println("OGSpwd " + pwd);
+                System.out.println("login to OGS server");
+                HttpParams httpparms = new BasicHttpParams();
+                HttpConnectionParams.setConnectionTimeout(httpparms, 6000);
+                HttpConnectionParams.setSoTimeout(httpparms, 6000);
+                HttpClient httpclient = new DefaultHttpClient(httpparms);
+                try {
+                    String cmd = "https://online-go.com/oauth2/access_token";
 
-                            List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-                            formparams.add(new BasicNameValuePair("client_id", OGSCLIENTID));
-                            formparams.add(new BasicNameValuePair("client_secret", OGSCLIENTSECRET));
-                            formparams.add(new BasicNameValuePair("grant_type", "password"));
-                            formparams.add(new BasicNameValuePair("username", user));
-                            formparams.add(new BasicNameValuePair("password", pwd));
-                            UrlEncodedFormEntity entity;
-                            entity = new UrlEncodedFormEntity(formparams, "UTF-8");
-                            HttpPost httppost = new HttpPost(cmd);
-                            httppost.setEntity(entity);
-                            HttpResponse response = httpclient.execute(httppost);
+                    List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+                    formparams.add(new BasicNameValuePair("client_id", OGSCLIENTID));
+                    formparams.add(new BasicNameValuePair("client_secret", OGSCLIENTSECRET));
+                    formparams.add(new BasicNameValuePair("grant_type", "password"));
+                    formparams.add(new BasicNameValuePair("username", user));
+                    formparams.add(new BasicNameValuePair("password", pwd));
+                    UrlEncodedFormEntity entity;
+                    entity = new UrlEncodedFormEntity(formparams, "UTF-8");
+                    HttpPost httppost = new HttpPost(cmd);
+                    httppost.setEntity(entity);
+                    HttpResponse response = httpclient.execute(httppost);
 
-                            // retrieve the access token from the response
-                            BufferedReader fin = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
-                            for (; ; ) {
-                                String s = fin.readLine();
-                                if (s==null) break;
-                                System.out.println("ogslog "+s);
-                                s=s.trim();
-                                if (s.indexOf("error")>=0) {
-                                    GoJsActivity.main.showMessage("ERROR login OGS "+s);
-                                } else {
-                                    // TODO retrieve the token
-                                }
-                            }
-                            fin.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    // retrieve the access token from the response
+                    BufferedReader fin = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
+                    for (; ; ) {
+                        String s = fin.readLine();
+                        if (s == null) break;
+                        System.out.println("ogslog " + s);
+                        s = s.trim();
+                        if (s.indexOf("error") >= 0) {
+                            GoJsActivity.main.showMessage("ERROR login OGS " + s);
+                        } else {
+                            // TODO retrieve the token
                         }
                     }
-                });
-                push.start();
-
+                    fin.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
-    }
-
-    private static void askUserForOGScredentials() {
-
     }
 }
