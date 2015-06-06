@@ -91,7 +91,9 @@ public class GoJsActivity extends FragmentActivity {
 	public static GoJsActivity main;
     private int numEventsReceived = 0;
 
-	//	private static void copyFile(InputStream in, OutputStream out) throws IOException {
+    public boolean getGamesFromDGS=true, getGamesFromOGS=true;
+
+    //	private static void copyFile(InputStream in, OutputStream out) throws IOException {
 	//		byte[] buffer = new byte[1024];
 	//		int read;
 	//		while((read = in.read(buffer)) != -1){
@@ -950,6 +952,13 @@ public class GoJsActivity extends FragmentActivity {
             int valInConfig = PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,1);
             WSclient.setConnect(valInConfig==1?true:false);
         }
+        {
+            // initialize active Go servers
+            int valInConfig = PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_DGSON,1);
+            getGamesFromDGS = (valInConfig==1?true:false);
+            valInConfig = PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_OGSON,1);
+            getGamesFromOGS = (valInConfig==1?true:false);
+        }
 
 		// initialize traffic stats
 		ActivityManager mgr = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
@@ -1289,14 +1298,25 @@ public class GoJsActivity extends FragmentActivity {
 		dialog.show(getSupportFragmentManager(),"dgs signin");
 	}
 
+    // TODO: fix to play first all DGS games, and then all OGS games
 	private void skipGame() {
-		if (Game.getGames().size()<=1) {
-			showMessage("No more games downloaded; retry GetGames ?");
-			changeState(guistate.nogame);
-			return;
-		}
-		if (++curgidx2play>=Game.getGames().size()) curgidx2play=0;
-		downloadAndShowGame();
+        if (Game.gameShown!=null) {
+            if (Game.gameShown.getGameID() >= 0) {
+                // DGS game
+                if (Game.getGames().size() <= 1) {
+                    // go to OGS games
+                    showMessage("No more games downloaded; retry GetGames ?");
+                    changeState(guistate.nogame);
+                    return;
+                }
+                if (++curgidx2play >= Game.getGames().size()) curgidx2play = 0;
+                downloadAndShowGame();
+            } else {
+                // OGS game
+                // OGS games are played last
+                OGSConnection.nextGame2play();
+            }
+        }
 	}
 	// TODO: move this method into Game !
 	private void resignGame() {
@@ -1637,23 +1657,53 @@ public class GoJsActivity extends FragmentActivity {
 						dialog.dismiss();
 					}
 				});
-				
-				final CheckBox connectClientServer = (CheckBox)v.findViewById(R.id.checkBoxClientServer);
+
+                final CheckBox connectClientServer = (CheckBox)v.findViewById(R.id.checkBoxClientServer);
                 {
                     int prefval=PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,1);
                     connectClientServer.setChecked(prefval==1?true:false);
                 }
-				connectClientServer.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View vv) {
+                connectClientServer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
                         boolean curval = connectClientServer.isChecked();
-						WSclient.setConnect(curval);
+                        WSclient.setConnect(curval);
                         int curvali = curval?1:0;
                         PrefUtils.saveToPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,curvali);
-					}
-				});
+                    }
+                });
 
-				builder.setView(v);
+                final CheckBox connectDGS = (CheckBox)v.findViewById(R.id.checkBoxDGS);
+                {
+                    int prefval=PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_DGSON,1);
+                    connectDGS.setChecked(prefval==1?true:false);
+                }
+                connectDGS.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        boolean curval = connectDGS.isChecked();
+                        getGamesFromDGS=curval;
+                        int curvali = curval?1:0;
+                        PrefUtils.saveToPrefs(getApplicationContext(),PrefUtils.PREFS_DGSON,curvali);
+                    }
+                });
+                final CheckBox connectOGS = (CheckBox)v.findViewById(R.id.checkBoxOGS);
+                {
+                    int prefval=PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_OGSON,1);
+                    connectOGS.setChecked(prefval==1?true:false);
+                }
+                connectOGS.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View vv) {
+                        boolean curval = connectOGS.isChecked();
+                        getGamesFromOGS=curval;
+                        int curvali = curval?1:0;
+                        PrefUtils.saveToPrefs(getApplicationContext(),PrefUtils.PREFS_OGSON,curvali);
+                    }
+                });
+
+
+                builder.setView(v);
 				return builder.create();
 			}
 		}

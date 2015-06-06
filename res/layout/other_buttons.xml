@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <TableLayout
+<TableLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbarAlwaysDrawVerticalTrack="true"
@@ -56,14 +58,28 @@
             android:layout_height="wrap_content"
             android:text="List saved games" />
 
-        <CheckBox
+    <CheckBox
+            android:id="@+id/checkBoxDGS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:checked="true"
+            android:text="DGS" />
+    <CheckBox
+            android:id="@+id/checkBoxOGS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:checked="true"
+            android:text="OGS" />
+    <CheckBox
             android:id="@+id/checkBoxClientServer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#ffffff"
             android:checked="true"
             android:text="connect to Client Server" />
-        
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

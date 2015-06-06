@@ -16,6 +16,8 @@ public class PrefUtils {
     public static final String PREFS_LOGIN_OGS_PASSWD = "__OGSPASWD__" ;
     public static final String PREFS_LOGIN_OGS_CLIENTID = "__OGSCLID__" ;
     public static final String PREFS_LOGIN_OGS_CLIENTSECRET = "__OGSCLSEC__" ;
+    public static final String PREFS_DGSON = "__DGSON__" ;
+    public static final String PREFS_OGSON = "__OGSON__" ;
 
 	/**
 	 * Called to save supplied value in shared preferences against given key.

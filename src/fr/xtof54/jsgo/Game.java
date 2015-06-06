@@ -301,28 +301,32 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 	}
 	
 	public static void loadStatusGames(final ServerConnection server) {
-		final EventManager em = EventManager.getEventManager();
-		EventManager.EventListener f = new EventManager.EventListener() {
-			@Override
-			public synchronized void reactToEvent() {
-				JSONObject o = server.o;
-				parseJSONStatusGames(o);
-				// also connects now to the client server to give it time to connect correctly
-				if (games2play.size()>0) WSclient.init(games2play.get(0).myid);
+        if (GoJsActivity.main.getGamesFromDGS) {
+            final EventManager em = EventManager.getEventManager();
+            EventManager.EventListener f = new EventManager.EventListener() {
+                @Override
+                public synchronized void reactToEvent() {
+                    JSONObject o = server.o;
+                    parseJSONStatusGames(o);
+                    // also connects now to the client server to give it time to connect correctly
+                    if (games2play.size()>0) WSclient.init(games2play.get(0).myid);
 
-				System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
-				em.unregisterListener(eventType.downloadListEnd, this);
-				em.sendEvent(eventType.downloadListGamesEnd);
-			}
-			@Override
-			public String getName() {return "loadStatusGame";}
-		};
-		em.registerListener(eventType.downloadListEnd, f);
-		server.sendCmdToServer(cmdGetListOfGames,eventType.downloadListStarted,eventType.downloadListEnd);
-
-        // TODO
-        System.out.println("OGS login:");
-        OGSConnection.login();
+                    System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
+                    em.unregisterListener(eventType.downloadListEnd, this);
+                    em.sendEvent(eventType.downloadListGamesEnd);
+                }
+                @Override
+                public String getName() {return "loadStatusGame";}
+            };
+            em.registerListener(eventType.downloadListEnd, f);
+            server.sendCmdToServer(cmdGetListOfGames, eventType.downloadListStarted, eventType.downloadListEnd);
+        }
+        if (GoJsActivity.main.getGamesFromOGS) {
+            // TODO: disable the game button while downloading is not done
+            System.out.println("OGS login:");
+            // TODO: this will be made after the waiting window has closed: do it before without events !
+            OGSConnection.login();
+        }
 	}
 
 	public static List<Game> getGames() {return games2play;}
@@ -753,9 +757,10 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 		if (myid==whiteid) return blackid;
 		else return whiteid;
 	}
-	
+
+    // this function is called by the "weblistener" that captures the last move from the embedded javascript
 	public void sendMove2server(String move, final ServerConnection server) {
-		if (server==null) {
+		if (gid>=0&&server==null) {
 			if (!GoJsActivity.main.initServer()) return;
 			sendMove2server(move, GoJsActivity.main.server);
 			return;
@@ -792,16 +797,22 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 				.setPositiveButton("OK, send !", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						addMoveToSGF(finmove);
-						String cmd = "quick_do.php?obj=game&cmd=move&gid="+getGameID()+"&move_id="+newMoveId+"&move="+finmove;
-						if (msg!=null) {
-							addMessageToSGF(msg.toString());
-						    cmd+="&msg="+URLEncoder.encode(msg.toString());
-						}
-						// TODO: check that server exists
-                        // this first command sends the move to the DGS server
-						server.sendCmdToServer(cmd,eventType.moveSentStart,eventType.moveSentEnd);
-                        // this second command sends the move to the push server for real-time playing
-						WSclient.sendMove(getGameID(), newMoveId, finmove, getOppID());
+                        if (gid>=0) {
+                            // this is a DGS game
+                            String cmd = "quick_do.php?obj=game&cmd=move&gid=" + getGameID() + "&move_id=" + newMoveId + "&move=" + finmove;
+                            if (msg != null) {
+                                addMessageToSGF(msg.toString());
+                                cmd += "&msg=" + URLEncoder.encode(msg.toString());
+                            }
+                            // TODO: check that server exists
+                            // this first command sends the move to the DGS server
+                            server.sendCmdToServer(cmd, eventType.moveSentStart, eventType.moveSentEnd);
+                            // this second command sends the move to the push server for real-time playing
+                            WSclient.sendMove(getGameID(), newMoveId, finmove, getOppID());
+                        } else {
+                            // OGS move
+                            OGSConnection.sendMove(-gid,finmove);
+                        }
 						ConfirmDialogFragment.this.getDialog().cancel();
 					}
 				});
