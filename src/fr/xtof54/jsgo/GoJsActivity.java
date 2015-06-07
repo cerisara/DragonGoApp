@@ -180,6 +180,9 @@ public class GoJsActivity extends FragmentActivity {
 		});
 	}
 	private guistate lastGameState;
+    // TODO: because this method calls a WebView method (loadUrl()), all of these calls must be made
+    // by the same thread (should it be the main android/app UI loop ?)
+    // So, we should apply the same principle as for showMessage
 	void changeState(guistate newstate) {
 		if (curstate==guistate.review && newstate!=guistate.review)
 			GoJsActivity.main.wv.loadUrl("javascript:eidogo.autoPlayers[0].detMoveNumber()");
@@ -1725,10 +1728,12 @@ public class GoJsActivity extends FragmentActivity {
 	        new CountDownTimer(1000*ntics, 1000) {
 	            public void onTick(long millisUntilFinished) {
 	                toastline+=4;
-	                String s = ss[toastline];
-	                for (int i=toastline+1;i<toastline+4&&i<ss.length;i++)
-	                    s+="\n"+ss[i];
-	                Toast.makeText(getBaseContext(), s, Toast.LENGTH_LONG).show();
+                    if (toastline<ss.length) {
+                        String s = ss[toastline];
+                        for (int i = toastline + 1; i < toastline + 4 && i < ss.length; i++)
+                            s += "\n" + ss[i];
+                        Toast.makeText(getBaseContext(), s, Toast.LENGTH_LONG).show();
+                    }
 	            }
 	            public void onFinish() {}
 	        }.start();

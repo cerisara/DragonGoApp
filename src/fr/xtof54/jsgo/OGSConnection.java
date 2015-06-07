@@ -70,6 +70,26 @@ public class OGSConnection {
         }
     }
 
+    static void acceptChallenge(String challid) {
+        initHttp();
+        try {
+            final String cmd = "https://online-go.com/api/v1/me/challenges/"+challid+"/accept/";
+            HttpPost httppost = new HttpPost(cmd);
+            String header = "Bearer "+atoken;
+            httppost.addHeader("Authorization",header);
+            HttpResponse response = httpclient.execute(httppost,httpctxt);
+            BufferedReader fin = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
+            for (; ; ) {
+                String s = fin.readLine();
+                if (s == null) break;
+                System.out.println("ogsacceptchallenge " + s);
+            }
+            fin.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static List<String> getNotifications0() {
         ArrayList<String> newgames2play = new ArrayList<String>();
         if (atoken==null) return null;
@@ -93,6 +113,45 @@ public class OGSConnection {
                     return null;
                 }
                 // TODO: do a real JSON parsing
+                // look for new challenges
+                for (int deb=0;;) {
+                    int i = s.indexOf("\"type\": \"challenge\"", deb);
+                    if (i<0) break;
+                    deb=i+8;
+                    String challid=null, challenger=null;
+                    int i0=i;
+                    {
+                        int j = s.lastIndexOf("challenge_id", i);
+                        if (j < 0) continue;
+                        i = s.indexOf(':', j);
+                        if (i < 0) continue;
+                        else i += 2;
+                        j = s.indexOf(',', i);
+                        if (j < 0) continue;
+                        challid = s.substring(i, j);
+                    }
+                    {
+                        int j = s.lastIndexOf("username", i0);
+                        if (j < 0) continue;
+                        i = s.indexOf(':', j);
+                        if (i < 0) continue;
+                        else i += 3;
+                        j = s.indexOf('"', i);
+                        if (j < 0) continue;
+                        challenger = s.substring(i, j);
+                    }
+                    System.out.println("ogs notifications found challengeid "+challid+" "+challenger);
+                    if (challenger!=null&&challid!=null) {
+                        final String chid = challid;
+                        GUI.askUser("Challenge from " + challenger + ": accept ?", new GUI.FunctionOK() {
+                            @Override
+                            public void isOK() {
+                                acceptChallenge(chid);
+                            }
+                        });
+                    }
+                }
+
                 // look for games where it's my move
                 for (int deb=0;;) {
                     int i = s.indexOf("\"type\": \"yourMove\"", deb);
@@ -182,8 +241,46 @@ public class OGSConnection {
         return sendMoveOK;
     }
 
+    private static String downoadGameReview(String gameid) {
+        try {
+            /*
+            dans api/v1/games/gameid, il y a dans:
+            - moves = tous les coups joues
+            - XXX: le temps restant
+            - last_move: un move ID ??
+            ...
+             */
+            final String cmd = "https://online-go.com/api/v1/games/"+gameid+"/reviews/";
+            HttpGet httpget = new HttpGet(cmd);
+            String header = "Bearer " + atoken;
+            httpget.addHeader("Authorization", header);
+            HttpResponse response = httpclient.execute(httpget, httpctxt);
+
+            BufferedReader fin = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
+            for (; ; ) {
+                String s = fin.readLine();
+                System.out.println("ogsreviewlog " + s);
+                if (s == null) break;
+                if (s.indexOf("Authentication credentials were not provided") >= 0) {
+                    GoJsActivity.main.showMessage("Auth. failed no credentials");
+                    return null;
+                }
+                s=s.trim();
+                if (s.length()>0) {
+                    // TODO: add the review as sgf comments ?
+                }
+            }
+            fin.close();
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     // return true iff download succeeded
     private static boolean downloadGame(String gid) {
+        downoadGameReview(gid);
         try {
             /*
             dans api/v1/games/gameid, il y a dans:
@@ -236,7 +333,7 @@ public class OGSConnection {
         Thread push = new Thread(new Runnable() {
             @Override
             public void run() {
-                // TODO: dont log every time
+                GUI.showWaitingWin();
                 if (atoken == null) {
                     System.out.println("ogs no access token, trying login...");
                     login0();
@@ -247,6 +344,7 @@ public class OGSConnection {
                     games2play = getNotifications0();
                     nextGame2play();
                 }
+                GUI.hideWaitingWin();
             }
         });
         push.start();

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
+import android.widget.TextView;
 import fr.xtof54.dragonGoApp.R;
 
 public class GUI {
@@ -44,7 +45,51 @@ public class GUI {
         }
 	}
 
-    private static class WaitDialogFragment extends DialogFragment {
+    public static class AskDialogFragment extends DialogFragment {
+        String m;
+        FunctionOK fct;
+        public AskDialogFragment() {}
+        public void setArgs(String msg, FunctionOK f) {
+            fct=f;
+            m=msg;
+        }
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            // Get the layout inflater
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+
+            // Inflate and set the layout for the dialog
+            // Pass null as the parent view because its going in the dialog layout
+            builder.setView(inflater.inflate(R.layout.error, null))
+                    // Add action buttons
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        AskDialogFragment.this.getDialog().cancel();
+                        }
+                    })
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            fct.isOK();
+                            AskDialogFragment.this.getDialog().cancel();
+                        }
+                    });
+            Dialog d = builder.create();
+//            TextView t = (TextView)GoJsActivity.main.findViewById(R.id.errormsg);
+//            t.setText(m);
+            return d;
+        }
+    }
+    public static interface FunctionOK {
+        public void isOK();
+    }
+    public static void askUser(String msg, FunctionOK f) {
+        AskDialogFragment d = new AskDialogFragment();
+        d.setArgs(msg,f);
+        d.show(GoJsActivity.main.getSupportFragmentManager(),"AskUser");
+    }
+
+    public static class WaitDialogFragment extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

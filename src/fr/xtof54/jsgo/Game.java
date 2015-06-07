@@ -503,7 +503,10 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 		saveSGFLocally();
 	}
 	void addMoveToSGF(String move) {
-		char oppColor = sgf.get(sgf.size()-2).charAt(1);
+        char oppColor;
+        if (sgf.size()<2 || sgf.get(sgf.size()-2).length()<2) {
+            oppColor='W';
+        } else oppColor = sgf.get(sgf.size()-2).charAt(1);
 		char myColor = oppColor=='W'?'B':'W';
 		sgf.add(sgf.size()-1, ";"+myColor+"["+move+"]");
 		saveSGFLocally();
