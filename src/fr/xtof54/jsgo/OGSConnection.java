@@ -203,6 +203,7 @@ public class OGSConnection {
     }
 
     public static boolean sendMove(int gameid, String move) {
+        // faut-il mettre tout ca dans un thread ?
         initHttp();
         sendMoveIsSuccess=true;
         try {
@@ -324,41 +325,36 @@ public class OGSConnection {
     }
 
     public static void login() {
-        Thread push = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                GUI.showWaitingWin();
-                if (atoken == null) {
-                    System.out.println("ogs no access token, trying login...");
-                    login0();
-                }
-                if (atoken == null) {
-                    System.out.println("ogs no access after login. Stopping");
-                } else {
-                    List<String> games2play = getNotifications0();
-                    {
-                        // add these games into the main games list
-                        List<Game> mainGameList = Game.getGames();
-                        for (String newgame:games2play) {
-                            int newgid = Integer.parseInt(newgame);
-                            boolean isAlreadyHere = false;
-                            for (Game g : mainGameList) {
-                                if (g.getGameID()==-newgid) {
-                                    isAlreadyHere=true; break;
-                                }
-                            }
-                            if (!isAlreadyHere) {
-                                Game newg = new Game(null,newgid);
-                                mainGameList.add(newg);
-                            }
+        GUI.showWaitingWin();
+        if (atoken == null) {
+            System.out.println("ogs no access token, trying login...");
+            login0();
+        }
+        if (atoken == null) {
+            System.out.println("ogs no access after login. Stopping");
+        } else {
+            List<String> games2play = getNotifications0();
+            {
+                // add these games into the main games list
+                List<Game> mainGameList = Game.getGames();
+                for (String newgame : games2play) {
+                    int newgid = Integer.parseInt(newgame);
+                    boolean isAlreadyHere = false;
+                    for (Game g : mainGameList) {
+                        if (g.getGameID() == -newgid) {
+                            isAlreadyHere = true;
+                            break;
                         }
                     }
-//                    nextGame2play();
+                    if (!isAlreadyHere) {
+                        Game newg = new Game(null, -newgid);
+                        mainGameList.add(newg);
+                    }
                 }
-                GUI.hideWaitingWin();
             }
-        });
-        push.start();
+//                    nextGame2play();
+        }
+        GUI.hideWaitingWin();
     }
 
     public static void login0() {

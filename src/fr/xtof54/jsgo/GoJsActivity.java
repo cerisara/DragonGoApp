@@ -506,23 +506,7 @@ public class GoJsActivity extends FragmentActivity {
                             @Override
                             public synchronized void reactToEvent() {
                                 em.unregisterListener(eventType.moveSentEnd, this);
-                                JSONObject o = server.o;
-                                if (o == null) {
-                                    // error: don't switch game
-                                    return;
-                                }
-                                String err;
-                                try {
-                                    err = o.getString("error");
-                                    if (err != null && err.length() > 0) {
-                                        // error: don't switch game
-                                        return;
-                                    }
-                                } catch (JSONException e) {
-                                   e.printStackTrace();
-                                }
-                                // TODO: only switch if sendMove is successful !!
-                                // switch to next game
+                                // switch to next game if sendmove successful
                                 if (!g.finishedWithThisGame()) {
                                     main.showMessage("Problem sending move");
                                 } else {

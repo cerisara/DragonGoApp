@@ -69,6 +69,11 @@ public class Game {
 		return g;
 	}
 
+    @Override
+    public String toString() {
+        return ""+getGameID();
+    }
+
 	/**
 	 * Called after a local game has been selected in the list of local games
 	 * 
@@ -301,30 +306,39 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 	}
 	
 	public static void loadStatusGames(final ServerConnection server) {
-        final EventManager em = EventManager.getEventManager();
-        if (GoJsActivity.main.getGamesFromDGS) {
-            EventManager.EventListener f = new EventManager.EventListener() {
-                @Override
-                public synchronized void reactToEvent() {
-                    JSONObject o = server.o;
-                    parseJSONStatusGames(o);
-                    // also connects now to the client server to give it time to connect correctly
-                    if (games2play.size()>0) WSclient.init(games2play.get(0).myid);
+        Thread push = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final EventManager em = EventManager.getEventManager();
+                if (GoJsActivity.main.getGamesFromDGS) {
+                    EventManager.EventListener f = new EventManager.EventListener() {
+                        @Override
+                        public synchronized void reactToEvent() {
+                            JSONObject o = server.o;
+                            parseJSONStatusGames(o);
+                            // also connects now to the client server to give it time to connect correctly
+                            if (games2play.size() > 0) WSclient.init(games2play.get(0).myid);
 
-                    System.out.println("end of loadstatusgame, unregistering listener " + games2play.size());
-                    em.unregisterListener(eventType.downloadListEnd, this);
+                            System.out.println("end of loadstatusgame, unregistering listener " + games2play.size());
+                            em.unregisterListener(eventType.downloadListEnd, this);
+                        }
+
+                        @Override
+                        public String getName() {
+                            return "loadStatusGame";
+                        }
+                    };
+                    em.registerListener(eventType.downloadListEnd, f);
+                    server.sendCmdToServer(cmdGetListOfGames, eventType.downloadListStarted, eventType.downloadListEnd);
                 }
-                @Override
-                public String getName() {return "loadStatusGame";}
-            };
-            em.registerListener(eventType.downloadListEnd, f);
-            server.sendCmdToServer(cmdGetListOfGames, eventType.downloadListStarted, eventType.downloadListEnd);
-        }
-        if (GoJsActivity.main.getGamesFromOGS) {
-            System.out.println("OGS login:");
-            OGSConnection.login();
-        }
-        em.sendEvent(eventType.downloadListGamesEnd);
+                if (GoJsActivity.main.getGamesFromOGS) {
+                    System.out.println("OGS login:");
+                    OGSConnection.login();
+                }
+                em.sendEvent(eventType.downloadListGamesEnd);
+            }
+        });
+        push.start();
 	}
 
 	public static List<Game> getGames() {return games2play;}
@@ -421,15 +435,34 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 
     // return false = isn't finished = keep the game !
 	public boolean finishedWithThisGame() {
+        System.out.println("ogsgamelist "+getGameID()+" "+games2play);
         if (getGameID()<0) {
             // OGS game: check if sendMove has succeeded !
             if (!OGSConnection.sendMoveIsSuccess) return false;
         } else {
             // DGS Game: also check
-            // TODO
+            JSONObject o = GoJsActivity.main.server.o;
+            if (o != null) {
+                String err;
+                try {
+                    err = o.getString("error");
+                    if (err != null && err.length() > 0) {
+                        // error: don't switch game
+                        return false;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-		games2play.remove(this);
-		gameShown=null;
+        // bizarre, le remove ne marche pas toujours... ?
+        ArrayList<Game> newl = new ArrayList<Game>();
+        for (int i=0;i<games2play.size();i++)
+            if (games2play.get(i).getGameID()!=getGameID())
+                newl.add(games2play.get(i));
+        games2play=newl;
+        System.out.println("ogsgamelist2 "+games2play);
+        gameShown=null;
         return true;
 	}
 
@@ -821,7 +854,10 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
                             WSclient.sendMove(getGameID(), newMoveId, finmove, getOppID());
                         } else {
                             // OGS move
-                            OGSConnection.sendMove(-gid,finmove);
+                            final EventManager em = EventManager.getEventManager();
+                            em.sendEvent(eventType.moveSentStart);
+                            OGSConnection.sendMove(-gid, finmove);
+                            em.sendEvent(eventType.moveSentEnd);
                         }
 						ConfirmDialogFragment.this.getDialog().cancel();
 					}
