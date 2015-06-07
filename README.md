@@ -1,7 +1,7 @@
 DragonGoApp
 ===========
 
-Android app to play the game of go with the Dragon Go Server.
+Android app to play the game of go with the DGS (and OGS in beta) servers.
 
 *New feature: DragonGoApp now also supports basic playing on the online-go.com (OGS) server !*
 
