@@ -3,7 +3,21 @@ DragonGoApp
 
 Android app to play the game of go with the Dragon Go Server.
 
-This is a new android app to use for DGS, with the following features:
+*New feature: DragonGoApp now also supports basic playing on the online-go.com (OGS) server !*
+
+Playing on OGS is for now very limited and is still beta code.
+So the app may crash or not behave as expected !
+For now, only two basic features are supported on OGS:
+
+* You can download the (only correspondence, you cannot play live with DragonGoApp !) games where it's your turn and send one move to the OGS server.
+* You can accept challenges that are sent to you
+* You cannot do anything else for now: no chat, no forum, you can not
+challenge, create a new game, not even resign. Please do all this on the OGS web site for now.
+* OGS uses OAuth2 for authentication: this is a bit constraining and before being able to use DragonGoApp on OGS, you must go, with a real computer browser, on your online-go.com profile and generate an application-specific password. Then, you must enter your online-go login with this password in the *Settings* menu of DragonGoApp, and click on the *OGS* button.
+
+-------------
+
+This is an android app originally developed for DGS (and now also OGS), with the following features:
 
 * Open-source: everyone can know exactly what it's doing and all of the app's internals.
 * Ad-free
