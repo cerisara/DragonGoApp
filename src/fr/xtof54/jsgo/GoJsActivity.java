@@ -519,16 +519,19 @@ public class GoJsActivity extends FragmentActivity {
                                         return;
                                     }
                                 } catch (JSONException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
+                                   e.printStackTrace();
                                 }
+                                // TODO: only switch if sendMove is successful !!
                                 // switch to next game
-                                g.finishedWithThisGame();
-                                if (Game.getGames().size() == 0) {
-                                    showMessage("No more games locally");
-                                    changeState(guistate.nogame);
-                                } else
-                                    downloadAndShowGame();
+                                if (!g.finishedWithThisGame()) {
+                                    main.showMessage("Problem sending move");
+                                } else {
+                                    if (Game.getGames().size() == 0) {
+                                        showMessage("No more games locally");
+                                        changeState(guistate.nogame);
+                                    } else
+                                        downloadAndShowGame();
+                                }
                             }
                         };
                         em.registerListener(eventType.moveSentEnd, f);
@@ -648,24 +651,32 @@ public class GoJsActivity extends FragmentActivity {
 				showMessage("No game to show");
 				return;
 			} else {
-
 				curgidx2play=0;
 			}
 		}
-		System.out.println("showing game "+curgidx2play);
+        final Game g = Game.getGames().get(curgidx2play);
+		System.out.println("showing game "+curgidx2play+" "+g.getGameID());
 
-		final Game g = Game.getGames().get(curgidx2play);
-		final EventManager em = EventManager.getEventManager();
-		em.registerListener(eventType.GameOK, new EventManager.EventListener() {
-			@Override
-			public String getName() {return "downloadAndShowGame";}
-			@Override
-			public synchronized void reactToEvent() {
-				em.unregisterListener(eventType.GameOK, this);
-				showGame(g);
-			}
-		});
-		g.downloadGame(server);
+        if (g.getGameID()>=0) {
+            // DGS game
+            final EventManager em = EventManager.getEventManager();
+            em.registerListener(eventType.GameOK, new EventManager.EventListener() {
+                @Override
+                public String getName() {
+                    return "downloadAndShowGame";
+                }
+
+                @Override
+                public synchronized void reactToEvent() {
+                    em.unregisterListener(eventType.GameOK, this);
+                    showGame(g);
+                }
+            });
+            g.downloadGame(server);
+        } else {
+            // OGS game
+            OGSConnection.nextGame2play(g);
+        }
 	}
 
 	// warning; this requires API 5 (> v2.0)
@@ -1290,7 +1301,7 @@ public class GoJsActivity extends FragmentActivity {
                                 showMessage("OGS Credentials saved");
 
                                 // immediately try to login
-                                OGSConnection.login();
+                                // OGSConnection.login();
                             }
                         });
 
@@ -1302,26 +1313,21 @@ public class GoJsActivity extends FragmentActivity {
 	}
 
     // TODO: fix to play first all DGS games, and then all OGS games
-	private void skipGame() {
-        if (Game.gameShown!=null) {
-            if (Game.gameShown.getGameID() >= 0) {
-                // DGS game
-                if (Game.getGames().size() <= 1) {
-                    // go to OGS games
-                    showMessage("No more games downloaded; retry GetGames ?");
-                    changeState(guistate.nogame);
-                    return;
-                }
-                if (++curgidx2play >= Game.getGames().size()) curgidx2play = 0;
-                downloadAndShowGame();
-            } else {
-                // OGS game
-                // OGS games are played last
-                OGSConnection.nextGame2play();
+    private void skipGame() {
+        if (Game.gameShown != null) {
+            // consider the same way both DGS and OGS games
+            if (Game.getGames().size() <= 1) {
+                // go to OGS games
+                showMessage("No more games downloaded; retry GetGames ?");
+                changeState(guistate.nogame);
+                return;
             }
+            if (++curgidx2play >= Game.getGames().size()) curgidx2play = 0;
+            downloadAndShowGame();
         }
-	}
-	// TODO: move this method into Game !
+    }
+
+    // TODO: move this method into Game !
 	private void resignGame() {
 		Game.gameShown.addResignToSGF();
 		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+Game.gameShown.moveid;

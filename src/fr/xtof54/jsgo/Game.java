@@ -61,7 +61,7 @@ public class Game {
 
 	public CharSequence getMessage() {return msg;}
 	public void setMessage(CharSequence m) {msg=m;}
-	
+
 	public static Game createDebugGame() {
 		Game g = new Game(null, 1);
 		games2play.add(g);
@@ -301,8 +301,8 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 	}
 	
 	public static void loadStatusGames(final ServerConnection server) {
+        final EventManager em = EventManager.getEventManager();
         if (GoJsActivity.main.getGamesFromDGS) {
-            final EventManager em = EventManager.getEventManager();
             EventManager.EventListener f = new EventManager.EventListener() {
                 @Override
                 public synchronized void reactToEvent() {
@@ -311,9 +311,8 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
                     // also connects now to the client server to give it time to connect correctly
                     if (games2play.size()>0) WSclient.init(games2play.get(0).myid);
 
-                    System.out.println("end of loadstatusgame, unregistering listener "+games2play.size());
+                    System.out.println("end of loadstatusgame, unregistering listener " + games2play.size());
                     em.unregisterListener(eventType.downloadListEnd, this);
-                    em.sendEvent(eventType.downloadListGamesEnd);
                 }
                 @Override
                 public String getName() {return "loadStatusGame";}
@@ -322,11 +321,10 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
             server.sendCmdToServer(cmdGetListOfGames, eventType.downloadListStarted, eventType.downloadListEnd);
         }
         if (GoJsActivity.main.getGamesFromOGS) {
-            // TODO: disable the game button while downloading is not done
             System.out.println("OGS login:");
-            // TODO: this will be made after the waiting window has closed: do it before without events !
             OGSConnection.login();
         }
+        em.sendEvent(eventType.downloadListGamesEnd);
 	}
 
 	public static List<Game> getGames() {return games2play;}
@@ -421,9 +419,18 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 		}
 	}
 
-	public void finishedWithThisGame() {
+    // return false = isn't finished = keep the game !
+	public boolean finishedWithThisGame() {
+        if (getGameID()<0) {
+            // OGS game: check if sendMove has succeeded !
+            if (!OGSConnection.sendMoveIsSuccess) return false;
+        } else {
+            // DGS Game: also check
+            // TODO
+        }
 		games2play.remove(this);
 		gameShown=null;
+        return true;
 	}
 
 	public boolean isInScoring() {

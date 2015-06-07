@@ -32,7 +32,7 @@ public class OGSConnection {
     static String atoken=null, rtoken=null;
     static HttpContext httpctxt = new BasicHttpContext();
     static HttpClient httpclient = null;
-    static List<String> games2play;
+    static boolean sendMoveIsSuccess=true;
 
     // to be run on a separate thread
     public static String getWithHttpGet(String cmd) {
@@ -189,16 +189,11 @@ public class OGSConnection {
         // TODO: try and download ONLY the last opponent move
     }
 
-    public static boolean nextGame2play() {
-        if (games2play==null||games2play.size()==0) {
-            GoJsActivity.main.showMessage("no more OGS game to play");
-            GoJsActivity.main.changeState(GoJsActivity.guistate.nogame);
-            return false;
-        }
+    public static boolean nextGame2play(Game g) {
         initHttp();
-        String gid = games2play.get(0);
+        int i=-g.getGameID();
+        String gid = ""+i;
         if (downloadGame(gid)) {
-            games2play.remove(0);
             return true;
         } else {
             GoJsActivity.main.showMessage("Error downloading OGS game");
@@ -209,7 +204,7 @@ public class OGSConnection {
 
     public static boolean sendMove(int gameid, String move) {
         initHttp();
-        boolean sendMoveOK=true;
+        sendMoveIsSuccess=true;
         try {
             final String cmd = "https://online-go.com/api/v1/games/"+gameid+"/move/";
             HttpPost httppost = new HttpPost(cmd);
@@ -230,15 +225,14 @@ public class OGSConnection {
                 String s = fin.readLine();
                 if (s == null) break;
                 System.out.println("ogssendmovelog " + s);
-                if (s.indexOf("error")>=0) sendMoveOK=false;
+                if (s.indexOf("error")>=0) sendMoveIsSuccess=false;
             }
             fin.close();
-            if (sendMoveOK) nextGame2play();
         } catch (Exception e) {
             e.printStackTrace();
-            sendMoveOK=false;
+            sendMoveIsSuccess=false;
         }
-        return sendMoveOK;
+        return sendMoveIsSuccess;
     }
 
     private static String downoadGameReview(String gameid) {
@@ -341,8 +335,25 @@ public class OGSConnection {
                 if (atoken == null) {
                     System.out.println("ogs no access after login. Stopping");
                 } else {
-                    games2play = getNotifications0();
-                    nextGame2play();
+                    List<String> games2play = getNotifications0();
+                    {
+                        // add these games into the main games list
+                        List<Game> mainGameList = Game.getGames();
+                        for (String newgame:games2play) {
+                            int newgid = Integer.parseInt(newgame);
+                            boolean isAlreadyHere = false;
+                            for (Game g : mainGameList) {
+                                if (g.getGameID()==-newgid) {
+                                    isAlreadyHere=true; break;
+                                }
+                            }
+                            if (!isAlreadyHere) {
+                                Game newg = new Game(null,newgid);
+                                mainGameList.add(newg);
+                            }
+                        }
+                    }
+//                    nextGame2play();
                 }
                 GUI.hideWaitingWin();
             }
