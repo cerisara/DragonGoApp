@@ -1,6 +1,8 @@
 package fr.xtof54.jsgo;
 
 import android.util.Log;
+import io.socket.IOAcknowledge;
+import io.socket.SocketIO;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -21,6 +23,8 @@ import org.apache.http.protocol.HttpContext;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -388,7 +392,7 @@ public class OGSConnection {
         String OGSCLIENTSECRET = PrefUtils.getFromPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTSECRET, null);
         if (OGSCLIENTSECRET==null) {
             OGSCLIENTSECRET = getClientSecretFromPrivateConfigfile();
-            System.out.println("ogs found secret "+OGSCLIENTID);
+            System.out.println("ogs found secret " + OGSCLIENTID);
             if (OGSCLIENTID==null) {
                 GoJsActivity.main.showMessage("You cannot connect to OGS with the app coming from F-Droid ! Please rather install: http://talc1.loria.fr/users/cerisara/DragonGoApp.apk");
                 return false;
@@ -454,6 +458,10 @@ public class OGSConnection {
                                     j = s.indexOf('"', i);
                                     rtoken = s.substring(i, j);
                                 } else rtoken=null;
+
+                                // debug
+                                testchat();
+
                                 return true;
                             }
                         }
@@ -465,5 +473,24 @@ public class OGSConnection {
             }
         }
         return false;
+    }
+
+    static void testchat() {
+        try {
+            System.out.println("ogs starting socketio");
+            SocketIO s = new SocketIO();
+            s.connect("https://ggs.online-go.com/", null);
+            System.out.println("ogs after connect");
+            String parms = "{game_id: 123, player_id: 1, chat: true}";
+            s.emit("game/connect", new IOAcknowledge() {
+                @Override
+                public void ack(Object... objects) {
+                    System.out.println("ogs in ack "+objects);
+                }
+            },parms);
+            System.out.println("ogs connect done");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

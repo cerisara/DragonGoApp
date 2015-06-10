@@ -40,7 +40,7 @@ public class WSclient {
 	private static WSclient wsclient = null;
 	private static int uid = -1;
 	
-	public static void init(int userid) {
+	public static void nit(int userid) {
 		uid=userid;
 		if (wsclient==null) wsclient=new WSclient(userid);
 	}

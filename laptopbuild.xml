@@ -736,6 +736,7 @@
                 <path refid="project.all.jars.path" />
                 <path refid="tested.project.classpath" />
                 <path path="${java.compiler.classpath}" />
+                <path path="libs/socketio.jar" />
             </path>
             <javac encoding="${java.encoding}"
                     source="${java.source}" target="${java.target}"
