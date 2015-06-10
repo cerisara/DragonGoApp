@@ -945,11 +945,11 @@ public class GoJsActivity extends FragmentActivity {
 		// initialize guistate
 		changeState(guistate.nogame);
 
-        {
-            // initialize pushserver
-            int valInConfig = PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,1);
-            WSclient.setConnect(valInConfig==1?true:false);
-        }
+//        {
+//            // initialize pushserver
+//            int valInConfig = PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,1);
+//            WSclient.setConnect(valInConfig==1?true:false);
+//        }
         {
             // initialize active Go servers
             int valInConfig = PrefUtils.getFromPrefs(getApplicationContext(),PrefUtils.PREFS_DGSON,1);
@@ -1660,7 +1660,7 @@ public class GoJsActivity extends FragmentActivity {
                     @Override
                     public void onClick(View vv) {
                         boolean curval = connectClientServer.isChecked();
-                        WSclient.setConnect(curval);
+//                        WSclient.setConnect(curval);
                         int curvali = curval?1:0;
                         PrefUtils.saveToPrefs(getApplicationContext(),PrefUtils.PREFS_PUSHSERVER,curvali);
                     }

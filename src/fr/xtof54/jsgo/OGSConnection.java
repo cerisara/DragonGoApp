@@ -2,7 +2,9 @@ package fr.xtof54.jsgo;
 
 import android.util.Log;
 import io.socket.IOAcknowledge;
+import io.socket.IOCallback;
 import io.socket.SocketIO;
+import io.socket.SocketIOException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -10,6 +12,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
@@ -19,10 +22,12 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.CookieManager;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
@@ -37,6 +42,7 @@ public class OGSConnection {
     static HttpContext httpctxt = new BasicHttpContext();
     static HttpClient httpclient = null;
     static boolean sendMoveIsSuccess=true;
+    static BasicCookieStore mycookiestore = new BasicCookieStore();
 
     // to be run on a separate thread
     public static String getClientIDFromPrivateConfigfile() {
@@ -336,6 +342,9 @@ public class OGSConnection {
             GoJsActivity.main.changeState(GoJsActivity.guistate.play);
             GoJsActivity.main.showMessage("OGS game: your turn !");
             GoJsActivity.main.showGame(g);
+
+            testchat();
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -412,7 +421,7 @@ public class OGSConnection {
                 System.out.println("OGSuser " + user);
                 System.out.println("OGSpwd " + pwd);
                 System.out.println("login to OGS server");
-                httpctxt.setAttribute(ClientContext.COOKIE_STORE, new BasicCookieStore());
+                httpctxt.setAttribute(ClientContext.COOKIE_STORE, mycookiestore);
                 initHttp();
                 try {
                     String cmd = "https://online-go.com/oauth2/access_token";
@@ -434,9 +443,6 @@ public class OGSConnection {
                     for (; ; ) {
                         String s = fin.readLine();
                         if (s == null) break;
-                        /*
-                        {"access_token": "56e18706ffeaee8424e8a10dd6885d5cee1beb79", "scope": "read", "expires_in": 31535999, "refresh_token": "6e2863f2619a2e1bed773ba0a93b737724969eff"}
-                         */
                         System.out.println("ogslog " + s);
                         s = s.trim();
                         if (s.indexOf("error") >= 0) {
@@ -458,10 +464,6 @@ public class OGSConnection {
                                     j = s.indexOf('"', i);
                                     rtoken = s.substring(i, j);
                                 } else rtoken=null;
-
-                                // debug
-                                testchat();
-
                                 return true;
                             }
                         }
@@ -479,7 +481,41 @@ public class OGSConnection {
         try {
             System.out.println("ogs starting socketio");
             SocketIO s = new SocketIO();
-            s.connect("https://ggs.online-go.com/", null);
+            List<Cookie> cookies = mycookiestore.getCookies();
+            System.out.println("ogs found ncookies "+cookies.size());
+            for (Cookie c : cookies)
+                s.addHeader("Cookie",c.getValue());
+            s.connect("https://ggs.online-go.com/", new IOCallback() {
+                @Override
+                public void onDisconnect() {
+                    System.out.println("ogs callback disconnect");
+                }
+
+                @Override
+                public void onConnect() {
+                    System.out.println("ogs callback connect");
+                }
+
+                @Override
+                public void onMessage(String s, IOAcknowledge ioAcknowledge) {
+                    System.out.println("ogs callback message "+s);
+                }
+
+                @Override
+                public void onMessage(JSONObject jsonObject, IOAcknowledge ioAcknowledge) {
+                    System.out.println("ogs callback json message ");
+                }
+
+                @Override
+                public void on(String s, IOAcknowledge ioAcknowledge, Object... objects) {
+                    System.out.println("ogs callback on "+s);
+                }
+
+                @Override
+                public void onError(SocketIOException e) {
+                    System.out.println("ogs callback error "+e.toString());
+                }
+            });
             System.out.println("ogs after connect");
             String parms = "{game_id: 123, player_id: 1, chat: true}";
             s.emit("game/connect", new IOAcknowledge() {

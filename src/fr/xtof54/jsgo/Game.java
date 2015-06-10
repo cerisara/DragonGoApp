@@ -318,7 +318,7 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 							JSONObject o = server.o;
 							parseJSONStatusGames(o);
 							// also connects now to the client server to give it time to connect correctly
-							if (games2play.size() > 0) WSclient.init(games2play.get(0).myid);
+//							if (games2play.size() > 0) WSclient.init(games2play.get(0).myid);
 
 							System.out.println("end of loadstatusgame, unregistering listener " + games2play.size());
 							em.unregisterListener(eventType.downloadListEnd, this);
@@ -853,7 +853,7 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
                             // this first command sends the move to the DGS server
                             server.sendCmdToServer(cmd, eventType.moveSentStart, eventType.moveSentEnd);
                             // this second command sends the move to the push server for real-time playing
-                            WSclient.sendMove(getGameID(), newMoveId, finmove, getOppID());
+//                            WSclient.sendMove(getGameID(), newMoveId, finmove, getOppID());
                         } else {
                             // OGS move
                             final EventManager em = EventManager.getEventManager();
