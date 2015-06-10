@@ -17,9 +17,9 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -35,28 +35,43 @@ public class OGSConnection {
     static boolean sendMoveIsSuccess=true;
 
     // to be run on a separate thread
-    public static String getWithHttpGet(String cmd) {
-        System.out.println("login to OGS server");
-        initHttp();
+    public static String getClientIDFromPrivateConfigfile() {
         String res=null;
         try {
-            HttpGet httpget = new HttpGet(cmd);
-            HttpResponse response = httpclient.execute(httpget);
-            BufferedReader fin = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
-            for (; ; ) {
-                String s = fin.readLine();
-                if (s == null) break;
-                System.out.println("talc1log " + s);
-                s = s.trim();
-                int i=s.indexOf("detinfo=");
-                if (i >= 0) {
-                    res=s.substring(i+8);
+            ClassLoader cl = ((Object)GoJsActivity.main).getClass().getClassLoader();
+            InputStream is = cl.getResourceAsStream("assets/privateconfig.txt");
+            BufferedReader b = new BufferedReader(new InputStreamReader(is));
+            for (;;) {
+                String s=b.readLine();
+                if (s==null) break;
+                if (s.startsWith("CLIENTID=")) {
+                    res=s.substring(9);
                     break;
                 }
             }
-            fin.close();
+            is.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
+        }
+        return res;
+    }
+    public static String getClientSecretFromPrivateConfigfile() {
+        String res=null;
+        try {
+            ClassLoader cl = ((Object)GoJsActivity.main).getClass().getClassLoader();
+            InputStream is = cl.getResourceAsStream("assets/privateconfig.txt");
+            BufferedReader b = new BufferedReader(new InputStreamReader(is));
+            for (;;) {
+                String s=b.readLine();
+                if (s==null) break;
+                if (s.startsWith("CLIENTSECRET=")) {
+                    res=s.substring(13);
+                    break;
+                }
+            }
+            is.close();
+        } catch (Exception e) {
+            return null;
         }
         return res;
     }
@@ -357,24 +372,28 @@ public class OGSConnection {
         GUI.hideWaitingWin();
     }
 
-    public static void login0() {
+    public static boolean login0() {
+        System.out.println("login0");
         String OGSCLIENTID = PrefUtils.getFromPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTID, null);
         if (OGSCLIENTID==null) {
-            OGSCLIENTID = getWithHttpGet("http://talc1.loria.fr/users/cerisara/ogsooid.txt");
-            PrefUtils.saveToPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTID, OGSCLIENTID);
+            OGSCLIENTID = getClientIDFromPrivateConfigfile();
+            System.out.println("ogs found client "+OGSCLIENTID);
+            if (OGSCLIENTID==null) {
+                GoJsActivity.main.showMessage("You cannot connect to OGS with the app coming from F-Droid ! Please rather install: http://talc1.loria.fr/users/cerisara/DragonGoApp.apk");
+                return false;
+            } else
+                PrefUtils.saveToPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTID, OGSCLIENTID);
         }
-        if (OGSCLIENTID==null) {
-            GoJsActivity.main.showMessage("Error connections A1");
-            return;
-        }
+
         String OGSCLIENTSECRET = PrefUtils.getFromPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTSECRET, null);
         if (OGSCLIENTSECRET==null) {
-            OGSCLIENTSECRET = getWithHttpGet("http://talc1.loria.fr/users/cerisara/ogsoose.txt");
-            PrefUtils.saveToPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTSECRET, OGSCLIENTSECRET);
-        }
-        if (OGSCLIENTSECRET==null) {
-            GoJsActivity.main.showMessage("Error connections A2");
-            return;
+            OGSCLIENTSECRET = getClientSecretFromPrivateConfigfile();
+            System.out.println("ogs found secret "+OGSCLIENTID);
+            if (OGSCLIENTID==null) {
+                GoJsActivity.main.showMessage("You cannot connect to OGS with the app coming from F-Droid ! Please rather install: http://talc1.loria.fr/users/cerisara/DragonGoApp.apk");
+                return false;
+            } else
+                PrefUtils.saveToPrefs(GoJsActivity.main.getApplicationContext(), PrefUtils.PREFS_LOGIN_OGS_CLIENTSECRET, OGSCLIENTSECRET);
         }
 
         final String pwd = PrefUtils.getFromPrefs(GoJsActivity.main.getApplicationContext(),PrefUtils.PREFS_LOGIN_OGS_PASSWD,null);
@@ -435,6 +454,7 @@ public class OGSConnection {
                                     j = s.indexOf('"', i);
                                     rtoken = s.substring(i, j);
                                 } else rtoken=null;
+                                return true;
                             }
                         }
                     }
@@ -444,5 +464,6 @@ public class OGSConnection {
                 }
             }
         }
+        return false;
     }
 }

@@ -1131,7 +1131,7 @@ public class GoJsActivity extends FragmentActivity {
 	}
 
 	private void downloadListOfGames() {
-		if (!initServer()) return;
+		if (getGamesFromDGS&&!initServer()) return;
 		final EventManager em = EventManager.getEventManager();
 		EventManager.EventListener l = new EventManager.EventListener() {
 			@Override
