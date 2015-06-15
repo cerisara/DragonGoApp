@@ -1,11 +1,11 @@
 DragonGoApp
 ===========
 
-Android app to play the game of go with the DGS (and OGS in beta) servers.
+Android app to play the game of go with the DGS (and OGS) servers.
 
 ---------------------
 
-*New feature: DragonGoApp now also supports basic playing on the online-go.com (OGS) server !*
+*This is a new feature: DragonGoApp now also supports basic playing on the online-go.com (OGS) server !*
 
 Playing on OGS is for now very limited and is still beta code.
 So the app may crash or not behave as expected !
@@ -15,16 +15,33 @@ For now, only two basic features are supported on OGS:
 * You can accept challenges that are sent to you
 * You cannot do anything else for now: no chat, no forum, you can not
 challenge, create a new game, not even resign. Please do all this on the OGS web site for now.
-* OGS uses OAuth2 for authentication: this is a bit constraining and before being able to use DragonGoApp on OGS, you must go, with a real computer browser, on your online-go.com profile and generate an application-specific password. Then, you must enter your online-go login with this password in the *Settings* menu of DragonGoApp, and click on the *OGS* button.
+* Both games from DGS and OGS are handled and stored the same way internally: only the "get-games" and "send-moves"
+connections are speficic to each server.
 
 ### Quick OGS-startup
 
-* If you want to play on OGS, you have to download and install the app from http://talc1.loria.fr/users/cerisara/DragonGoApp.apk. Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !
-* DragonGoApp can download games from both DGS and OGS, so you may enter both credentials (one at a time) for DGS and OGS in the Settings menu, using for instance the first time the button DGS, and the second time the button OGS.
+* OGS uses OAuth2 for authentication: before doing anything with the android app, you must first go, with a real computer browser, on your online-go.com profile and generate an application-specific password.
+* If you want to play on OGS, you have to download and install the android app from http://talc1.loria.fr/users/cerisara/DragonGoApp.apk. (Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !)
+* Launch the app for the first time, and wait for about two minutes for the app to configure its local storage on your phone.
+* Then, click on the settings menu of your phone, and choose the "Settings" sub-menu:
+a window appears with a field for the user name and another field to enter the password.
+Writes in these fields your OGS login and the application-specific password that you have generated before.
+Then, press the "OGS" button to let the app know that these credentials shall be used with the OGS server.
 * You then want to select to which servers DragonGoApp shall try to connect, using the DGS and OGS check-boxes on the
-"advanced" options (press the button "..." on the top right of the main window to reach the advanced options).
-For example, if you just want to play with OGS, you must check the "OGS" checkbox and uncheck the "DGS" checkbox;
+"advanced" options:
+Press the button "..." on the top right of the main window to reach the advanced options, scroll down until you see
+the OGS and DGS checkboxes.
+If you just want to play with OGS, you must check the "OGS" checkbox and uncheck the "DGS" checkbox;
 otherwise, the app will stop at connection time because it can not connect to DGS, and you won't even see your OGS games.
+* You can then return to the main screen, and just press the top-left "Games" button: the app will download the games
+where it's your turn to play, and show you the first game. You can try various moves: use the "Reset" button to come back
+to the initial position where you have to move. When you're ready, press "Reset", play one move, and press the "Send" button.
+A confirmation window will pop-up. Press OK, the move is sent, and the app will automatically switch to the next game,
+or just shows a message saying that you don't any more games to play.
+* Later on, when you want to play again, just press the "Games" button to try and download your last opponents moves.
+
+Note that there is much more features in DragonGoApp, but this is just a quickstart guide and you're welcome to try all
+other features at your pace...
 
 -------------
 
