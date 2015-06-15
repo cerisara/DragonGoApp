@@ -19,7 +19,7 @@ challenge, create a new game, not even resign. Please do all this on the OGS web
 
 ### Quick OGS-startup
 
-* If you want to play on OGS, you have to download and install the app from (here | http://talc1.loria.fr/users/cerisara/DragonGoApp.apk). Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !
+* If you want to play on OGS, you have to download and install the app from http://talc1.loria.fr/users/cerisara/DragonGoApp.apk. Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !
 * DragonGoApp can download games from both DGS and OGS, so you may enter both credentials (one at a time) for DGS and OGS in the Settings menu, using for instance the first time the button DGS, and the second time the button OGS.
 * You then want to select to which servers DragonGoApp shall try to connect, using the DGS and OGS check-boxes on the
 "advanced" options (press the button "..." on the top right of the main window to reach the advanced options).
