@@ -16,7 +16,7 @@ For now, only two basic features are supported on OGS:
 * You cannot do anything else for now: no chat, no forum, you can not
 challenge, create a new game, not even resign. Please do all this on the OGS web site for now.
 * Both games from DGS and OGS are handled and stored the same way internally: only the "get-games" and "send-moves"
-connections are speficic to each server.
+connections are specific to each server.
 
 ### Quick OGS-startup
 
@@ -44,6 +44,8 @@ Note that there is much more features in DragonGoApp, but this is just a quickst
 other features at your pace...
 
 -------------
+
+### Main user guide
 
 This is an android app originally developed for DGS (and now also OGS), with the following features:
 
