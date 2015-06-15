@@ -3,6 +3,8 @@ DragonGoApp
 
 Android app to play the game of go with the DGS (and OGS in beta) servers.
 
+---------------------
+
 *New feature: DragonGoApp now also supports basic playing on the online-go.com (OGS) server !*
 
 Playing on OGS is for now very limited and is still beta code.
@@ -14,6 +16,15 @@ For now, only two basic features are supported on OGS:
 * You cannot do anything else for now: no chat, no forum, you can not
 challenge, create a new game, not even resign. Please do all this on the OGS web site for now.
 * OGS uses OAuth2 for authentication: this is a bit constraining and before being able to use DragonGoApp on OGS, you must go, with a real computer browser, on your online-go.com profile and generate an application-specific password. Then, you must enter your online-go login with this password in the *Settings* menu of DragonGoApp, and click on the *OGS* button.
+
+### Quick OGS-startup
+
+* If you want to play on OGS, you have to download and install the app from (here | http://talc1.loria.fr/users/cerisara/DragonGoApp.apk). Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !
+* DragonGoApp can download games from both DGS and OGS, so you may enter both credentials (one at a time) for DGS and OGS in the Settings menu, using for instance the first time the button DGS, and the second time the button OGS.
+* You then want to select to which servers DragonGoApp shall try to connect, using the DGS and OGS check-boxes on the
+"advanced" options (press the button "..." on the top right of the main window to reach the advanced options).
+For example, if you just want to play with OGS, you must check the "OGS" checkbox and uncheck the "DGS" checkbox;
+otherwise, the app will stop at connection time because it can not connect to DGS, and you won't even see your OGS games.
 
 -------------
 
