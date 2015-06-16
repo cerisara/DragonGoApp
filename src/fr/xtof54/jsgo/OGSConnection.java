@@ -38,6 +38,7 @@ public class OGSConnection {
     static HttpClient httpclient = null;
     static boolean sendMoveIsSuccess = true;
     static BasicCookieStore mycookiestore = new BasicCookieStore();
+    private static int playerid=-1;
 
     // to be run on a separate thread
     public static String getClientIDFromPrivateConfigfile() {
@@ -195,7 +196,25 @@ public class OGSConnection {
                     }
                     String gameid = s.substring(i, j);
                     newgames2play.add(gameid);
-                    System.out.println("ogs notifications found gameid " + gameid);
+                    System.out.println("ogs notifications found gameid "+gameid);
+                    {
+                        // also get at the same time the player_id
+                        int k=s.lastIndexOf("player_id",i);
+                        if (k>=0) {
+                            j=s.indexOf(':',k);
+                            if (j>=0) {
+                                i=s.indexOf(',',j);
+                                if (i>=0) {
+                                    try {
+                                        k = Integer.parseInt(s.substring(j + 1, i).trim());
+                                        playerid=k;
+                                    } catch (Exception  e) {
+                                        System.out.println("ogs WARNING: error parsing playerid "+s);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             fin.close();
@@ -296,7 +315,7 @@ public class OGSConnection {
 
     // return true iff download succeeded
     private static boolean downloadGame(String gid) {
-        downoadGameReview(gid);
+        // downoadGameReview(gid);
         try {
             /*
             dans api/v1/games/gameid, il y a dans:
@@ -341,7 +360,6 @@ public class OGSConnection {
 
             // get chat data
             connectChat(gamid);
-
             return true;
         } catch (Exception e) {
             e.printStackTrace();
