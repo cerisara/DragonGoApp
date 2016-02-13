@@ -26,7 +26,7 @@
       <h1 class="project-name">DragonGoApp</h1>
       <h2 class="project-tagline">Android app to play the game of go with the DGS and OGS servers</h2>
       <a href="https://github.com/cerisara/DragonGoApp" class="btn">View on GitHub</a>
-      <a href="https://talc1.loria.fr/users/cerisara/DragonGoApp.apk" class="btn">Download .apk</a>
+      <a href="http://talc1.loria.fr/users/cerisara/DragonGoApp.apk" class="btn">Download .apk</a>
     </section>
 
     <section class="main-content">
@@ -51,12 +51,13 @@ and
 
 <br>
 
+<p>
 Playing by correspondence is very nice for busy people, because you can play just one move whenever you have 5 minutes free time, anytime.
 Also, in most cases you play several games simultaneously (up to a dozen for me), which always let you with some goban to handle
 whenever you wish to. If you like go, I strongly encourage you to try correspondence games on any of the two servers above !
+</p>
 
-<br>
-
+<p>
 Because you typically play correspondence games on the go (at lunch time, in the bus...), mobile applications are ideal tools to
 get you entertained all day long.
 DragonGoApp is one such application for your android smartphone.
@@ -64,25 +65,32 @@ It is also the only android app I know of that seamlessly supports both DGS and 
 that there is absolutely no annoying ad, tracking, limited features, paying premium...).
 Furtermore, it is completely safe (the source code is public and the apk is certified by F-Droid) and it minimizes bandwidth usage,
 hence saving your mobile data plan.
+</p>
 
 <h3>Important limitation</h3>
+<p>
 As explained before, DragonGoApp is designed to continue playing the same games everyday during several weeks,
 because it is the most important feature for playing correspondence games on the go.
 But it does not (or badly) support neither initializing a new game, nor terminating a game, because both these operations
 occur only very rarely in correspondence games, and may involve complex server-dependent interactions with the server.
-<br>
-So, before using DragonGoApp to play, first start/initialize your games on a real computer that is connected to either DGS or OGS.
-<br>
+</p>
+<p>
+So, before using DragonGoApp to play, first start/initialize one or a few games on a real computer that is connected to either DGS or OGS.
+You can of course also play moves on your computer or anywhere, and the next time you run DragonGoApp, it will automatically
+update the games on your mobile.
+</p>
+<p>
 Similarly, when you reach the end of a game and want to pass, quit the app and pass and finalize your game on a real computer as well.
+</p>
 
 <h3>Overview of how to play with DragonGoApp</h3>
 
 <ul>
 <li>Once the apk is installed, setup your DGS and/or OGS login and password in DragonGoApp
 <li>Whenever you have some time to play a move, just launch DragonGoApp and press "GetGames"
-<li>The new games where it's your turn to play are then downloaded from DGS and/or OGS and shown on the goban one after the other
+<li>Your games are then downloaded from DGS and/or OGS and shown on the goban one after the other
 <li>You can then explore variations on the goban, and when you're decided, place your stone and send your move to the server.
-Alternatively, you can skip the current game and show the next game.
+Alternatively, you can skip the current game and show the next one.
 </ul>
 
 
@@ -91,7 +99,9 @@ Alternatively, you can skip the current game and show the next game.
 
 <ul>
 <li>OGS uses OAuth2 for authentication: before doing anything with the android app, you must first go, with a real computer browser, on your online-go.com profile and generate an application-specific password.</li>
-<li>If you want to play on OGS, you have to download and install the android app from <a href="http://talc1.loria.fr/users/cerisara/DragonGoApp.apk">http://talc1.loria.fr/users/cerisara/DragonGoApp.apk</a>. (Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !)</li>
+<li>If you want to play on OGS, you have to download and install the android app 
+with the "download apk" button at the top of this page
+(Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !)</li>
 <li>Launch the app for the first time, and wait for about two minutes for the app to configure its local storage on your phone.</li>
 <li>Then, click on the settings menu of your phone, and choose the "Settings" sub-menu:
 a window appears with a field for the user name and another field to enter the password.
@@ -111,13 +121,35 @@ or just shows a message saying that you don't any more games to play.</li>
 <li>Later on, when you want to play again, just press the "Games" button to try and download your last opponents moves.</li>
 </ul>
 
+<h2>
+<a id="how-to-start-playing" class="anchor" href="#how-to-start-playing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick-start DGS</h2>
+
+<p>Before playing, you must enter your DGS login and password via the "menu/settings" dialog. The app supports two user logins for DGS, and when you
+use the "menu/settings" to enter credentials, these credentials are stored for the currently selected user. By default, it's the first
+user. Changing to the second user can be done by selecting the "devLogin" in the list of commands trigerred by the fifth rightmost button.
+You can also select here the "devDGS" (development DGS) server, but you probably shouldn't care about it.</p>
+
+<ul>
+<li>Press <em>Games</em> to download the games where it's your turn to play</li>
+<li>Click on the board where you wanna play</li>
+<li>Press <em>Sent</em> . the next game to move will be shown automatically.</li>
+</ul>
+
+<p>Note that the app is pretty good for playing games, but not very good for counting game score (when you arrive at this stage, the app
+just shows the DGS page of the game) or finding an opponent. 
+Although you can challenge opponents from within the app in 19x19 and 9x9 DGS ladders, 
+I recommend to do it from the web site.</p>
+
+<hr>
+
+<p>Both games from DGS and OGS are handled and stored the same way internally: only the "get-games" and "send-moves"
+connections are specific to each server.
+</p>
+
 <p>Note that there is much more features in DragonGoApp, but this is just a quickstart guide and you're welcome to try all
 other features at your pace...</p>
 
 <hr>
-
-Both games from DGS and OGS are handled and stored the same way internally: only the "get-games" and "send-moves"
-connections are specific to each server.</li>
 
 
 <h3>
@@ -137,17 +169,13 @@ connections are specific to each server.</li>
 <li>Read the DGS Forums: by default, only the new/unread messages will be shown, but you can switch to read all messages by pressing menu-settings while in the forums view.</li>
 </ul>
 
-<p>You can install the latest release from <a href="https://f-droid.org/repository/browse/?fdfilter=dragongoapp&amp;fdid=fr.xtof54.dragonGoApp">F-droid</a></p>
-
-<p>Limitations:</p>
-
-<ul>
-<li>Ending game (territory agreement, scoring) is supported by displaying the DGS website, for now.</li>
-<li>When inviting or accepting a game, you cannot change the game settings (handicap...) for now</li>
-</ul>
+<p>You can install the latest release from <a href="https://f-droid.org/repository/browse/?fdfilter=dragongoapp&amp;fdid=fr.xtof54.dragonGoApp">F-droid</a>
+Note that the F-droid apk can only play with the DGS server, because of security constraints on OGS.
+So if you want to play on OGS, prefer the "download apk" button at the top of this page.
+</p>
 
 <h1>
-<a id="quick-start" class="anchor" href="#quick-start" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick-start</h1>
+<a id="quick-start" class="anchor" href="#quick-start" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Description</h1>
 
 <p>When run for the first time, a "loading" window appears for a few seconds: it's actually not downloading anything at this stage,
 but it's just uncompressing the eidogo javascript library onto the SD-card. This is only done once.</p>
@@ -204,28 +232,8 @@ but it's just uncompressing the eidogo javascript library onto the SD-card. This
 </ul>
 
 <p>Note that although the "look and feel" of DragonGoApp is not very appealing,
-this app actually has all the required functionalities (and even more) to really do its job, I mean, playing Go with DGS !
-It's just that, as a programmer, I hate spending time on designing colourful and nice GUIs. I'm really only interested by the
-core features, sorry about that, but that's just how I am.</p>
-
-<h2>
-<a id="how-to-start-playing" class="anchor" href="#how-to-start-playing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to start playing</h2>
-
-<p>Before playing, you must enter your DGS login and password via the "menu/settings" dialog. The app supports two user logins, and when you
-use the "menu/settings" to enter credentials, these credentials are stored for the currently selected user. By default, it's the first
-user. Changing to the second user can be done by selecting the "devLogin" in the list of commands trigerred by the fifth rightmost button.
-You can also select here the "devDGS" (development DGS) server, but you shouldn't care about it.</p>
-
-<ul>
-<li>Press <em>Games</em> to download the games where it's your turn to play</li>
-<li>Click on the board where you wanna play</li>
-<li>Press <em>Sent</em> . the next game to move will be shown automatically.</li>
-</ul>
-
-<p>Note that the app is pretty good for playing games, but not very good for counting game score (when you arrive at this stage, the app
-just shows the DGS page of the game) or finding an opponent. 
-Although you can challenge opponents from within the app in 19x19 and 9x9 ladders, for other challenges (waiting room, other tournaments)
-I recommend to do it from the web site.</p>
+this app actually has all the required functionalities (and even more) to really do its job, i.e., playing correspondence Go with DGS and OGS !
+</p>
 
 <h2>
 <a id="bandwidth-efficiency" class="anchor" href="#bandwidth-efficiency" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bandwidth efficiency</h2>
