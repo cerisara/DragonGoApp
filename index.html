@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Dragongoapp by cerisara</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Dragongoapp</h1>
+      <h2 class="project-tagline">Android app to play the game of go with the DGS and OGS servers</h2>
+      <a href="https://github.com/cerisara/DragonGoApp" class="btn">View on GitHub</a>
+      <a href="https://github.com/cerisara/DragonGoApp/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/cerisara/DragonGoApp/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="dragongoapp" class="anchor" href="#dragongoapp" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DragonGoApp</h1>
+
+<p>Android app to play the game of go with the DGS (and OGS) servers.</p>
+
+<hr>
+
+<p><em>This is a new feature: DragonGoApp now also supports basic playing on the online-go.com (OGS) server !</em></p>
+
+<p>Playing on OGS is for now very limited and is still beta code.
+So the app may crash or not behave as expected !
+For now, only two basic features are supported on OGS:</p>
+
+<ul>
+<li>You can download the (only correspondence, you cannot play live with DragonGoApp !) games where it's your turn and send one move to the OGS server.</li>
+<li>You can accept challenges that are sent to you</li>
+<li>You cannot do anything else for now: no chat, no forum, you can not
+challenge, create a new game, not even resign. Please do all this on the OGS web site for now.</li>
+<li>Both games from DGS and OGS are handled and stored the same way internally: only the "get-games" and "send-moves"
+connections are specific to each server.</li>
+</ul>
+
+<h3>
+<a id="quick-ogs-startup" class="anchor" href="#quick-ogs-startup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick OGS-startup</h3>
+
+<ul>
+<li>OGS uses OAuth2 for authentication: before doing anything with the android app, you must first go, with a real computer browser, on your online-go.com profile and generate an application-specific password.</li>
+<li>If you want to play on OGS, you have to download and install the android app from <a href="http://talc1.loria.fr/users/cerisara/DragonGoApp.apk">http://talc1.loria.fr/users/cerisara/DragonGoApp.apk</a>. (Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !)</li>
+<li>Launch the app for the first time, and wait for about two minutes for the app to configure its local storage on your phone.</li>
+<li>Then, click on the settings menu of your phone, and choose the "Settings" sub-menu:
+a window appears with a field for the user name and another field to enter the password.
+Writes in these fields your OGS login and the application-specific password that you have generated before.
+Then, press the "OGS" button to let the app know that these credentials shall be used with the OGS server.</li>
+<li>You then want to select to which servers DragonGoApp shall try to connect, using the DGS and OGS check-boxes on the
+"advanced" options:
+Press the button "..." on the top right of the main window to reach the advanced options, scroll down until you see
+the OGS and DGS checkboxes.
+If you just want to play with OGS, you must check the "OGS" checkbox and uncheck the "DGS" checkbox;
+otherwise, the app will stop at connection time because it can not connect to DGS, and you won't even see your OGS games.</li>
+<li>You can then return to the main screen, and just press the top-left "Games" button: the app will download the games
+where it's your turn to play, and show you the first game. You can try various moves: use the "Reset" button to come back
+to the initial position where you have to move. When you're ready, press "Reset", play one move, and press the "Send" button.
+A confirmation window will pop-up. Press OK, the move is sent, and the app will automatically switch to the next game,
+or just shows a message saying that you don't any more games to play.</li>
+<li>Later on, when you want to play again, just press the "Games" button to try and download your last opponents moves.</li>
+</ul>
+
+<p>Note that there is much more features in DragonGoApp, but this is just a quickstart guide and you're welcome to try all
+other features at your pace...</p>
+
+<hr>
+
+<h3>
+<a id="main-user-guide" class="anchor" href="#main-user-guide" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Main user guide</h3>
+
+<p>This is an android app originally developed for DGS (and now also OGS), with the following features:</p>
+
+<ul>
+<li>Open-source: everyone can know exactly what it's doing and all of the app's internals.</li>
+<li>Ad-free</li>
+<li>Small bandwidth usage: this is especially useful when you have a limited data plan; The app shows you <em>in real time</em> your data usage (globally at the mobile level, not only for the app itself);</li>
+<li>Full-featured SGF editor/player based on the open-source eidogo code. Also shows game information and game comments.</li>
+<li>Support dual servers/credentials (DGS and develDGS)</li>
+<li>Playing moves (obviously !), pass, resign, send/receive messages, attach a comment to a move</li>
+<li>invite/accept/refuse challenges, challenge in 19x19 and 9x9 ladders</li>
+<li>Follow reviews of professional games from gobase, which are included in the app</li>
+<li>Read the DGS Forums: by default, only the new/unread messages will be shown, but you can switch to read all messages by pressing menu-settings while in the forums view.</li>
+</ul>
+
+<p>You can install the latest release from <a href="https://f-droid.org/repository/browse/?fdfilter=dragongoapp&amp;fdid=fr.xtof54.dragonGoApp">F-droid</a></p>
+
+<p>Limitations:</p>
+
+<ul>
+<li>Ending game (territory agreement, scoring) is supported by displaying the DGS website, for now.</li>
+<li>When inviting or accepting a game, you cannot change the game settings (handicap...) for now</li>
+</ul>
+
+<h1>
+<a id="quick-start" class="anchor" href="#quick-start" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick-start</h1>
+
+<p>When run for the first time, a "loading" window appears for a few seconds: it's actually not downloading anything at this stage,
+but it's just uncompressing the eidogo javascript library onto the SD-card. This is only done once.</p>
+
+<h2>
+<a id="gui-overview" class="anchor" href="#gui-overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>GUI overview</h2>
+
+<p>The 5 top-left buttons always present the most useful function at any time:</p>
+
+<ul>
+<li>
+<em>Games</em> : download status games from DGS server</li>
+<li>
+<em>Zm+</em> : Zoom-in the goban</li>
+<li>
+<em>Zm-</em> : Zoom-out the goban</li>
+<li>
+<em>Msg</em> : download status messages from DGS server</li>
+<li>
+<em>Fwd</em> / <em>Bck</em> : navigate in the game; these buttons are redundant with the arrows on the goban.</li>
+<li>
+<em>Reset</em> : comes back to the original position (as in the server): very useful when exploring lines of play, just before sending the actual next move you wanna play.</li>
+<li>
+<em>Send</em> : send your last move to DGS. A confirmation dialog is shown.</li>
+</ul>
+
+<p>There is a top-right button <em>...</em> that shows a list of additional functionalities:</p>
+
+<ul>
+<li>
+<em>Skip this game</em> : when you don't want to answer right now</li>
+<li>
+<em>Resign game</em> : pretty clear</li>
+<li>
+<em>Add a game message</em> : press this before sending a move, and a comment will be attached to this move in the SGF. Two standard comments are proposed (to welcome and thank you opponent), but you can write your own. You can also edit or remove your comment as many times as you wish as long as you have not sent the move.</li>
+<li>
+<em>View 19x19 ladder</em> : shows only the ladder positions that you can challenge. Uses a local cache, so it may not be always synchronized with the actual ladder in DGS, but you can re-download the ladder at any time.</li>
+<li>
+<em>View 9x9 ladder</em> : same thing for another ladder</li>
+<li>
+<em>View forums</em> : download the list of forum messages that you have not read yet (or all of them)</li>
+<li>
+<em>List saved games</em> : every game is saved locally, so you can view it, and even play a move from this list. You can also remove all or a single game from your sd card.</li>
+<li>
+<em>DGS/login</em> : these 4 buttons allow to select another user or another server</li>
+<li>
+<em>reset GUI</em> : press it to come back to the initial GUI, as if you just had launched the app</li>
+<li>
+<em>Open game reviews</em> : continues the reading of Pro games reviews</li>
+<li>
+<em>recopy Eidogo</em> : for debugging only</li>
+<li>
+<em>redraw last goban</em> : shortcut to quickly view the last goban</li>
+</ul>
+
+<p>Note that although the "look and feel" of DragonGoApp is not very appealing,
+this app actually has all the required functionalities (and even more) to really do its job, I mean, playing Go with DGS !
+It's just that, as a programmer, I hate spending time on designing colourful and nice GUIs. I'm really only interested by the
+core features, sorry about that, but that's just how I am.</p>
+
+<h2>
+<a id="how-to-start-playing" class="anchor" href="#how-to-start-playing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to start playing</h2>
+
+<p>Before playing, you must enter your DGS login and password via the "menu/settings" dialog. The app supports two user logins, and when you
+use the "menu/settings" to enter credentials, these credentials are stored for the currently selected user. By default, it's the first
+user. Changing to the second user can be done by selecting the "devLogin" in the list of commands trigerred by the fifth rightmost button.
+You can also select here the "devDGS" (development DGS) server, but you shouldn't care about it.</p>
+
+<ul>
+<li>Press <em>Games</em> to download the games where it's your turn to play</li>
+<li>Click on the board where you wanna play</li>
+<li>Press <em>Sent</em> . the next game to move will be shown automatically.</li>
+</ul>
+
+<p>Note that the app is pretty good for playing games, but not very good for counting game score (when you arrive at this stage, the app
+just shows the DGS page of the game) or finding an opponent. 
+Although you can challenge opponents from within the app in 19x19 and 9x9 ladders, for other challenges (waiting room, other tournaments)
+I recommend to do it from the web site.</p>
+
+<h2>
+<a id="bandwidth-efficiency" class="anchor" href="#bandwidth-efficiency" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bandwidth efficiency</h2>
+
+<p>Very few buttons actually connects to the Internet: <em>Games</em>, <em>Send</em>, <em>View forums</em> and the first time you press one of the <em>View ladders</em> button, or when you later on press <em>Reload</em> when viewing a ladder.</p>
+
+<p>In fact, the app is designed to
+only access the Internet when it's really useful, hence minimizing bandwidth and consumption of your data plan. This has always been
+a major design guideline when writing this app, and you can actually always check in real time, on the top-right of the status bar, the
+total amount of internet connection that has been consumed by the app since it's been launched. Typically, you can play one move in 6 or 7 games with less than a few dozens of kbits of bandwidth.</p>
+
+<p>Starting from version 1.8, the app caches locally the game SGF and the ladders (<em>not the forums</em>).
+But by default, it'll reload the SGF at every move.
+You can switch to a more bandwidth-saving mode via the menu: "Bandwidth config, prefer local SGF".
+Then, when downloading the status list of games, it also gets the last move of your opponent, which is simply added to the local SGF.
+The SGF will not be downloaded any more.
+This greatly reduces bandwidth consumption and improves playing speed, BUT this approach has one drawback: you don't see the comments
+sent by your opponent and attached to each move, because the "get status" connection does not return these comments ! 
+If you want to see them, then you should switch back via the bandwidth menu to the "always download SGF" option.
+Then, you will also always get all comments attached to every move.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/cerisara/DragonGoApp">Dragongoapp</a> is maintained by <a href="https://github.com/cerisara">cerisara</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
