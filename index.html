@@ -23,35 +23,68 @@
   </head>
   <body>
     <section class="page-header">
-      <h1 class="project-name">Dragongoapp</h1>
+      <h1 class="project-name">DragonGoApp</h1>
       <h2 class="project-tagline">Android app to play the game of go with the DGS and OGS servers</h2>
       <a href="https://github.com/cerisara/DragonGoApp" class="btn">View on GitHub</a>
-      <a href="https://github.com/cerisara/DragonGoApp/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/cerisara/DragonGoApp/tarball/master" class="btn">Download .tar.gz</a>
+      <a href="https://talc1.loria.fr/users/cerisara/DragonGoApp.apk" class="btn">Download .apk</a>
     </section>
 
     <section class="main-content">
       <h1>
 <a id="dragongoapp" class="anchor" href="#dragongoapp" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DragonGoApp</h1>
 
-<p>Android app to play the game of go with the DGS (and OGS) servers.</p>
+<p>Android app to play the game of go on the DGS and OGS servers.</p>
 
 <hr>
 
-<p><em>This is a new feature: DragonGoApp now also supports basic playing on the online-go.com (OGS) server !</em></p>
+<h2>
+<a id="nutshell" class="anchor" href="#nutshell" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>
+DragonGoApp in a nutshell
+</h2>
 
-<p>Playing on OGS is for now very limited and is still beta code.
-So the app may crash or not behave as expected !
-For now, only two basic features are supported on OGS:</p>
+There are two ways to play the game of Go (aka Baduk) online: either live (a game lasts about half an hour) or
+by correspondence (a game may last several weeks). DragonGoApp is a mobile Android application for playing
+correspondent games with both main online servers that support correspondence games:
+<a href="http://www.dragongoserver.net/">Dragon Go Server</a>
+and
+<a href="https://online-go.com">Online-go.com</a>
+
+<br>
+
+Playing by correspondence is very nice for busy people, because you can play just one move whenever you have 5 minutes free time, anytime.
+Also, in most cases you play several games simultaneously (up to a dozen for me), which always let you with some goban to handle
+whenever you wish to. If you like go, I strongly encourage you to try correspondence games on any of the two servers above !
+
+<br>
+
+Because you typically play correspondence games on the go (at lunch time, in the bus...), mobile applications are ideal tools to
+get you entertained all day long.
+DragonGoApp is one such application for your android smartphone.
+It is also the only android app I know of that seamlessly supports both DGS and OGS servers, and is free and opensource (which means
+that there is absolutely no annoying ad, tracking, limited features, paying premium...).
+Furtermore, it is completely safe (the source code is public and the apk is certified by F-Droid) and it minimizes bandwidth usage,
+hence saving your mobile data plan.
+
+<h3>Important limitation</h3>
+As explained before, DragonGoApp is designed to continue playing the same games everyday during several weeks,
+because it is the most important feature for playing correspondence games on the go.
+But it does not (or badly) support neither initializing a new game, nor terminating a game, because both these operations
+occur only very rarely in correspondence games, and may involve complex server-dependent interactions with the server.
+<br>
+So, before using DragonGoApp to play, first start/initialize your games on a real computer that is connected to either DGS or OGS.
+<br>
+Similarly, when you reach the end of a game and want to pass, quit the app and pass and finalize your game on a real computer as well.
+
+<h3>Overview of how to play with DragonGoApp</h3>
 
 <ul>
-<li>You can download the (only correspondence, you cannot play live with DragonGoApp !) games where it's your turn and send one move to the OGS server.</li>
-<li>You can accept challenges that are sent to you</li>
-<li>You cannot do anything else for now: no chat, no forum, you can not
-challenge, create a new game, not even resign. Please do all this on the OGS web site for now.</li>
-<li>Both games from DGS and OGS are handled and stored the same way internally: only the "get-games" and "send-moves"
-connections are specific to each server.</li>
+<li>Once the apk is installed, setup your DGS and/or OGS login and password in DragonGoApp
+<li>Whenever you have some time to play a move, just launch DragonGoApp and press "GetGames"
+<li>The new games where it's your turn to play are then downloaded from DGS and/or OGS and shown on the goban one after the other
+<li>You can then explore variations on the goban, and when you're decided, place your stone and send your move to the server.
+Alternatively, you can skip the current game and show the next game.
 </ul>
+
 
 <h3>
 <a id="quick-ogs-startup" class="anchor" href="#quick-ogs-startup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick OGS-startup</h3>
@@ -82,6 +115,10 @@ or just shows a message saying that you don't any more games to play.</li>
 other features at your pace...</p>
 
 <hr>
+
+Both games from DGS and OGS are handled and stored the same way internally: only the "get-games" and "send-moves"
+connections are specific to each server.</li>
+
 
 <h3>
 <a id="main-user-guide" class="anchor" href="#main-user-guide" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Main user guide</h3>
