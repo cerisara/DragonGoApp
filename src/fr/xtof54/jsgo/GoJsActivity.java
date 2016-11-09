@@ -1337,6 +1337,34 @@ public class GoJsActivity extends FragmentActivity {
 		server.sendCmdToServer(cmd, eventType.moveSentStart, eventType.moveSentEnd);
 	}
 
+/*
+
+
+From kitkat onwards use evaluateJavascript method instead loadUrl to call the javascript functions like below
+
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+        webView.evaluateJavascript("enable();", null);
+    } else {
+        webView.loadUrl("javascript:enable();");
+    }
+
+
+
+
+
+public void run(final String scriptSrc) { 
+        webView.post(new Runnable() {
+            @Override
+            public void run() { 
+                webView.loadUrl("javascript:" + scriptSrc); 
+            }
+        }); 
+    }
+
+and if this doesn't work, do new Thread(new Runnaable(){..<like above>..}).start() 
+
+*/
+
 	private void loadSgf() {
 		System.out.println("eidogodir: "+eidogodir);
 		String f=eidogodir+"/example.html";
