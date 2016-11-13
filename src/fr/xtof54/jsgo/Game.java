@@ -278,6 +278,7 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 					g.setUsers(users);
 					games2play.add(g);
 				}
+                System.out.println("games in the list "+games2play.size());
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
