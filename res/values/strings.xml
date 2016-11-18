@@ -1,17 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">DragonGoApp</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Please wait, copying eidogo on disk&#8230;</string>
-    <string name="username">login</string>
-    <string name="password">password</string>
-    <string name="signinDGS">DGS</string>
-    <string name="signinOGS">OGS</string>
-    <string name="cancel">Cancel</string>
-    <string name="ok">OK</string>
-    <string name="loading">loading</string>
-    <string name="server1">http://www.dragongoserver.net/</string>
-    <string name="server2">http://dragongoserver.sourceforge.net/</string>
-    
+    <string name="app_name">DragonGoAct</string>
 </resources>
