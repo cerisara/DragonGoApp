@@ -398,6 +398,7 @@ public class DragonGoAct extends Activity
 		System.out.println("debugloadurl file://"+f);
 		System.out.println("just before loading the url: ");
 		wv.loadUrl("file://"+f);
+
         wv.invalidate();
     }
 
