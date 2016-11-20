@@ -5,8 +5,11 @@
         android:orderInCategory="100"
         android:title="Settings"/>
     <item
-        android:id="@+id/bandwidth"
+        android:id="@+id/cleanEidogo"
+        android:orderInCategory="100"
+        android:title="Remove Eidogo"/>
+    <item
+        android:id="@+id/installEidogo"
         android:orderInCategory="100"
         android:title="Reinstall Eidogo"/>
-    
 </menu>

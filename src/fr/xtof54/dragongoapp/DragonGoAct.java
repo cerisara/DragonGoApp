@@ -15,22 +15,24 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.content.res.AssetManager;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.view.Menu;
+import android.view.View;
 import android.view.MenuItem;
 import android.text.InputType;
 
 public class DragonGoAct extends Activity
 {
-	enum guistate {nogame, play, message, review, forums};
+	enum guistate {nogame, play, message, forums};
 	guistate curstate = guistate.nogame;
 	WebView wv=null;
     DGSConnect dgs=null;
-    ProgressDialog progressDoalog=null;
 	public File eidogodir=null;
     ArrayList<Game> games = new ArrayList<Game>();
     int gameShown = 0;
@@ -38,6 +40,7 @@ public class DragonGoAct extends Activity
     String login, password;
 
     public boolean checkDGSconnect() {
+        // WARNING: must be called only from within a Runnable passed to showConnectWindow() !!
         if (dgs==null) dgs = new DGSConnect();
         if (dgs==null) {
             showMessage("connection error "+dgs.error);
@@ -50,6 +53,7 @@ public class DragonGoAct extends Activity
      }
 
     public void downloadGamesList() {
+        // WARNING: must be called only from within a Runnable passed to showConnectWindow() !!
         if (checkDGSconnect()) {
             ArrayList<Game> gameheaders = dgs.downloadGamesList();
             for (int j=0;j<gameheaders.size();j++) {
@@ -70,30 +74,24 @@ public class DragonGoAct extends Activity
     public void sendMove(final String move) {
         if (gameShown>=0&&gameShown<games.size()) {
             if (games.get(gameShown).isdgs) {
-                showConnectWindow("sending move to DGS...");
-                Thread t = new Thread(new Runnable() {
+                showConnectWindow("sending move to DGS...", new Runnable() {
                     @Override
                     public void run() {
-                        if (!checkDGSconnect()) hideConnectWindow();
-                        else {
+                        if (checkDGSconnect()) {
                             if (dgs.sendmove(games.get(gameShown),move)) {
                                 // success
                                 if (gameShown==games.size()-1) {
-                                    hideConnectWindow();
                                     showMessage("No more games locally");
                                     changeState(guistate.nogame);
                                 } else {
                                     downloadGamesList();
-                                    hideConnectWindow();
                                 }
                             } else {
-                                hideConnectWindow();
                                 showMessage("failed to send move "+dgs.error);
                             }
                         }
                     }
                 });
-                t.start();
             } else showMessage("no way to send to DGS: game is local");
         } else showMessage("no way to send to DGS: no game exists");
     }
@@ -103,10 +101,10 @@ public class DragonGoAct extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-		initGUI();
         // always init with a local unsaved empty board
         games.add(new Game());
         initEidogo();
+		initGUI();
     }
 
 	private class myWebViewClient extends WebViewClient {
@@ -142,29 +140,39 @@ public class DragonGoAct extends Activity
 		}
 	}
 
-    void showConnectWindow(String msg) {
-        progressDoalog = new ProgressDialog(DragonGoAct.this);
-        progressDoalog.setIndeterminate(true);
-        progressDoalog.setMessage(msg);
-        progressDoalog.setTitle("Connecting...");
-    }
-    void hideConnectWindow() {
-        try {
-            if (progressDoalog != null && progressDoalog.isShowing()) {
-                 progressDoalog.dismiss();
+    void showConnectWindow(final String msg, final Runnable job) {
+        class TT extends AsyncTask<String,Void,Boolean> {
+            ProgressDialog progressDoalog = new ProgressDialog(DragonGoAct.this);
+            @Override
+            protected void onPreExecute() {
+                progressDoalog.setIndeterminate(true);
+                progressDoalog.setMessage(msg);
+                progressDoalog.setTitle("Connecting...");
+                progressDoalog.show();
+                super.onPreExecute();
             }
-        } catch (Exception ex) {
-            System.out.println("ERROR in hideConnectWindow "+ex.getMessage());
+            @Override
+            protected Boolean doInBackground(final String... parms) {
+                job.run();
+                return true;
+            }
+            @Override
+            protected void onPostExecute(final Boolean success) {
+                progressDoalog.dismiss();
+                super.onPostExecute(success);
+            }
         }
+        TT t = new TT();
+        t.execute();
     }
 
 	public void writeInLabel(final String s) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-//				final TextView label = (TextView)findViewById(R.id.textView1);
-//				label.setText(s);
-//				label.invalidate();
+				final TextView label = (TextView)findViewById(R.id.textView1);
+				label.setText(s);
+				label.invalidate();
 			}
 		});
 	}
@@ -180,52 +188,40 @@ public class DragonGoAct extends Activity
 
 	void initGUI() {
         setContentView(R.layout.main);
+
+		{
+			final Button button = (Button)findViewById(R.id.but6);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					System.out.println("press button6 on state "+curstate);
+                    showGame();
+				}
+			});
+		}
+	
+
+
 		wv = (WebView)findViewById(R.id.web1);
 		wv.setWebViewClient(new myWebViewClient());
 		wv.getSettings().setJavaScriptEnabled(true);
 		wv.getSettings().setSupportZoom(true);
+        showGame();
     }
 
     void initEidogo() {
-		// ====================================
-		// copy the eidogo dir into the external sdcard
-		// only copy if it does not exist already
-		// this takes time, so do it in a thread and show a message for the user to wait
-		boolean mExternalStorageAvailable = false;
-		boolean mExternalStorageWriteable = false;
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			mExternalStorageAvailable = mExternalStorageWriteable = true;
-		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-			mExternalStorageAvailable = true;
-			mExternalStorageWriteable = false;
-		} else {
-			mExternalStorageAvailable = mExternalStorageWriteable = false;
-		}
-		if (mExternalStorageAvailable&&mExternalStorageWriteable) {
-			File d = getExternalCacheDir();
-			eidogodir = new File(d, "eidogo");
-			if (forcecopy||!eidogodir.exists()) {
-				eidogodir.mkdirs();
-				final Button button3 = (Button)findViewById(R.id.but3);
-				button3.setClickable(false);
-				button3.setEnabled(false);
-				final Button button2= (Button)findViewById(R.id.but2);
-				button2.setClickable(false);
-				button2.setEnabled(false);
-				final Button button1= (Button)findViewById(R.id.but1);
-				button1.setClickable(false);
-				button1.setEnabled(false);
-				button1.invalidate();
-				button2.invalidate();
-				button3.invalidate();
-                showConnectWindow("preparing Eidogo onto SD-card...");
-				new CopyEidogoTask().execute("noparms");
-			} else {
-				showMessage("eidogo already on disk");
-			}
-		} else {
-			showMessage("R/W ERROR sdcard "+mExternalStorageAvailable+" "+mExternalStorageWriteable);
+        File d = getFilesDir();
+        eidogodir = new File(d, "eidogo");
+        if (forcecopy||!eidogodir.exists()) {
+            eidogodir.mkdirs();
+            showConnectWindow("preparing Eidogo onto SD-card...", new Runnable() {
+                @Override
+                public void run() {
+                    copyEidogo("eidogo",eidogodir);
+                    System.out.println("eidogo copy finished");
+                }});
+        } else {
+            showMessage("eidogo already on disk");
 		}
     }
 
@@ -269,7 +265,7 @@ public class DragonGoAct extends Activity
 		switch (newstate) {
 		case nogame:
 			// we allow clicking just in case the user wants to play locally, disconnected
-			writeInLabel("Getgame: download game from DGS");
+			writeInLabel("[Games] to download game from DGS");
 			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
 			setButtons("Games","Zm+","Zm-","Msg"); break;
 		case play:
@@ -282,17 +278,6 @@ public class DragonGoAct extends Activity
 		default:
 		}
 		curstate=newstate;
-	}
-
-	private class CopyEidogoTask extends AsyncTask<String, Void, String> {
-		protected String doInBackground(String... parms) {
-			copyEidogo("eidogo",eidogodir);
-			return "init done";
-		}
-		protected void onPostExecute(String res) {
-			System.out.println("eidogo copy finished");
-            hideConnectWindow();
-		}
 	}
 
 	private void setButtons(final String b1, final String b2, final String b3, final String b4) {
@@ -333,8 +318,11 @@ public class DragonGoAct extends Activity
 		case R.id.action_settings:
             ask4credentials();
 			return true;
-		case R.id.bandwidth:
+		case R.id.cleanEidogo:
 			cleanAllLocalData();
+			return true;
+		case R.id.installEidogo:
+			initEidogo();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -355,17 +343,18 @@ public class DragonGoAct extends Activity
     void cleanAllLocalData() {
         // TODO: ask for confirmation
         if (eidogodir!=null && eidogodir.exists()) {
-            showConnectWindow("deleting eidogo dir...");
-            recursiveDelete(eidogodir);
-            hideConnectWindow();
+            showConnectWindow("deleting eidogo dir...", new Runnable() {
+                @Override
+                public void run() {
+                    recursiveDelete(eidogodir);
+                }});
         }
     }
 
-	private void ask4credentials() {
+    private void ask4credentials() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter DGS login name");
         final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
@@ -373,6 +362,26 @@ public class DragonGoAct extends Activity
             public void onClick(DialogInterface dialog, int which) {
                 login = input.getText().toString();
                 System.out.println("set user login "+login);
+
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(DragonGoAct.this);
+                builder2.setTitle("Enter DGS password");
+                final EditText input2 = new EditText(DragonGoAct.this);
+                input2.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                builder2.setView(input2);
+                builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        password = input2.getText().toString();
+                        System.out.println("set password"+password);
+                    }
+                });
+                builder2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder2.show();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -383,4 +392,13 @@ public class DragonGoAct extends Activity
         });
         builder.show();
     }
+
+	void showGame() {
+		String f=eidogodir+"/example.html";
+		System.out.println("debugloadurl file://"+f);
+		System.out.println("just before loading the url: ");
+		wv.loadUrl("file://"+f);
+        wv.invalidate();
+    }
+
 }
