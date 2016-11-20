@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.content.res.AssetManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.Context;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -29,6 +30,7 @@ import android.text.InputType;
 
 public class DragonGoAct extends Activity
 {
+    public static DragonGoAct main;
 	enum guistate {nogame, play, message, forums};
 	guistate curstate = guistate.nogame;
 	WebView wv=null;
@@ -37,10 +39,19 @@ public class DragonGoAct extends Activity
     ArrayList<Game> games = new ArrayList<Game>();
     int gameShown = 0;
     boolean forcecopy=false;
-    String login, password;
+    public String login, password;
 
     public boolean checkDGSconnect() {
         // WARNING: must be called only from within a Runnable passed to showConnectWindow() !!
+		String loginkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
+		String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
+		login = PrefUtils.getFromPrefs(this, loginkey ,null);
+		password = PrefUtils.getFromPrefs(this, pwdkey ,null);
+		if (login==null||password==null) {
+			showMessage("Please enter your credentials first via menu Settings");
+			return false;
+		}
+
         if (dgs==null) dgs = new DGSConnect();
         if (dgs==null) {
             showMessage("connection error "+dgs.error);
@@ -56,16 +67,12 @@ public class DragonGoAct extends Activity
         // WARNING: must be called only from within a Runnable passed to showConnectWindow() !!
         if (checkDGSconnect()) {
             ArrayList<Game> gameheaders = dgs.downloadGamesList();
-            for (int j=0;j<gameheaders.size();j++) {
-                int i=0;
-                for (i=0;i<games.size();i++) {
-                    if (games.get(i).id == gameheaders.get(j).id) {
-                        games.get(i).gotNewMove=true;
-                        break;
-                    }
-                }
-                if (i>=games.size()) {
-                    games.add(gameheaders.get(j));
+            if (gameheaders==null) showMessage("ERROR getting messages from DGS");
+            else {
+                if (gameheaders.size()==0) showMessage("no new game from DGS");
+                else {
+                    games.clear();
+                    games.addAll(gameheaders);
                 }
             }
         }
@@ -101,6 +108,7 @@ public class DragonGoAct extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        main=this;
         // always init with a local unsaved empty board
         games.add(new Game());
         initEidogo();
@@ -199,8 +207,48 @@ public class DragonGoAct extends Activity
 				}
 			});
 		}
-	
+        {
+			final Button button = (Button)findViewById(R.id.but1);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					System.out.println("press button1 on state "+curstate);
+                    switch(curstate) {
+                        case nogame:
+                            downloadGamesList();
+                            break;
+                        case play: // send the move
+                            // ask eidogo to send last move; it will be captured by the web listener
+                            System.out.println("DEBUG SENDING MOVE TO SERVER");
+                            wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
+                            break;
+                    }
+				}
+			});
+		}
 
+        {
+			final Button button = (Button)findViewById(R.id.but2);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					System.out.println("press button2 on state "+curstate);
+                    wv.zoomIn();
+                    wv.invalidate();
+				}
+			});
+		}
+        {
+			final Button button = (Button)findViewById(R.id.but3);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					System.out.println("press button3 on state "+curstate);
+                    wv.zoomOut();
+                    wv.invalidate();
+				}
+			});
+		}
 
 		wv = (WebView)findViewById(R.id.web1);
 		wv.setWebViewClient(new myWebViewClient());
@@ -357,6 +405,7 @@ public class DragonGoAct extends Activity
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
+		final Context c = getApplicationContext();
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -373,6 +422,11 @@ public class DragonGoAct extends Activity
                     public void onClick(DialogInterface dialog, int which) {
                         password = input2.getText().toString();
                         System.out.println("set password"+password);
+                        String userkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
+                        String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
+                        PrefUtils.saveToPrefs(c, userkey, login);
+                        PrefUtils.saveToPrefs(c, pwdkey, password);
+                        showMessage("DGS Credentials saved");
                     }
                 });
                 builder2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -394,6 +448,7 @@ public class DragonGoAct extends Activity
     }
 
 	void showGame() {
+        games.get(gameShown).write2html();
 		String f=eidogodir+"/example.html";
 		System.out.println("debugloadurl file://"+f);
 		System.out.println("just before loading the url: ");
