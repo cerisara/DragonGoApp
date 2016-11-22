@@ -23,9 +23,13 @@ import android.widget.Toast;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.PopupWindow;
 import android.view.Menu;
 import android.view.View;
+import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.Gravity;
 import android.text.InputType;
 
 public class DragonGoAct extends Activity
@@ -249,6 +253,32 @@ public class DragonGoAct extends Activity
 				}
 			});
 		}
+        {
+			final Button button = (Button)findViewById(R.id.morebutts);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					System.out.println("press morebutts on state "+curstate);
+                    popupmenu();
+/*
+                    PopupMenu popup=new PopupMenu(DragonGoAct.this,button);
+                    popup.getMenuInflater().inflate(R.menu.popup_menu,popup.getMenu());
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        public boolean onMenuItemClick(MenuItem item) {
+                            String it=item.getTitle();
+                            if (it.equals("Set login/password")) ask4credentials();
+                            else if (it.equals("Del Eidogo")) cleanAllLocalData();
+                            else if (it.equals("Set Eidogo")) initEidogo();
+                            else System.out.println("ERROR last button menu unk "+it);
+                            return true;
+                        }
+                    });
+                    popup.show();
+*/
+				}
+			});
+		}
+
 
 		wv = (WebView)findViewById(R.id.web1);
 		wv.setWebViewClient(new myWebViewClient());
@@ -457,4 +487,53 @@ public class DragonGoAct extends Activity
         wv.invalidate();
     }
 
+    private void popupmenu() {
+        LayoutInflater inflater = (LayoutInflater)DragonGoAct.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        Display display = getWindowManager().getDefaultDisplay();
+
+        int width = display.getWidth()/2;
+        int height = display.getHeight()/2;
+
+        View pop = inflater.inflate(R.layout.popup_menu,null,false);
+        pop.measure(View.MeasureSpec.UNSPECIFIED,View.MeasureSpec.UNSPECIFIED);
+        height = pop.getMeasuredHeight();
+        width = pop.getMeasuredWidth()+200;
+        final PopupWindow pu = new PopupWindow(pop,width,height,true);
+        pu.showAtLocation(findViewById(R.id.but1),Gravity.CENTER,1,1);
+
+        Button bcancel = (Button)pu.getContentView().findViewById(R.id.cancelm);
+        Button bcreds = (Button)pu.getContentView().findViewById(R.id.credsm);
+        Button bclear = (Button)pu.getContentView().findViewById(R.id.clearm);
+        Button beidogo= (Button)pu.getContentView().findViewById(R.id.installm);
+
+        bcancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pu.dismiss();
+            }
+        });
+        bcreds.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pu.dismiss();
+                ask4credentials();
+            }
+        });
+        bclear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pu.dismiss();
+                cleanAllLocalData();
+            }
+        });
+        beidogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pu.dismiss();
+                initEidogo();
+            }
+        });
+    }
+
 }
+
