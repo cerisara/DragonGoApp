@@ -87,7 +87,44 @@ public class DGSConnect {
     }
 
     public ArrayList<Game> downloadGamesList() {
-        // TODO
+        String cmd = server+"quick_do.php?obj=game&cmd=list&view=status";
+        boolean hasError = false;
+        error="no error";
+        try {
+            System.out.println("debug send cmd "+cmd);
+            HttpGet httpget = new HttpGet(cmd);
+            HttpResponse response = httpclient.execute(httpget);
+            Header[] heds = response.getAllHeaders();
+            for (Header s : heds)
+                System.out.println("[HEADER] "+s);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+                for (;;) {
+                    String s = fin.readLine();
+                    if (s==null) break;
+                    System.out.println("cmdlog "+s);
+                    s=s.trim();
+                    if (s.length()>0 && s.charAt(0)=='{') {
+                        return Game.loadJSONStatus(s);
+                    }
+                }
+                System.out.println("ZARBI on ne devrait pas arriver ici");
+                fin.close();
+                hasError=true;
+                error="error unk nogame ?";
+            } else {
+                // entity==null
+                hasError=true;
+                error="no server reply";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            hasError=true;
+            error=e.toString();
+        }
+        System.out.println("server runnable terminated");
         return null;
     }
 }
