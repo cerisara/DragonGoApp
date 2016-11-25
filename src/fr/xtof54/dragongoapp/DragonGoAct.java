@@ -65,7 +65,21 @@ public class DragonGoAct extends Activity
             } else return true;
         }
         return false;
-     }
+    }
+
+    public void playNextGame() {
+        // WARNING: must be called only from within a Runnable passed to showConnectWindow() !!
+        gameShown++;
+        if (gameShown>=games.size()) gameShown=0;
+        // download SGF + show the game
+        ArrayList<String> sgf = dgs.downloadSGF(games.get(gameShown).id);
+        if (sgf==null) showMessage("download SGF error "+dgs.error);
+        else {
+            games.get(gameShown).setSGF(sgf);
+            games.get(gameShown).save();
+            showGame();
+        }
+    }
 
     public void downloadGamesList() {
         // WARNING: must be called only from within a Runnable passed to showConnectWindow() !!
@@ -77,6 +91,8 @@ public class DragonGoAct extends Activity
                 else {
                     games.clear();
                     games.addAll(gameheaders);
+                    gameShown=-1;
+                    playNextGame();
                 }
             }
         }

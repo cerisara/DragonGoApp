@@ -18,6 +18,10 @@ public class Game {
     String oppmove;
     int oppmoveid;
 
+    public void setSGF(ArrayList<String> sgf0) {
+        sgf=sgf0;
+    }
+
 	final String[] exampleFileHtmlHeader = {
 			"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"",
 			"    \"http://www.w3.org/TR/html4/loose.dtd\">",
@@ -75,6 +79,10 @@ public class Game {
     public Game(JSONArray json, int gameid) {
         id=gameid;
         this.json=json;
+    }
+
+    public void save() {
+        // TODO save in f+id.sgf in case of skip game
     }
 
 	public void write2html() {

@@ -86,6 +86,39 @@ public class DGSConnect {
         return true;
     }
 
+    public ArrayList<String> downloadSGF(int gameid) {
+        error="no error";
+        try {
+            ArrayList<String> sgf = new ArrayList<String>();
+            final String cmd = server+"sgf.php?gid="+gameid+"&owned_comments=1&quick_mode=1";
+            HttpGet httpget = new HttpGet(cmd);
+            HttpResponse response = httpclient.execute(httpget);
+            Header[] heds = response.getAllHeaders();
+            for (Header s : heds)
+                System.out.println("[HEADER] "+s);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+                for (;;) {
+                    String s = fin.readLine();
+                    if (s==null) break;
+                    s=s.trim();
+                    if (s.length()>0&&s.charAt(0)!='[') {
+                        sgf.add(s);
+                    }
+                    System.out.println("SGFdownload "+s);
+                }
+                fin.close();
+            }
+            return sgf;
+        } catch (Exception e) {
+            e.printStackTrace();
+            error="download SGF error";
+            return null;
+        }
+    }
+
     public ArrayList<Game> downloadGamesList() {
         String cmd = server+"quick_do.php?obj=game&cmd=list&view=status";
         boolean hasError = false;
