@@ -82,7 +82,32 @@ public class DGSConnect {
     }
 
     public boolean sendmove(Game g, String move) {
-        // TODO
+        if (move.toLowerCase().startsWith("tt")) move="pass";
+        System.out.println("sending move "+move+" "+g.oppmoveid+" "+g.id);
+        try {
+            final String cmd = server+"quick_do.php?obj=game&cmd=move&gid=" + g.id + "&move_id=" + g.oppmoveid + "&move=" + move;
+            HttpGet httpget = new HttpGet(cmd);
+            HttpResponse response = httpclient.execute(httpget);
+            Header[] heds = response.getAllHeaders();
+            for (Header s : heds)
+                System.out.println("[HEADER] "+s);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+                for (;;) {
+                    String s = fin.readLine();
+                    if (s==null) break;
+                    s=s.trim();
+                    System.out.println("SendMovelog "+s);
+                }
+                fin.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            error="sendmove error";
+            return false;
+        }
         return true;
     }
 
@@ -117,6 +142,37 @@ public class DGSConnect {
             error="download SGF error";
             return null;
         }
+    }
+
+    public ArrayList<Game> downloadMessagesList() {
+        try {
+            String cmd = server+"quick_do.php?obj=message&cmd=list&filter_folders=2&with=user_id";
+            System.out.println("debug send cmd "+cmd);
+            HttpGet httpget = new HttpGet(cmd);
+            HttpResponse response = httpclient.execute(httpget);
+            Header[] heds = response.getAllHeaders();
+            for (Header s : heds)
+                System.out.println("[HEADER] "+s);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("UTF-8")));
+                for (;;) {
+                    String s = fin.readLine();
+                    if (s==null) break;
+                    s=s.trim();
+                    System.out.println("cmdlog "+s);
+                }
+                fin.close();
+                error="error get messages";
+            } else {
+                error="no server reply";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            error=e.toString();
+        }
+        return null;
     }
 
     public ArrayList<Game> downloadGamesList() {

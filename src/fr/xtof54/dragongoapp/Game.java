@@ -164,6 +164,7 @@ public class Game {
                     g.myid = users[0];
                     g.blackid = users[1];
                     g.whiteid = users[2];
+                    g.isdgs=true;
 					games.add(g);
 				}
                 System.out.println("games in the list "+games.size());

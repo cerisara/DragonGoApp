@@ -54,7 +54,7 @@
         android:layout_alignTop="@+id/but1"
         android:layout_toRightOf="@+id/but3"
         android:clickable="true"
-        android:text="pass"
+        android:text="Msg"
         />
 
     <Button
@@ -65,7 +65,7 @@
         android:layout_alignTop="@+id/but1"
         android:layout_toRightOf="@+id/but4"
         android:clickable="true"
-        android:text="Fwd"
+        android:text="-"
         />
 
     <Button

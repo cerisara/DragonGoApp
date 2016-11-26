@@ -70,7 +70,14 @@ public class DragonGoAct extends Activity
     public void playNextGame() {
         // WARNING: must be called only from within a Runnable passed to showConnectWindow() !!
         gameShown++;
-        if (gameShown>=games.size()) gameShown=0;
+        if (gameShown>=games.size()) {
+            gameShown=0;
+            games.clear();
+            showMessage("no more games");
+            games.add(new Game());
+            changeState(guistate.nogame);
+            showGame();
+        }
         // download SGF + show the game
         ArrayList<String> sgf = dgs.downloadSGF(games.get(gameShown).id);
         if (sgf==null) showMessage("download SGF error "+dgs.error);
@@ -102,24 +109,41 @@ public class DragonGoAct extends Activity
     public void sendMove(final String move) {
         if (gameShown>=0&&gameShown<games.size()) {
             if (games.get(gameShown).isdgs) {
-                showConnectWindow("sending move to DGS...", new Runnable() {
+                // ask for confirmation
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Really send Move ?");
+                final Context c = getApplicationContext();
+                builder.setPositiveButton("SEND", new DialogInterface.OnClickListener() { 
                     @Override
-                    public void run() {
-                        if (checkDGSconnect()) {
-                            if (dgs.sendmove(games.get(gameShown),move)) {
-                                // success
-                                if (gameShown==games.size()-1) {
-                                    showMessage("No more games locally");
-                                    changeState(guistate.nogame);
-                                } else {
-                                    downloadGamesList();
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        showConnectWindow("sending move to DGS...", new Runnable() {
+                            @Override
+                            public void run() {
+                                if (checkDGSconnect()) {
+                                    if (dgs.sendmove(games.get(gameShown),move)) {
+                                        // success
+                                        if (gameShown==games.size()-1) {
+                                            showMessage("No more games locally");
+                                            changeState(guistate.nogame);
+                                        } else {
+                                            downloadGamesList();
+                                        }
+                                    } else {
+                                        showMessage("failed to send move "+dgs.error);
+                                    }
                                 }
-                            } else {
-                                showMessage("failed to send move "+dgs.error);
                             }
-                        }
+                        });
                     }
                 });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
             } else showMessage("no way to send to DGS: game is local");
         } else showMessage("no way to send to DGS: no game exists");
     }
@@ -252,7 +276,6 @@ public class DragonGoAct extends Activity
 				}
 			});
 		}
-
         {
 			final Button button = (Button)findViewById(R.id.but2);
 			button.setOnClickListener(new View.OnClickListener() {
@@ -275,6 +298,35 @@ public class DragonGoAct extends Activity
 				}
 			});
 		}
+        {
+			final Button button = (Button)findViewById(R.id.but4);
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					System.out.println("press button4 on state "+curstate);
+                    switch(curstate) {
+                        case nogame: // get messages
+                            showConnectWindow("Loading messages...", new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (checkDGSconnect()) {
+                                        dgs.downloadMessagesList();
+                                    }
+                                }});
+                            break;
+                        case play: // skip game
+                            showConnectWindow("loading new game...", new Runnable() {
+                                @Override
+                                public void run() {
+                                    playNextGame();
+                                }});
+                            break;
+                    }
+                    wv.invalidate();
+				}
+			});
+		}
+
         {
 			final Button button = (Button)findViewById(R.id.morebutts);
 			button.setOnClickListener(new View.OnClickListener() {
@@ -379,7 +431,7 @@ public class DragonGoAct extends Activity
 			setButtons("Games","Zm+","Zm-","Msg"); break;
 		case play:
 			callwv("javascript:eidogo.autoPlayers[0].detallowClicking()");
-			setButtons("Send","Zm+","Zm-","Reset","Bck"); break;
+			setButtons("Send","Zm+","Zm-","Skip","Bck"); break;
 		case message:
 			callwv("javascript:eidogo.autoPlayers[0].detforbidClicking()");
 			setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
