@@ -78,6 +78,7 @@ public class DragonGoAct extends Activity
             games.get(gameShown).setSGF(sgf);
             games.get(gameShown).save();
             showGame();
+            changeState(guistate.play);
         }
     }
 
@@ -235,12 +236,17 @@ public class DragonGoAct extends Activity
 					System.out.println("press button1 on state "+curstate);
                     switch(curstate) {
                         case nogame:
-                            downloadGamesList();
+                            showConnectWindow("Loading games...", new Runnable() {
+                                @Override
+                                public void run() {
+                                    downloadGamesList();
+                                }});
                             break;
                         case play: // send the move
                             // ask eidogo to send last move; it will be captured by the web listener
                             System.out.println("DEBUG SENDING MOVE TO SERVER");
-                            wv.loadUrl("javascript:eidogo.autoPlayers[0].detsonSend()");
+                            callwv("javascript:eidogo.autoPlayers[0].detsonSend()");
+                            wv.invalidate();
                             break;
                     }
 				}
@@ -351,6 +357,15 @@ public class DragonGoAct extends Activity
 		System.out.println("endof copy");
 	}
 
+    void callwv(final String cmd) {
+		this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+                 wv.loadUrl(cmd);
+            }
+        });
+    }
+
     // TODO: because this method calls a WebView method (loadUrl()), all of these calls must be made
     // by the same thread (should it be the main android/app UI loop ?)
     // So, we should apply the same principle as for showMessage
@@ -360,14 +375,13 @@ public class DragonGoAct extends Activity
 		case nogame:
 			// we allow clicking just in case the user wants to play locally, disconnected
 			writeInLabel("[Games] to download game from DGS");
-			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
+			callwv("javascript:eidogo.autoPlayers[0].detallowClicking()");
 			setButtons("Games","Zm+","Zm-","Msg"); break;
 		case play:
-			writeInLabel("click on the board to play");
-			wv.loadUrl("javascript:eidogo.autoPlayers[0].detallowClicking()");
+			callwv("javascript:eidogo.autoPlayers[0].detallowClicking()");
 			setButtons("Send","Zm+","Zm-","Reset","Bck"); break;
 		case message:
-			wv.loadUrl("javascript:eidogo.autoPlayers[0].detforbidClicking()");
+			callwv("javascript:eidogo.autoPlayers[0].detforbidClicking()");
 			setButtons("GetMsg","Invite","SendMsg","Back2game"); break;
 		default:
 		}
@@ -494,13 +508,13 @@ public class DragonGoAct extends Activity
     }
 
 	void showGame() {
-        games.get(gameShown).write2html();
+        Game g = games.get(gameShown);
+        g.write2html();
 		String f=eidogodir+"/example.html";
 		System.out.println("debugloadurl file://"+f);
 		System.out.println("just before loading the url: ");
-		wv.loadUrl("file://"+f);
-
-        wv.invalidate();
+        writeInLabel("DGS game: "+g.black+" vs. "+g.white);
+		callwv("file://"+f);
     }
 
     private void popupmenu() {

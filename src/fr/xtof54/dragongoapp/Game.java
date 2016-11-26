@@ -17,9 +17,31 @@ public class Game {
     private JSONArray json=null;
     String oppmove;
     int oppmoveid;
+    public String black="unk", white="unk";
 
     public void setSGF(ArrayList<String> sgf0) {
         sgf=sgf0;
+        // get player names from SGF
+        for (String s: sgf0) {
+            int i=s.indexOf("PB[");
+            if (i>=0) {
+                int j=s.indexOf("]",i);
+                if (j>=0) {
+                    black=s.substring(i+3,j);
+                    break;
+                }
+            }
+        }
+        for (String s: sgf0) {
+            int i=s.indexOf("PW[");
+            if (i>=0) {
+                int j=s.indexOf("]",i);
+                if (j>=0) {
+                    white=s.substring(i+3,j);
+                    break;
+                }
+            }
+        }
     }
 
 	final String[] exampleFileHtmlHeader = {
@@ -103,6 +125,8 @@ public class Game {
 	}
 
     public static ArrayList<Game> loadJSONStatus(String s) {
+        // TODO: check for messages and invitations ! at least to warn the user when he is invited to a game !
+        // TODO: capture black_gameinfo.remtime and black_gameinfo.rating_start
         System.out.println("LOADJSONNNNNNNNNNNNNNNNN "+s);
         ArrayList<Game> games = new ArrayList<Game>();
 		try {
@@ -143,7 +167,8 @@ public class Game {
 					games.add(g);
 				}
                 System.out.println("games in the list "+games.size());
-			} else return games;
+			}
+            return games;
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
