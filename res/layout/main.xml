@@ -65,7 +65,7 @@
         android:layout_alignTop="@+id/but1"
         android:layout_toRightOf="@+id/but4"
         android:clickable="true"
-        android:text="-"
+        android:text="Bck"
         />
 
     <Button

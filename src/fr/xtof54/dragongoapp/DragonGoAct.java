@@ -310,7 +310,8 @@ public class DragonGoAct extends Activity
                                 @Override
                                 public void run() {
                                     if (checkDGSconnect()) {
-                                        dgs.downloadMessagesList();
+                                        msgs=dgs.downloadMessagesList();
+                                        showMessages(msg);
                                     }
                                 }});
                             break;
@@ -326,6 +327,22 @@ public class DragonGoAct extends Activity
 				}
 			});
 		}
+
+        {
+            final Button button = (Button)findViewById(R.id.but5);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    System.out.println("press button5 on state "+curstate);
+                    CharSequence t = button.getText();
+                    if (t.equals("Fwd"))
+                    	callwv("javascript:eidogo.autoPlayers[0].fwd()");
+                    else if (t.equals("Bck"))
+                    	callwv("javascript:eidogo.autoPlayers[0].backward()");
+                }
+            });
+        }
+
 
         {
 			final Button button = (Button)findViewById(R.id.morebutts);
