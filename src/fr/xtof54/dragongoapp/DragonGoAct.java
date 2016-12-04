@@ -310,8 +310,8 @@ public class DragonGoAct extends Activity
                                 @Override
                                 public void run() {
                                     if (checkDGSconnect()) {
-                                        msgs=dgs.downloadMessagesList();
-                                        showMessages(msg);
+                                        // msgs=dgs.downloadMessagesList();
+                                        // showMessages(msg);
                                     }
                                 }});
                             break;
