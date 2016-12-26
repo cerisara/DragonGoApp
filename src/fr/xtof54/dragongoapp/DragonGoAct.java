@@ -73,10 +73,11 @@ public class DragonGoAct extends Activity
         if (gameShown>=games.size()) {
             gameShown=0;
             games.clear();
-            showMessage("no more games");
+            showMessage("no more games; local board");
             games.add(new Game());
             changeState(guistate.nogame);
             showGame();
+	    return;
         }
         // download SGF + show the game
         ArrayList<String> sgf = dgs.downloadSGF(games.get(gameShown).id);

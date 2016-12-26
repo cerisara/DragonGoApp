@@ -29,6 +29,6 @@ cd out/
 /data/data/com.termux/files/home/bin/aapt add dgapp.apk classes.dex
 
 # sign with debug key
-apksigner -p android $ANDH/debug.keystore dgapp.apk dragondoapp.apk
+apksigner -p android $ANDH/debug.keystore dgapp.apk dragongoapp.apk
 
 
