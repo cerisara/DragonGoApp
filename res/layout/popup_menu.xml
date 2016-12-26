@@ -38,5 +38,14 @@
         android:clickable="true"
         android:id="@+id/installm"
         android:text="Set Eidogo"/>
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/installm"
+        android:clickable="true"
+        android:id="@+id/guireset"
+        android:text="GUI reset"/>
+
 </RelativeLayout>
 

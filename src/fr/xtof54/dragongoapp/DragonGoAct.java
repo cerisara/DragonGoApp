@@ -604,6 +604,7 @@ public class DragonGoAct extends Activity
         Button bcreds = (Button)pu.getContentView().findViewById(R.id.credsm);
         Button bclear = (Button)pu.getContentView().findViewById(R.id.clearm);
         Button beidogo= (Button)pu.getContentView().findViewById(R.id.installm);
+        Button breset= (Button)pu.getContentView().findViewById(R.id.guireset);
 
         bcancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -630,6 +631,13 @@ public class DragonGoAct extends Activity
             public void onClick(View v) {
                 pu.dismiss();
                 initEidogo();
+            }
+        });
+        breset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pu.dismiss();
+                changeState(guistate.nogame);
             }
         });
     }
