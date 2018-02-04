@@ -1,0 +1,40 @@
+<html>
+<head>
+<script type="text/javascript">
+
+  window.onerror = function(msg,url,line) {
+    document.write("error msg: " + msg + '<br>');
+    document.write("error url: " + url + '<br>');
+    document.write("error line: " + line + '<br>');
+  }
+
+  function loadFunc() {
+    if (typeof(Storage) !== "undefined") {
+      var oldvar = localStorage.getItem("oldvar");
+      document.write("ok elt "+oldvar);
+    } else {
+      document.write("No Web Storage support");
+    }
+  }
+
+  function saveFunc() {
+    if (typeof(Storage) !== "undefined") {
+      document.write("ok saved");
+      localStorage.setItem("oldvar", "Smith");
+    } else {
+      document.write("No Web Storage support");
+    }
+  }
+
+</script>
+</head>
+
+<body>
+
+<p>Click the button to start:</p>
+<form>
+<input type="button" value="load" onclick="loadFunc();" />
+<input type="button" value="save" onclick="saveFunc();" />
+
+</body>
+</html>
