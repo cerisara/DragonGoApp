@@ -1582,6 +1582,16 @@ public class GoJsActivity extends FragmentActivity {
 						dialog.dismiss();
 					}
 				});
+				Button bsettings = (Button)v.findViewById(R.id.baction_settings);
+				bsettings .setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View vv) {
+						System.out.println("DGSAPP setting");
+						dialog.dismiss();
+						GoJsActivity.main.ask4credentials();
+					}
+				});
+	
 				Button bforums= (Button)v.findViewById(R.id.forums);
 				bforums.setOnClickListener(new View.OnClickListener() {
 					@Override

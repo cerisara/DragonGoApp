@@ -37,6 +37,7 @@ public class GUI {
         try {
             if (!isWaitingDialogShown) {
                 waitdialog = new WaitDialogFragment();
+		waitdialog.setCancelable(false);
                 waitdialog.show(GoJsActivity.main.getSupportFragmentManager(),"waiting");
                 isWaitingDialogShown=true;
             }
