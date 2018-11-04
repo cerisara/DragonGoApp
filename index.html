@@ -26,14 +26,14 @@
       <h1 class="project-name">DragonGoApp</h1>
       <h2 class="project-tagline">Android app to play the game of go with the DGS and OGS servers</h2>
       <a href="https://github.com/cerisara/DragonGoApp" class="btn">View on GitHub</a>
-      <a href="http://talc1.loria.fr/users/cerisara/DragonGoApp.apk" class="btn">Download .apk</a>
+      <a href="http://talc2.loria.fr/xtof/DragonGoApp.apk" class="btn">Download .apk</a>
     </section>
 
     <section class="main-content">
       <h1>
 <a id="dragongoapp" class="anchor" href="#dragongoapp" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DragonGoApp</h1>
 
-<p>Android app to play the game of go on the DGS and OGS servers.</p>
+<p>Android app to play the game of go on the DGS server.</p>
 
 <hr>
 
@@ -44,10 +44,8 @@ DragonGoApp in a nutshell
 
 There are two ways to play the game of Go (aka Baduk) online: either live (a game lasts about half an hour) or
 by correspondence (a game may last several weeks). DragonGoApp is a mobile Android application for playing
-correspondent games with both main online servers that support correspondence games:
+correspondent games with the
 <a href="http://www.dragongoserver.net/">Dragon Go Server</a>
-and
-<a href="https://online-go.com">Online-go.com</a>
 
 <br>
 
@@ -61,8 +59,8 @@ whenever you wish to. If you like go, I strongly encourage you to try correspond
 Because you typically play correspondence games on the go (at lunch time, in the bus...), mobile applications are ideal tools to
 get you entertained all day long.
 DragonGoApp is one such application for your android smartphone.
-It is also the only android app I know of that seamlessly supports both DGS and OGS servers, and is free and opensource (which means
-that there is absolutely no annoying ad, tracking, limited features, paying premium...).
+It is also the only android app I know of that supports DGS and is free and opensource (which means
+that there is absolutely no annoying ad, tracking, limited features, paying premium... and it does not rely on the Google Service Framework).
 Furtermore, it is completely safe (the source code is public and the apk is certified by F-Droid) and it minimizes bandwidth usage,
 hence saving your mobile data plan.
 </p>
@@ -86,39 +84,11 @@ Similarly, when you reach the end of a game and want to pass, quit the app and p
 <h3>Overview of how to play with DragonGoApp</h3>
 
 <ul>
-<li>Once the apk is installed, setup your DGS and/or OGS login and password in DragonGoApp
-<li>Whenever you have some time to play a move, just launch DragonGoApp and press "GetGames"
+<li>Once the apk is installed, setup your DGS login and password in DragonGoApp
+<li>Whenever you have some time to play a move, just launch DragonGoApp and press "Games"
 <li>Your games are then downloaded from DGS and/or OGS and shown on the goban one after the other
 <li>You can then explore variations on the goban, and when you're decided, place your stone and send your move to the server.
 Alternatively, you can skip the current game and show the next one.
-</ul>
-
-
-<h3>
-<a id="quick-ogs-startup" class="anchor" href="#quick-ogs-startup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick OGS-startup</h3>
-
-<ul>
-<li>OGS uses OAuth2 for authentication: before doing anything with the android app, you must first go, with a real computer browser, on your online-go.com profile and generate an application-specific password.</li>
-<li>If you want to play on OGS, you have to download and install the android app 
-with the "download apk" button at the top of this page
-(Note that, because of OGS security restrictions, both the versions distributed from GitHub and F-droid will not be able to connect to OGS !)</li>
-<li>Launch the app for the first time, and wait for about two minutes for the app to configure its local storage on your phone.</li>
-<li>Then, click on the settings menu of your phone, and choose the "Settings" sub-menu:
-a window appears with a field for the user name and another field to enter the password.
-Writes in these fields your OGS login and the application-specific password that you have generated before.
-Then, press the "OGS" button to let the app know that these credentials shall be used with the OGS server.</li>
-<li>You then want to select to which servers DragonGoApp shall try to connect, using the DGS and OGS check-boxes on the
-"advanced" options:
-Press the button "..." on the top right of the main window to reach the advanced options, scroll down until you see
-the OGS and DGS checkboxes.
-If you just want to play with OGS, you must check the "OGS" checkbox and uncheck the "DGS" checkbox;
-otherwise, the app will stop at connection time because it can not connect to DGS, and you won't even see your OGS games.</li>
-<li>You can then return to the main screen, and just press the top-left "Games" button: the app will download the games
-where it's your turn to play, and show you the first game. You can try various moves: use the "Reset" button to come back
-to the initial position where you have to move. When you're ready, press "Reset", play one move, and press the "Send" button.
-A confirmation window will pop-up. Press OK, the move is sent, and the app will automatically switch to the next game,
-or just shows a message saying that you don't any more games to play.</li>
-<li>Later on, when you want to play again, just press the "Games" button to try and download your last opponents moves.</li>
 </ul>
 
 <h2>
@@ -135,27 +105,12 @@ You can also select here the "devDGS" (development DGS) server, but you probably
 <li>Press <em>Sent</em> . the next game to move will be shown automatically.</li>
 </ul>
 
-<p>Note that the app is pretty good for playing games, but not very good for counting game score (when you arrive at this stage, the app
-just shows the DGS page of the game) or finding an opponent. 
-Although you can challenge opponents from within the app in 19x19 and 9x9 DGS ladders, 
-I recommend to do it from the web site.</p>
-
 <hr>
-
-<p>Both games from DGS and OGS are handled and stored the same way internally: only the "get-games" and "send-moves"
-connections are specific to each server.
-</p>
-
-<p>Note that there is much more features in DragonGoApp, but this is just a quickstart guide and you're welcome to try all
-other features at your pace...</p>
-
-<hr>
-
 
 <h3>
 <a id="main-user-guide" class="anchor" href="#main-user-guide" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Main user guide</h3>
 
-<p>This is an android app originally developed for DGS (and now also OGS), with the following features:</p>
+<p>This is an android app originally developed for DGS, with the following features:</p>
 
 <ul>
 <li>Open-source: everyone can know exactly what it's doing and all of the app's internals.</li>
@@ -164,14 +119,16 @@ other features at your pace...</p>
 <li>Full-featured SGF editor/player based on the open-source eidogo code. Also shows game information and game comments.</li>
 <li>Support dual servers/credentials (DGS and develDGS)</li>
 <li>Playing moves (obviously !), pass, resign, send/receive messages, attach a comment to a move</li>
-<li>invite/accept/refuse challenges, challenge in 19x19 and 9x9 ladders</li>
 <li>Follow reviews of professional games from gobase, which are included in the app</li>
-<li>Read the DGS Forums: by default, only the new/unread messages will be shown, but you can switch to read all messages by pressing menu-settings while in the forums view.</li>
 </ul>
 
-<p>You can install the latest release from <a href="https://f-droid.org/repository/browse/?fdfilter=dragongoapp&amp;fdid=fr.xtof54.dragonGoApp">F-droid</a>
-Note that the F-droid apk can only play with the DGS server, because of security constraints on OGS.
-So if you want to play on OGS, prefer the "download apk" button at the top of this page.
+<p>You can install the latest release from the button at the top of this page.
+There is also an old version in the F-droid repository, but you then have to activate the "archive" repository to see it.
+But I do not recommend using the F-droid version, because it's quite old. Prefer the version proposed here if you trust me.
+I would like to make it again available in F-droid, but this registration process may take quite some time and I still
+have lots of improvements to do to the source code before.
+The last option is to download the source code from github, and adapt the "build.sh" script to your environment
+(this script is really minimal, and the app compilation is extremely simple so you should be able to compile it in no time).
 </p>
 
 <h1>
@@ -212,11 +169,11 @@ but it's just uncompressing the eidogo javascript library onto the SD-card. This
 <li>
 <em>Add a game message</em> : press this before sending a move, and a comment will be attached to this move in the SGF. Two standard comments are proposed (to welcome and thank you opponent), but you can write your own. You can also edit or remove your comment as many times as you wish as long as you have not sent the move.</li>
 <li>
-<em>View 19x19 ladder</em> : shows only the ladder positions that you can challenge. Uses a local cache, so it may not be always synchronized with the actual ladder in DGS, but you can re-download the ladder at any time.</li>
+<em>View 19x19 ladder</em> : shows only the ladder positions that you can challenge. Uses a local cache, so it may not be always synchronized with the actual ladder in DGS, but you can re-download the ladder at any time (disabled for now - may be working again later on).</li>
 <li>
-<em>View 9x9 ladder</em> : same thing for another ladder</li>
+<em>View 9x9 ladder</em> : same thing for another ladder (disabled for now - may be working again later on)</li>
 <li>
-<em>View forums</em> : download the list of forum messages that you have not read yet (or all of them)</li>
+<em>View forums</em> : download the list of forum messages that you have not read yet (or all of them) (disabled for now - may be working again later on)</li>
 <li>
 <em>List saved games</em> : every game is saved locally, so you can view it, and even play a move from this list. You can also remove all or a single game from your sd card.</li>
 <li>
@@ -232,7 +189,8 @@ but it's just uncompressing the eidogo javascript library onto the SD-card. This
 </ul>
 
 <p>Note that although the "look and feel" of DragonGoApp is not very appealing,
-this app actually has all the required functionalities (and even more) to really do its job, i.e., playing correspondence Go with DGS and OGS !
+this app actually has all the required functionalities to really do its job, i.e., playing correspondence Go with DGS.
+I just don't like fancy GUIs...
 </p>
 
 <h2>
