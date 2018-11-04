@@ -30,6 +30,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -37,9 +39,6 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONObject;
-
-import android.net.NetworkInfo;
-import android.net.http.AndroidHttpClient;
 
 import fr.xtof54.jsgo.EventManager.eventType;
 
@@ -53,7 +52,7 @@ import fr.xtof54.jsgo.EventManager.eventType;
  */
 public class AndroidServerConnection {
 	private String u,p,server;
-	private AndroidHttpClient httpclientdirect=null;
+	private CloseableHttpClient httpclientdirect=null;
 	private HttpContext httpctxt=null;
 
 	/**
@@ -83,7 +82,7 @@ public class AndroidServerConnection {
 
 	void initHttp() {
 		if (httpclientdirect==null) {
-			httpclientdirect = AndroidHttpClient.newInstance(null);
+			httpclientdirect = HttpClients.createDefault();
 			httpctxt = new BasicHttpContext();
 			httpctxt.setAttribute(ClientContext.COOKIE_STORE, new BasicCookieStore());
 			// login
@@ -166,7 +165,6 @@ public class AndroidServerConnection {
 
 	Ladder ladd = null;
 	String res;
-	
 	/**
 	 * In the case of long strings, StringBuilder can crash because of OutOfMemory.
 	 * So the caller must saveInFile, and then get the string back from this file.
@@ -185,7 +183,7 @@ public class AndroidServerConnection {
 					Header[] httpHeader = response0.getHeaders("Location");
 				    while (httpHeader.length > 0) {
 				        httpclientdirect.close();
-				        httpclientdirect = AndroidHttpClient.newInstance(null);
+				        httpclientdirect = HttpClients.createDefault();
 				        String url = httpHeader[0].getValue();
 				        System.out.println("redirect "+url);
 				        HttpGet httpGet = new HttpGet(url);
