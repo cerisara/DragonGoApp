@@ -13,7 +13,7 @@ import org.json.JSONObject;
 
 //import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import fr.xtof54.dragonGoApp.R;
+import fr.xtof54.jsgo.R;
 import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.ServerConnection.DetLogger;
 import android.net.TrafficStats;

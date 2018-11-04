@@ -17,7 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import fr.xtof54.dragonGoApp.R;
+import fr.xtof54.jsgo.R;
 import fr.xtof54.jsgo.EventManager.eventType;
 
 public class Message {

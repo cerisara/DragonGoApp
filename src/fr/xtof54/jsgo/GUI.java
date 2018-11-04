@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.widget.TextView;
-import fr.xtof54.dragonGoApp.R;
+import fr.xtof54.jsgo.R;
 
 public class GUI {
 	private GUI() {}

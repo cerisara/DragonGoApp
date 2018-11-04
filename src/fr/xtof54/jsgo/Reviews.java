@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 
-import fr.xtof54.dragonGoApp.R;
+import fr.xtof54.jsgo.R;
 import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.GoJsActivity.guistate;
 

@@ -30,7 +30,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import fr.xtof54.dragonGoApp.R;
+import fr.xtof54.jsgo.R;
 import fr.xtof54.jsgo.EventManager.eventType;
 import fr.xtof54.jsgo.GoJsActivity.guistate;
 

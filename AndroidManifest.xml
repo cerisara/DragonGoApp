@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="fr.xtof54.dragonGoApp"
+    package="fr.xtof54.jsgo"
     android:versionCode="10"
     android:versionName="1.10" >
 
