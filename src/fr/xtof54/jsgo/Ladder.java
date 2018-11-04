@@ -16,7 +16,8 @@ import fr.xtof54.jsgo.EventManager.eventType;
 
 public class Ladder {
 	public static final int LADDER19x19 = 3;
-	public static final int LADDER9x9 = 1;
+	// public static final int LADDER9x9 = 1; // unrated
+	public static final int LADDER9x9 = 105;  // rated
 	
 	String[] userList=null, ridList;
 	File cacheFile=null;

@@ -52,7 +52,7 @@ import fr.xtof54.jsgo.EventManager.eventType;
  */
 public class AndroidServerConnection {
 	private String u,p,server;
-	private CloseableHttpClient httpclientdirect=null;
+	private HttpClient httpclientdirect=null;
 	private HttpContext httpctxt=null;
 
 	/**
@@ -81,8 +81,10 @@ public class AndroidServerConnection {
 	};
 
 	void initHttp() {
+		// this function is not called for normal play but it is called for forums, ladders...
+		System.out.println("DGSAPP inithttp");
 		if (httpclientdirect==null) {
-			httpclientdirect = HttpClients.createDefault();
+			httpclientdirect = new DefaultHttpClient();
 			httpctxt = new BasicHttpContext();
 			httpctxt.setAttribute(ClientContext.COOKIE_STORE, new BasicCookieStore());
 			// login
@@ -96,10 +98,10 @@ public class AndroidServerConnection {
 				HttpPost httppost = new HttpPost(getUrl()+"login.php");
 				httppost.setEntity(entity);
 				directConnectExecute(httppost,null);
-	            GoJsActivity.main.updateTraffic();
+				    GoJsActivity.main.updateTraffic();
 			} catch (Exception e) {
 				e.printStackTrace();
-	            GoJsActivity.main.updateTraffic();
+				    GoJsActivity.main.updateTraffic();
 			}
 		}
 	}
@@ -181,41 +183,42 @@ public class AndroidServerConnection {
 				@Override
 				public String handleResponse(HttpResponse response0) throws ClientProtocolException, IOException {
 					Header[] httpHeader = response0.getHeaders("Location");
-				    while (httpHeader.length > 0) {
-				        httpclientdirect.close();
-				        httpclientdirect = HttpClients.createDefault();
-				        String url = httpHeader[0].getValue();
-				        System.out.println("redirect "+url);
-				        HttpGet httpGet = new HttpGet(url);
-				        response0 = httpclientdirect.execute(httpGet);
-				        httpHeader = response0.getHeaders("Location");
-				    }
-				    final HttpResponse response = response0;
-				    
+					while (httpHeader.length > 0) {
+						// TODO cannot close httpclient but we should ensure to call releaseConnection() !
+						//httpclientdirect.close();
+						httpclientdirect = HttpClients.createDefault();
+						String url = httpHeader[0].getValue();
+						System.out.println("DGSAPP redirect "+url);
+						HttpGet httpGet = new HttpGet(url);
+						response0 = httpclientdirect.execute(httpGet);
+						httpHeader = response0.getHeaders("Location");
+					}
+					final HttpResponse response = response0;
+
 					StatusLine status = response.getStatusLine();
-					System.out.println("httpclient execute status "+status.toString());
+					System.out.println("DGSAPP httpclient execute status "+status.toString());
 					HttpEntity entity = response.getEntity();
 					// no because I got a status>=300 but login succeeds...
-//					if (status.getStatusCode() >= 300) {
-//						throw new HttpResponseException(status.getStatusCode(),status.getReasonPhrase());
-//					}
+					//					if (status.getStatusCode() >= 300) {
+					//						throw new HttpResponseException(status.getStatusCode(),status.getReasonPhrase());
+					//					}
 					if (entity == null) {
 						throw new ClientProtocolException("Response contains no content");
 					}
 					InputStream instream = entity.getContent();
 					BufferedReader fin = new BufferedReader(new InputStreamReader(instream, Charset.forName("ISO-8859-1")));
 					if (saveInFile==null) {
-						System.out.println("building String with answer to request");
+						System.out.println("DGSAPP building String with answer to request");
 						StringBuilder sb = new StringBuilder();
 						for (;;) {
 							String s = fin.readLine();
 							if (s==null) break;
-							System.out.println("request answer "+s);
+							System.out.println("DGSAPP request answer "+s);
 							sb.append(s);
 						}
 						res = sb.toString();
 					} else {
-						System.out.println("saving res in file "+saveInFile);
+						System.out.println("DGSAPP saving res in file "+saveInFile);
 						PrintWriter fout = new PrintWriter(new FileWriter(saveInFile));
 						for (;;) {
 							String s = fin.readLine();
@@ -226,14 +229,14 @@ public class AndroidServerConnection {
 						res=null;
 					}
 					fin.close();
-		            GoJsActivity.main.updateTraffic();
+					GoJsActivity.main.updateTraffic();
 					return res;
 				}
 			},httpctxt);
-			System.out.println("just after execute...");
+			System.out.println("DGSAPP just after execute...");
 		} catch (Exception e) {
 			e.printStackTrace();
-            GoJsActivity.main.updateTraffic();
+			GoJsActivity.main.updateTraffic();
 		}
 		return res;
 	}

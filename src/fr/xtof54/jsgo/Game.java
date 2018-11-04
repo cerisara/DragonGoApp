@@ -312,7 +312,8 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 			public void run() {
 				final EventManager em = EventManager.getEventManager();
 				if (GoJsActivity.main.getGamesFromDGS) {
-					System.out.println("loadstatusgame DGS ");
+					System.out.println("DGSAPP loadstatusgame DGS ");
+					// this listener will be called when list if downloaded
 					EventManager.EventListener f = new EventManager.EventListener() {
 						@Override
 						public synchronized void reactToEvent() {
@@ -321,8 +322,10 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 							// also connects now to the client server to give it time to connect correctly
 //							if (games2play.size() > 0) WSclient.init(games2play.get(0).myid);
 
-							System.out.println("end of loadstatusgame, unregistering listener " + games2play.size());
+							System.out.println("DGSAPP end of loadstatusgame, unregistering listener " + games2play.size());
 							em.unregisterListener(eventType.downloadListEnd, this);
+							// TODO: what happens if the list cannot be downloaded ? Should send this event anyway ?
+							em.sendEvent(eventType.downloadListGamesEnd);
 						}
 
 						@Override
@@ -333,12 +336,6 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
 					em.registerListener(eventType.downloadListEnd, f);
 					server.sendCmdToServer(cmdGetListOfGames, eventType.downloadListStarted, eventType.downloadListEnd);
 				}
-				if (GoJsActivity.main.getGamesFromOGS) {
-					System.out.println("loadstatusgame OGS ");
-					System.out.println("OGS login:");
-					OGSConnection.login();
-				}
-				em.sendEvent(eventType.downloadListGamesEnd);
 			}
 		});
 		push.start();

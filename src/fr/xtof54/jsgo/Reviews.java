@@ -144,6 +144,6 @@ public abstract class Reviews {
 	public static void advance() {
         isNotReviewStage=true;
         for (int j=0;j<curmove;j++)
-            GoJsActivity.main.wv.loadUrl("javascript:eidogo.autoPlayers[0].forward()");
+            GoJsActivity.viewUrl("javascript:eidogo.autoPlayers[0].forward()");
 	}
 }

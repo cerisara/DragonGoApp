@@ -34,7 +34,8 @@
             android:id="@+id/ladder19"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:enabled="false"
             android:text="View 19x19 ladder" />
         
         <Button
@@ -42,6 +43,7 @@
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+	    android:enabled="false"
             android:text="View 9x9 ladder" />
 
         <Button
@@ -49,6 +51,7 @@
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+	    android:enabled="false"
             android:text="View Forums" />
         
         <Button
@@ -65,20 +68,6 @@
             android:textColor="#ffffff"
             android:checked="true"
             android:text="DGS" />
-    <CheckBox
-            android:id="@+id/checkBoxOGS"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:checked="true"
-            android:text="OGS" />
-    <CheckBox
-            android:id="@+id/checkBoxClientServer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:checked="true"
-            android:text="connect to Client Server" />
 
         <RelativeLayout
             android:layout_width="match_parent"
