@@ -583,7 +583,7 @@ public class GoJsActivity extends FragmentActivity {
 			g.downloadGame(server);
 		} else {
 			// OGS game
-			OGSConnection.nextGame2play(g);
+			// OGSConnection.nextGame2play(g);
 		}
 	}
 

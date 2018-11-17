@@ -17,6 +17,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 import fr.xtof54.jsgo.R;
 import fr.xtof54.jsgo.GoJsActivity.guistate;
+import java.net.URLEncoder;
 
 /**
  * Main page, once logged-in:
@@ -41,73 +42,85 @@ public class Forums {
 	static String txt;
 	static int inList=0;
 	private static boolean showAll=false;
-    private static String class2find = "class=\"NewFlag\"";
-    private static String class2find2 = "class=\"NewFlag\"";
-	
+	private static String class2find = "class=\"NewFlag\"";
+	private static String class2find2 = "class=\"NewFlag\"";
+
 	public static void show() {
-        if (!GoJsActivity.main.initAndroidServer()) return;
-        inList=0;
-        Thread forumthread = new Thread(new Runnable() {
+		if (!GoJsActivity.main.initAndroidServer()) return;
+		try {
+			String u=GoJsActivity.main.androidServer.u;
+			String p=GoJsActivity.main.androidServer.p;
+			String param = "userid="+URLEncoder.encode(u,"UTF-8")+
+				"&passwd="+URLEncoder.encode(p,"UTF-8")+
+				"&login="+URLEncoder.encode("Log in","UTF-8");
+			GoJsActivity.viewURL("https://www.dragongoserver.net/login.php?"+param);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		/*
+		inList=0;
+		Thread forumthread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				getLastForums();
 				showForums(toshow);
 			}
 		});
-        forumthread.start();
+		forumthread.start();
+		*/
 	}
 
 	// the back button has been pressed
 	public static boolean back() {
 		if (inList==1) {
-		    // go back to the list of topics
-		    toshow2.clear(); hrefs2.clear();
+			// go back to the list of topics
+			toshow2.clear(); hrefs2.clear();
 			inList--;
 			showForums(toshow);
 			return false;
 		} else if (inList==2) {
-		    // go back to the list of threads for the current topic
+			// go back to the list of threads for the current topic
 			inList--;
 			showForums(toshow2);
 			return false;
 		} else return true;
 	}
-	
+
 	static void showForums(final List<String> cats) {
 		GoJsActivity.main.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-			    if (cats.size()==0) {
-			        GoJsActivity.main.showMessage("No new forums; repress to see all forums");
-			        if (!showAll) switchShowNew();
-			        return;
-			    }
+				if (cats.size()==0) {
+					GoJsActivity.main.showMessage("No new forums; repress to see all forums");
+					if (!showAll) switchShowNew();
+					return;
+				}
 				System.out.println("set Forum view");
 				GoJsActivity.main.setContentView(R.layout.forumcats);
 				String[] c = new String[cats.size()];
 				for (int i=0;i<c.length;i++) c[i]=cats.get(i);
-		        ArrayAdapter<String> adapter = new ArrayAdapter<String>(GoJsActivity.main, R.layout.detlistitem, c);
+				ArrayAdapter<String> adapter = new ArrayAdapter<String>(GoJsActivity.main, R.layout.detlistitem, c);
 				final ListView listFrameview = (ListView)GoJsActivity.main.findViewById(R.id.forumCatsList);
 				listFrameview.setAdapter(adapter);
 				listFrameview.setOnItemClickListener(new OnItemClickListener() {
-		            @Override
-		            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
-		            	final int n=position;
-		            	Thread forumcatthread = new Thread(new Runnable() {
+					@Override
+					public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
+						final int n=position;
+						Thread forumcatthread = new Thread(new Runnable() {
 							@Override
 							public void run() {
-				            	Forums.catChosen(n);
+								Forums.catChosen(n);
 							}
 						});
-		            	forumcatthread.start();
-		            }
-		        });
+						forumcatthread.start();
+					}
+				});
 				GoJsActivity.main.curstate=guistate.forums;
 				System.out.println("forum list done "+c.length);
 			}
 		});
 	}
-	
+
 	static void catChosen(int pos) {
 		if (inList==1) {
 			catChosen2(pos);
@@ -170,11 +183,11 @@ public class Forums {
 			e.printStackTrace();
 		}
 		inList++;
-        GUI.hideWaitingWin();
+		GUI.hideWaitingWin();
 		showForums(toshow2);
 	}
 	static void catChosen2(int pos) {
-	    GUI.showWaitingWin();
+		GUI.showWaitingWin();
 		System.out.println("chosen cat2 "+pos);
 		String cmd = GoJsActivity.main.androidServer.getUrl()+"forum/"+hrefs2.get(pos);
 		System.out.println("direct connect cmd "+cmd);
@@ -232,9 +245,9 @@ public class Forums {
 			e.printStackTrace();
 		}
 		GUI.hideWaitingWin();
-		
-//		txt = txt.replace("<BR>", "\n");
-//		txt = txt.replaceAll("<.*>", "");
+
+		//		txt = txt.replace("<BR>", "\n");
+		//		txt = txt.replaceAll("<.*>", "");
 		inList++;
 
 		// display
@@ -249,26 +262,26 @@ public class Forums {
 		});
 	}
 	public static void switchShowNew() {
-	    showAll=!showAll;
-	    if (showAll) {
-	        GoJsActivity.main.showMessage("showing old msgs");
-            class2find="class=ThreadCnt";
-            class2find2="class=Name><";
-	    } else {
-            class2find="class=\"NewFlag\"";
-            class2find2="class=\"NewFlag\"";
-	        GoJsActivity.main.showMessage("showing new msgs only");
-	    }
+		showAll=!showAll;
+		if (showAll) {
+			GoJsActivity.main.showMessage("showing old msgs");
+			class2find="class=ThreadCnt";
+			class2find2="class=Name><";
+		} else {
+			class2find="class=\"NewFlag\"";
+			class2find2="class=\"NewFlag\"";
+			GoJsActivity.main.showMessage("showing new msgs only");
+		}
 	}
-	
+
 	private static void treatLine3(String s) {
-	    // no need to reprint the subject here, it was already shown in the list on the previous screen
-//		int i=s.indexOf("PostHeadNormal Subject");
-//		if (i>=0) {
-//			int j=s.indexOf("</a>",i);
-//			int k=s.lastIndexOf('>', j)+1;
-//			txt+="("+s.substring(k, j)+", ";
-//		}
+		// no need to reprint the subject here, it was already shown in the list on the previous screen
+		//		int i=s.indexOf("PostHeadNormal Subject");
+		//		if (i>=0) {
+		//			int j=s.indexOf("</a>",i);
+		//			int k=s.lastIndexOf('>', j)+1;
+		//			txt+="("+s.substring(k, j)+", ";
+		//		}
 		int i=s.indexOf("PostHeadNormal Author");
 		if (i>=0) {
 			int j=s.indexOf("</A>",i);
@@ -283,44 +296,44 @@ public class Forums {
 		}
 	}
 	private static void treatLine2(String s) {
-    	int j=s.indexOf(class2find2);
-    	if (j<0) return;
-    	int hrefdeb = s.lastIndexOf("href", j);
-    	j=s.indexOf('"',hrefdeb)+1;
-    	int k=s.indexOf('"',j);
-    	hrefs2.add(s.substring(j,k).replace("&amp;", "&"));
-    	System.out.println("put in hrefs2 "+s.substring(j,k));
-    	j=s.indexOf('>',k)+1;
-    	k=s.indexOf('<',j);
-    	toshow2.add(s.substring(j, k));
-    	System.out.println("put in toshow2 "+s.substring(j, k));
+		int j=s.indexOf(class2find2);
+		if (j<0) return;
+		int hrefdeb = s.lastIndexOf("href", j);
+		j=s.indexOf('"',hrefdeb)+1;
+		int k=s.indexOf('"',j);
+		hrefs2.add(s.substring(j,k).replace("&amp;", "&"));
+		System.out.println("put in hrefs2 "+s.substring(j,k));
+		j=s.indexOf('>',k)+1;
+		k=s.indexOf('<',j);
+		toshow2.add(s.substring(j, k));
+		System.out.println("put in toshow2 "+s.substring(j, k));
 	}
-	
+
 	static private void treatLine(String s) {
-    	int j=s.indexOf(class2find);
-    	if (j<0) return;
-    	int hrefdeb = s.lastIndexOf("href", j);
-    	j=s.indexOf('"',hrefdeb)+1;
-    	int k=s.indexOf('"',j);
-    	hrefs.add(s.substring(j,k));
-    	j=s.indexOf('>',hrefdeb)+1;
-    	k=s.indexOf('<',j);
-    	toshow.add(s.substring(j, k));
+		int j=s.indexOf(class2find);
+		if (j<0) return;
+		int hrefdeb = s.lastIndexOf("href", j);
+		j=s.indexOf('"',hrefdeb)+1;
+		int k=s.indexOf('"',j);
+		hrefs.add(s.substring(j,k));
+		j=s.indexOf('>',hrefdeb)+1;
+		k=s.indexOf('<',j);
+		toshow.add(s.substring(j, k));
 	}
-	
+
 	static void getLastForums() {
-	    GUI.showWaitingWin();
+		GUI.showWaitingWin();
 		GoJsActivity.main.androidServer.initHttp();
 		String cmd = GoJsActivity.main.androidServer.getUrl()+"forum/index.php";
 		System.out.println("direct connect cmd "+cmd);
 		HttpGet get = new HttpGet(cmd);
-		
+
 		final String cacheFile = GoJsActivity.main.eidogodir+"/forumsHtmlString";
 		GoJsActivity.main.androidServer.directConnectExecute(get,cacheFile);
-		
+
 		System.out.println("load forums tmp file");
-        toshow.clear(); hrefs.clear();
-        toshow2.clear(); hrefs2.clear();
+		toshow.clear(); hrefs.clear();
+		toshow2.clear(); hrefs2.clear();
 		try {
 			BufferedReader f = new BufferedReader(new FileReader(cacheFile));
 			String firsthalf = null;
@@ -369,7 +382,7 @@ public class Forums {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-		    GUI.hideWaitingWin();
+			GUI.hideWaitingWin();
 		}
 	}
 }

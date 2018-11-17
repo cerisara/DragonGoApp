@@ -438,7 +438,7 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
         System.out.println("ogsgamelist "+getGameID()+" "+games2play);
         if (getGameID()<0) {
             // OGS game: check if sendMove has succeeded !
-            if (!OGSConnection.sendMoveIsSuccess) return false;
+            //if (!OGSConnection.sendMoveIsSuccess) return false;
         } else {
             // DGS Game: also check
             JSONObject o = GoJsActivity.main.server.o;
@@ -856,7 +856,7 @@ I/System.out(11012): jsonheader 38 white_gameinfo.rating_start_elo
                             // OGS move
                             final EventManager em = EventManager.getEventManager();
                             em.sendEvent(eventType.moveSentStart);
-                            OGSConnection.sendMove(-gid, finmove);
+                            //OGSConnection.sendMove(-gid, finmove);
                             em.sendEvent(eventType.moveSentEnd);
                         }
 						ConfirmDialogFragment.this.getDialog().cancel();
