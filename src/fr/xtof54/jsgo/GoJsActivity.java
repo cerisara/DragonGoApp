@@ -52,6 +52,8 @@ import android.widget.Toast;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 
+import android.view.MotionEvent;
+
 /**
  * TODO:
  * - quicksuite: use status to get in a single command both the games and messages
@@ -88,6 +90,9 @@ public class GoJsActivity extends FragmentActivity {
 	public File eidogodir;
 	final boolean forcecopy=false;
 	WebView wv;
+	public static boolean webviewTouchable = true;
+	private static Runnable webviewAfterLoad = null;
+	public String curhtml=null;
 	ArrayList<Game> games2play = new ArrayList<Game>();
 	int curgidx2play=0,moveid=0;
 	final String netErrMsg = "Connection errors or timeout, you may retry";
@@ -109,7 +114,22 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	private static Thread viewer = null;
 	private static ArrayBlockingQueue<String> viewerq = new ArrayBlockingQueue<String>(100);
+	public static void viewURL(final String url, final Runnable pagePostProcessor) {
+		if (pagePostProcessor==null) {
+			System.out.println("DGSAPP settouchview true");
+			webviewTouchable=true;
+			viewURL(url);
+		} else {
+			System.out.println("DGSAPP settouchview false");
+			webviewTouchable=false;
+			webviewAfterLoad=pagePostProcessor;
+			viewURL(url);
+			// TODO: il faut que le pagePostProcessor remette les 2 vars ci-dessus !!
+		}
+	}
 	public static void viewURL(final String url) {
+		System.out.println("DGSAPP settouchview true");
+		webviewTouchable=true;
 		try {
 			viewerq.put(url);
 		} catch (Exception e) {
@@ -412,6 +432,7 @@ public class GoJsActivity extends FragmentActivity {
 			// ask for comments to display them in big
 			System.out.println("page finished call detComments");
 			GoJsActivity.viewUrl("javascript:eidogo.autoPlayers[0].detComments()");
+			// also get the HTML of the page
 			GoJsActivity.viewUrl("javascript:console.log('MAGIC'+document.getElementsByTagName('html')[0].innerHTML);");
 		}
 
@@ -616,6 +637,7 @@ public class GoJsActivity extends FragmentActivity {
 
 		// intercept calls to console.log
 		wv.setWebChromeClient(new WebChromeClient() {
+			// this is called from javascript after any page has finished loading to grab the HTML
 			public boolean onConsoleMessage(ConsoleMessage cmsg)
 			{
 				// check secret prefix
@@ -625,6 +647,13 @@ public class GoJsActivity extends FragmentActivity {
 
 					/* process HTML */
 					System.out.println("DGSAPP CAPTUREHTML "+msg);
+					// put the HTML in main.curhtml
+					main.curhtml = msg;
+					if (webviewAfterLoad!=null) {
+						Runnable tmp = webviewAfterLoad;
+						webviewAfterLoad=null;
+						tmp.run();
+					}
 					return true;
 				}
 
@@ -636,6 +665,13 @@ public class GoJsActivity extends FragmentActivity {
 		wv.setWebViewClient(new myWebViewClient());
 		wv.getSettings().setJavaScriptEnabled(true);
 		wv.getSettings().setSupportZoom(true);
+
+		wv.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent e) {
+				return !webviewTouchable;
+			}
+		});
 
 		//		String myHTML  = "<html><body><a href='androidcall01|123456'>Call Back to Android 01 with param 123456</a>my Content<p>my Content<p>my Content<p><a href='androidcall02|7890123'>Call Back to Android 01 with param 7890123</a></body></html>";
 		//		wv.loadDataWithBaseURL("about:blank", myHTML, "text/html", "utf-8", "");
@@ -1006,6 +1042,22 @@ public class GoJsActivity extends FragmentActivity {
 	}
 	private ErrDialogFragment errdialog = null;
 
+	public String getCreds() {
+		String loginkey = PrefUtils.PREFS_LOGIN_USERNAME_KEY;
+		String pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD_KEY;
+		if (chosenLogin==1) {
+			loginkey = PrefUtils.PREFS_LOGIN_USERNAME2_KEY;
+			pwdkey = PrefUtils.PREFS_LOGIN_PASSWORD2_KEY;
+		}
+		String u = PrefUtils.getFromPrefs(this, loginkey ,null);
+		String p = PrefUtils.getFromPrefs(this, pwdkey ,null);
+		System.out.println("credsdebug "+u+" "+p+" "+chosenLogin);
+		if (u==null||p==null) {
+			showMessage("Please enter your credentials first via menu Settings");
+			return null;
+		}
+		return u+" "+p;
+	}
 	boolean initServer() {
 		System.out.println("call initserver "+server);
 		if (server!=null) return true;

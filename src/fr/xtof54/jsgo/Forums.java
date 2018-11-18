@@ -2,6 +2,8 @@ package fr.xtof54.jsgo;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,18 +48,53 @@ public class Forums {
 	private static String class2find2 = "class=\"NewFlag\"";
 
 	public static void show() {
-		if (!GoJsActivity.main.initAndroidServer()) return;
+		
+		// new version, which exploits the webview
+
 		try {
-			String u=GoJsActivity.main.androidServer.u;
-			String p=GoJsActivity.main.androidServer.p;
+			String up=GoJsActivity.main.getCreds();
+			if (up==null) return;
+			String[] upp = up.split(" ");
+			String u=upp[0];
+			String p=upp[1];
 			String param = "userid="+URLEncoder.encode(u,"UTF-8")+
 				"&passwd="+URLEncoder.encode(p,"UTF-8")+
 				"&login="+URLEncoder.encode("Log in","UTF-8");
-			GoJsActivity.viewURL("https://www.dragongoserver.net/login.php?"+param);
+			// first login
+			System.out.println("DGSAPP forums login");
+			GoJsActivity.viewURL("https://www.dragongoserver.net/login.php?"+param, new Runnable() {
+				public void run() {
+					// second look for forums
+					System.out.println("DGSAPP forums goto forums");
+					GoJsActivity.viewURL("https://www.dragongoserver.net/forum/index.php", new Runnable() {
+						public void run() {
+							// third simplify the page for forums
+							String html0 = GoJsActivity.main.curhtml;
+							String html1 = "<html><body><table><tbody>\n";
+							for (String s: html0.split("\n")) {
+								if (s.indexOf("Row1")>=0) html1+=s.replaceAll("<a href=\"","<a href=\"https://www.dragongoserver.net/forum/");
+							}
+							html1+="</tbody></table></body></html>\n";
+							try {
+								PrintWriter f = new PrintWriter(new FileWriter(GoJsActivity.main.eidogodir+"/forums.html"));
+								f.println(html1);
+								f.close();
+								GoJsActivity.viewURL("file://"+GoJsActivity.main.eidogodir+"/forums.html");
+							} catch (Exception e) {
+								e.printStackTrace();
+								GoJsActivity.main.webviewTouchable=true;
+							}
+						}
+					});
+				}
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		/*
+		 *
+		 * very old version
+		 *
 		inList=0;
 		Thread forumthread = new Thread(new Runnable() {
 			@Override
