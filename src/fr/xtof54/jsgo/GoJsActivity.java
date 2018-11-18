@@ -37,6 +37,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebChromeClient;
+import android.webkit.ConsoleMessage;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -410,6 +412,7 @@ public class GoJsActivity extends FragmentActivity {
 			// ask for comments to display them in big
 			System.out.println("page finished call detComments");
 			GoJsActivity.viewUrl("javascript:eidogo.autoPlayers[0].detComments()");
+			GoJsActivity.viewUrl("javascript:console.log('MAGIC'+document.getElementsByTagName('html')[0].innerHTML);");
 		}
 
 		@Override
@@ -610,6 +613,25 @@ public class GoJsActivity extends FragmentActivity {
 		setContentView(R.layout.activity_main);
 
 		wv = (WebView)findViewById(R.id.web1);
+
+		// intercept calls to console.log
+		wv.setWebChromeClient(new WebChromeClient() {
+			public boolean onConsoleMessage(ConsoleMessage cmsg)
+			{
+				// check secret prefix
+				if (cmsg.message().startsWith("MAGIC"))
+				{
+					String msg = cmsg.message().substring(5); // strip off prefix
+
+					/* process HTML */
+					System.out.println("DGSAPP CAPTUREHTML "+msg);
+					return true;
+				}
+
+				return false;
+			}
+		});
+
 
 		wv.setWebViewClient(new myWebViewClient());
 		wv.getSettings().setJavaScriptEnabled(true);
