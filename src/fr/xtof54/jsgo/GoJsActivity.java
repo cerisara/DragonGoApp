@@ -1477,24 +1477,6 @@ public class GoJsActivity extends FragmentActivity {
 					}
 				});
 
-				Button bladder19 = (Button)v.findViewById(R.id.ladder19);
-				bladder19.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View vv) {
-						viewLadder(Ladder.LADDER19x19);
-						dialog.dismiss();
-					}
-				});
-
-				Button bladder9 = (Button)v.findViewById(R.id.ladder9);
-				bladder9.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View vv) {
-						viewLadder(Ladder.LADDER9x9);
-						dialog.dismiss();
-					}
-				});
-
 				RadioButton bserver1 = (RadioButton)v.findViewById(R.id.dgs);
 				bserver1.setOnClickListener(new View.OnClickListener() {
 					@Override
