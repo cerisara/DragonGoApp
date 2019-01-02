@@ -1309,28 +1309,62 @@ public class GoJsActivity extends FragmentActivity {
 
 	// TODO: move this method into Game !
 	private void resignGame() {
-		Game.gameShown.addResignToSGF();
-		String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+Game.gameShown.moveid;
-		if (Game.gameShown.getMessage()!=null) {
-			cmd+="&msg="+URLEncoder.encode(Game.gameShown.getMessage().toString());
-			Game.gameShown.addMessageToSGF(Game.gameShown.getMessage().toString());
-		}
-		EventManager.getEventManager().registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
+		// ask for confirmation before resign
+		class ConfirmDialogFragment extends DialogFragment {
+			String cmdSentBeforeNetErr;
+			eventType eventTobesent;
+
 			@Override
-			public void reactToEvent() {
-				EventManager.getEventManager().unregisterListener(eventType.moveSentEnd,this);
-				// switch to next game
-				Game.gameShown.finishedWithThisGame();
-				if (Game.getGames().size()==0) {
-					showMessage("No more games locally");
-					changeState(guistate.nogame);
-				} else
-					downloadAndShowGame();
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because its going in the dialog layout
+				View v = inflater.inflate(R.layout.error, null);
+				// Add action buttons
+				builder.setView(v).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						ConfirmDialogFragment.this.getDialog().cancel();
+					}
+				})
+				.setPositiveButton("Resign !", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Game.gameShown.addResignToSGF();
+						String cmd = "quick_do.php?obj=game&cmd=resign&gid="+Game.gameShown.getGameID()+"&move_id="+Game.gameShown.moveid;
+						if (Game.gameShown.getMessage()!=null) {
+							cmd+="&msg="+URLEncoder.encode(Game.gameShown.getMessage().toString());
+							Game.gameShown.addMessageToSGF(Game.gameShown.getMessage().toString());
+						}
+						EventManager.getEventManager().registerListener(eventType.moveSentEnd, new EventManager.EventListener() {
+							@Override
+							public void reactToEvent() {
+								EventManager.getEventManager().unregisterListener(eventType.moveSentEnd,this);
+								// switch to next game
+								Game.gameShown.finishedWithThisGame();
+								if (Game.getGames().size()==0) {
+									showMessage("No more games locally");
+									changeState(guistate.nogame);
+								} else
+									downloadAndShowGame();
+							}
+							@Override
+							public String getName() {return "resign";}
+						});
+						server.sendCmdToServer(cmd, eventType.moveSentStart, eventType.moveSentEnd);
+
+						ConfirmDialogFragment.this.getDialog().cancel();
+					}
+				});
+				builder.setTitle("Confirmation");
+				TextView tv = (TextView)v.findViewById(R.id.errormsg);
+				tv.setText("Confirm resign ?");
+				return builder.create();
 			}
-			@Override
-			public String getName() {return "resign";}
-		});
-		server.sendCmdToServer(cmd, eventType.moveSentStart, eventType.moveSentEnd);
+		}
+		ConfirmDialogFragment confirmDialog = new ConfirmDialogFragment();
+		confirmDialog.show(GoJsActivity.main.getSupportFragmentManager(),"confirmBeforeResign");
 	}
 
 	/*
