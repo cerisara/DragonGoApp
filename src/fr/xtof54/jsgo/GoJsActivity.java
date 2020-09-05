@@ -109,6 +109,12 @@ public class GoJsActivity extends FragmentActivity {
 	//		}
 	//	}
 
+    /*
+    static {
+        System.loadLibrary("gnuGo-3.8");
+    }
+    */
+
 	public static void viewUrl(final String url) {
 		viewURL(url);
 	}
@@ -839,31 +845,35 @@ public class GoJsActivity extends FragmentActivity {
 		} else {
 			mExternalStorageAvailable = mExternalStorageWriteable = false;
 		}
-		if (mExternalStorageAvailable&&mExternalStorageWriteable) {
-			File d = getExternalCacheDir();
-			eidogodir = new File(d, "eidogo");
-			if (forcecopy||!eidogodir.exists()) {
-				eidogodir.mkdirs();
-				final Button button3 = (Button)findViewById(R.id.but3);
-				button3.setClickable(false);
-				button3.setEnabled(false);
-				final Button button2= (Button)findViewById(R.id.but2);
-				button2.setClickable(false);
-				button2.setEnabled(false);
-				final Button button1= (Button)findViewById(R.id.but1);
-				button1.setClickable(false);
-				button1.setEnabled(false);
-				button1.invalidate();
-				button2.invalidate();
-				button3.invalidate();
-				new CopyEidogoTask().execute("noparms");
-			} else {
-				showMessage("eidogo already on disk");
-				initFinished();
-			}
-		} else {
-			showMessage("R/W ERROR sdcard");
-		}
+        {
+            File d = null;
+            if (mExternalStorageAvailable&&mExternalStorageWriteable) d = getExternalCacheDir();
+            else d = getCacheDir();
+            if (d!=null && d.exists()) {
+                eidogodir = new File(d, "eidogo");
+                if (forcecopy||!eidogodir.exists()) {
+                    eidogodir.mkdirs();
+                    final Button button3 = (Button)findViewById(R.id.but3);
+                    button3.setClickable(false);
+                    button3.setEnabled(false);
+                    final Button button2= (Button)findViewById(R.id.but2);
+                    button2.setClickable(false);
+                    button2.setEnabled(false);
+                    final Button button1= (Button)findViewById(R.id.but1);
+                    button1.setClickable(false);
+                    button1.setEnabled(false);
+                    button1.invalidate();
+                    button2.invalidate();
+                    button3.invalidate();
+                    new CopyEidogoTask().execute("noparms");
+                } else {
+                    showMessage("eidogo already on disk");
+                    initFinished();
+                }
+            } else {
+                showMessage("R/W ERROR sdcard");
+            }
+        }
 
 
 		// manage events to show/hide the waiting dialog
