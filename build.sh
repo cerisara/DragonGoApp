@@ -69,6 +69,7 @@ $ANDBIN/aapt add app.apk classes.dex
 
 echo "$signerpass"
 
-jarsigner -verbose -keystore $HOME/maclef.keystore -storepass $signerpass -keypass $signerpass -sigalg SHA1withRSA -digestalg SHA1 app.apk xtof54
+# jarsigner -verbose -keystore $HOME/maclef.keystore -storepass $signerpass -keypass $signerpass -sigalg SHA1withRSA -digestalg SHA1 app.apk xtof54
 
+jarsigner -verbose -keystore $HOME/apkkeystore -storepass $signerpass -keypass $signerpass -sigalg SHA1withRSA -digestalg SHA1 app.apk cerisara
 
