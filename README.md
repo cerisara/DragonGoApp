@@ -2,6 +2,11 @@ DragonGoApp
 ===========
 
 Android app to play the game of go on the DGS servers.
+
+Note January 2025: I know this app is pretty old and I've not updated it since a long time, but I've just checked on my Redmi phone,
+and it's still working fine! (I'm actually a bit surprised that it does, but that's pretty cool). So the app's still a viable option
+to play on DGS, even though it's a bit minimal from a GUI point of view, at least, it has passed the test of time and it's still functional, so please enjoy DGS go and have fun!
+
 Follow below links for more information:
 
 * Download the apk here in the releases. Warning: you have to trust me that this apk is indeed compiled from this source code. The correct way to do it would be to rather maintain an F-Droid repo, I did this long ago, but it's too much work to maintain. So here it is... And if you don't trust me (which is normal), just recompile it, sorry...
