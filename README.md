@@ -4,7 +4,7 @@ DragonGoApp
 Android app to play the game of go on the DGS servers.
 Follow below links for more information:
 
-* Download the apk [here](http://uldocs.atilf.fr/lexres/dragongoapp.apk)
+* Download the apk here in the releases. Warning: you have to trust me that this apk is indeed compiled from this source code. The correct way to do it would be to rather maintain an F-Droid repo, I did this long ago, but it's too much work to maintain. So here it is... And if you don't trust me (which is normal), just recompile it, sorry...
 
 * You can also compile it quite easily, because it does not depend on any compilation framework/IDE: it has minimal and simple libraries, and compilation is done only with the build.sh script. So you just need to adapt the build.sh script with the correct path to your android SDK, create a signing key and write the passphrase on jarsigner.password, and run the script.
 
