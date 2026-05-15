@@ -152,7 +152,16 @@ public class GoJsActivity extends FragmentActivity {
 							GoJsActivity.main.runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									GoJsActivity.main.wv.loadUrl(surl);
+									// Every viewUrl("javascript:...") call site ends up here. Use the
+									// non-deprecated WebView.evaluateJavascript path on those so the
+									// WebView's back stack does not collect synthetic javascript:
+									// history entries between moves.
+									if (surl != null && surl.startsWith("javascript:")) {
+										GoJsActivity.main.wv.evaluateJavascript(
+												surl.substring("javascript:".length()), null);
+									} else {
+										GoJsActivity.main.wv.loadUrl(surl);
+									}
 								}
 							});
 						}
